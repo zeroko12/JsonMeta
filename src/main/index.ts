@@ -1,5 +1,6 @@
 import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron'
 import { join } from 'node:path'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import { checkPassword } from './auth'
 import {
   readJson,
@@ -155,7 +156,46 @@ function createWindow() {
   return win
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  // ── E2E self-test mode ──
+  // When E2E_TEST=1 is set, validate the real user file then exit.
+  // Used by tests/manual/e2e-exe-self-test.ts to verify the bundled EXE.
+  if (process.env.E2E_TEST === '1') {
+    const filePath = process.env.E2E_TEST_FILE
+    const resultPath = process.env.E2E_TEST_RESULT
+    const writeResult = (status: 'OK' | 'FAIL', info: Record<string, unknown>) => {
+      if (!resultPath) {
+        process.stdout.write(`[E2E_TEST] ${status} ${JSON.stringify(info)}\n`)
+        return
+      }
+      try {
+        mkdirSync(resultPath.replace(/[^\\/]+$/, ''), { recursive: true })
+        writeFileSync(resultPath, JSON.stringify({ status, ...info }, null, 2))
+      } catch (err) {
+        process.stdout.write(`[E2E_TEST] FAIL write-result ${(err as Error).message}\n`)
+      }
+    }
+    if (!filePath) {
+      writeResult('FAIL', { error: 'E2E_TEST_FILE not set' })
+      app.exit(2)
+      return
+    }
+    try {
+      const data = await readJson(filePath)
+      const topKeys = Object.keys(data as object)
+      writeResult('OK', {
+        file: filePath,
+        topKeys: topKeys.length,
+        sample: topKeys.slice(0, 3),
+      })
+      app.exit(0)
+    } catch (err) {
+      writeResult('FAIL', { error: (err as Error).message, file: filePath })
+      app.exit(1)
+    }
+    return
+  }
+
   createWindow()
 
   app.on('activate', () => {
