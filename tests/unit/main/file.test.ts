@@ -3,9 +3,6 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 
-// We test the underlying logic by importing the modules under test.
-// Because main/ipc runs in Node, vitest can import them directly.
-
 describe('file: readJson / writeJson', () => {
   let dir: string
   beforeEach(async () => {
@@ -111,4 +108,29 @@ describe('hasMeaningfulChange', () => {
   })
 
   // We'll need real file IO for actual comparison — skip the rest.
+})
+
+describe('BOM stripping', () => {
+  it('readJson strips UTF-8 BOM and parses successfully', async () => {
+    const dir = join(tmpdir(), `bom-${Date.now()}-${Math.random().toString(36).slice(2)}`)
+    await mkdir(dir, { recursive: true })
+    const filePath = join(dir, 'test.json')
+    // Write JSON prefixed with UTF-8 BOM (U+FEFF) — Notepad saves like this
+    const bom = Buffer.from([0xef, 0xbb, 0xbf]) // UTF-8 BOM
+    const body = Buffer.from('{"a":1}', 'utf8')
+    await writeFile(filePath, Buffer.concat([bom, body]))
+    const { readJson } = await import('../../../src/main/ipc/file')
+    const result = await readJson(filePath)
+    expect(result).toEqual({ a: 1 })
+  })
+
+  it('writeJson does not introduce BOM', async () => {
+    const dir = join(tmpdir(), `bomw-${Date.now()}-${Math.random().toString(36).slice(2)}`)
+    await mkdir(dir, { recursive: true })
+    const filePath = join(dir, 'test.json')
+    const { writeJson } = await import('../../../src/main/ipc/file')
+    await writeJson(filePath, { x: 1 })
+    const bytes = await readFile(filePath)
+    expect(bytes[0]).not.toBe(0xef) // no BOM
+  })
 })

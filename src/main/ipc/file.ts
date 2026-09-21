@@ -12,9 +12,13 @@ import { basename, dirname, join } from 'node:path'
 
 const MAX_BACKUPS = 10
 
-/** Read a JSON file. Returns the parsed object. */
+/** Read a JSON file. Strips UTF-8 BOM if present (Notepad often saves with BOM). */
 export async function readJson<T = unknown>(filePath: string): Promise<T> {
-  const text = await readFile(filePath, 'utf8')
+  let text = await readFile(filePath, 'utf8')
+  // Strip UTF-8 BOM (U+FEFF) — Windows editors (Notepad) prepend this
+  if (text.charCodeAt(0) === 0xfeff) {
+    text = text.slice(1)
+  }
   return JSON.parse(text) as T
 }
 
@@ -24,9 +28,13 @@ export async function writeJson(filePath: string, data: unknown): Promise<void> 
   await writeFile(filePath, text, 'utf8')
 }
 
-/** Read file bytes as UTF-8 text (for raw diff comparison). */
+/** Read file bytes as UTF-8 text (for raw diff comparison). Strips BOM. */
 export async function readText(filePath: string): Promise<string> {
-  return readFile(filePath, 'utf8')
+  let text = await readFile(filePath, 'utf8')
+  if (text.charCodeAt(0) === 0xfeff) {
+    text = text.slice(1)
+  }
+  return text
 }
 
 /**
