@@ -178,26 +178,6 @@ function captureAttributes(line: string): { attrs: CSharpAttribute[]; rest: stri
 }
 
 /**
- * Regex capturing a property declaration. Allows leading attributes,
- * access modifiers, generic types, and { get; (set|init); } accessors.
- *
- * Group 1: type (e.g. "List<ImplantElementConfig>")
- * Group 2: name
- * Group 3: "set" or "init" or absent
- * Group 4: default-value expression (text between `=` and `;`)
- */
-/**
- * Regex capturing a property OR public field declaration. The actual
- * type/name extraction is done by `splitTypeAndName` (more robust than a
- * single regex for generic types).
- *
- * Form 1 (auto-property):  `public T Name { get; set; } = initializer;`
- * Form 2 (public field):   `public T Name = initializer;`
- */
-const PROP_REGEX =
-  /(?:public|private|internal|protected)\s+(?:readonly\s+)?(\S+(?:\s+\S+)*?)\s+_?(\w+)(?:\s*\{\s*get;\s*(set|init)?\s*;\s*\})?(?:\s*=\s*([^;]+))?;?/
-
-/**
  * Parse all properties from a class body. Returns one entry per matched
  * declaration (with attributes, /// comment, and inline comment if present).
  *

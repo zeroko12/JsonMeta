@@ -1,13 +1,17 @@
 import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron'
 import { join } from 'node:path'
-import psList from 'ps-list'
+import { checkPassword } from './auth'
+import { readJson, saveJsonWithBackup, createBackup, listBackups, restoreBackup } from './ipc/file'
+import { watchFile, stopWatching } from './ipc/file-watch'
+import { loadSchema, saveSchema } from './ipc/schema'
+import { detectMainProgram } from './ipc/process'
 
-const HARDCODED_PASSWORD = 'admin123'
-
+// ----- AUTH -----
 ipcMain.handle('auth:check', async (_event, password: string) => {
-  return password === HARDCODED_PASSWORD
+  return checkPassword(password)
 })
 
+// ----- FILE -----
 ipcMain.handle('file:pickDirectory', async (event) => {
   const win = BrowserWindow.fromWebContents(event.sender)
   if (!win) return null
@@ -19,15 +23,65 @@ ipcMain.handle('file:pickDirectory', async (event) => {
   return result.filePaths[0]
 })
 
-ipcMain.handle('process:detectMainProgram', async () => {
-  const procs = await psList()
-  const matched = procs.filter((p) => /ion|implant/i.test(p.name))
-  return {
-    running: matched.length > 0,
-    pids: matched.map((p) => p.pid),
-  }
+ipcMain.handle('file:readJson', async (_event, path: string) => {
+  return readJson(path)
 })
 
+ipcMain.handle(
+  'file:writeJson',
+  async (
+    _event,
+    path: string,
+    data: unknown,
+    options?: { backup?: boolean; maxBackups?: number },
+  ) => {
+    return saveJsonWithBackup(path, data, options ?? {})
+  },
+)
+
+ipcMain.handle('file:listBackups', async (_event, targetPath: string) => {
+  return listBackups(targetPath)
+})
+
+ipcMain.handle('file:restoreBackup', async (_event, backupPath: string, targetPath: string) => {
+  return restoreBackup(backupPath, targetPath)
+})
+
+ipcMain.handle('file:createBackup', async (_event, targetPath: string) => {
+  return createBackup(targetPath)
+})
+
+ipcMain.handle('file:watchStart', async (_event, path: string) => {
+  // Forward change events to all renderer windows via 'file:onChange'
+  await watchFile(path, (e) => {
+    for (const win of BrowserWindow.getAllWindows()) {
+      win.webContents.send('file:onChange', e)
+    }
+  })
+  return { ok: true }
+})
+
+ipcMain.handle('file:watchStop', async () => {
+  await stopWatching()
+  return { ok: true }
+})
+
+// ----- SCHEMA -----
+ipcMain.handle('schema:load', async (_event, schemaPath: string) => {
+  return loadSchema(schemaPath)
+})
+
+ipcMain.handle('schema:save', async (_event, schemaPath: string, schema: unknown) => {
+  await saveSchema(schemaPath, schema as Parameters<typeof saveSchema>[1])
+  return { ok: true }
+})
+
+// ----- PROCESS -----
+ipcMain.handle('process:detectMainProgram', async () => {
+  return detectMainProgram()
+})
+
+// ----- WINDOW -----
 function createWindow() {
   const win = new BrowserWindow({
     width: 1280,

@@ -1,0 +1,156 @@
+/**
+ * Main-process IPC handlers for file operations:
+ *  - read / write JSON
+ *  - timestamped backup creation
+ *  - backup rotation (keep last 10)
+ *  - restore from backup
+ *  - diff detection (skip writes when no change)
+ */
+
+import { readFile, writeFile, readdir, stat, mkdir } from 'node:fs/promises'
+import { basename, dirname, join } from 'node:path'
+
+const MAX_BACKUPS = 10
+
+/** Read a JSON file. Returns the parsed object. */
+export async function readJson<T = unknown>(filePath: string): Promise<T> {
+  const text = await readFile(filePath, 'utf8')
+  return JSON.parse(text) as T
+}
+
+/** Write a JSON file with 2-space indent. */
+export async function writeJson(filePath: string, data: unknown): Promise<void> {
+  const text = JSON.stringify(data, null, 2)
+  await writeFile(filePath, text, 'utf8')
+}
+
+/** Read file bytes as UTF-8 text (for raw diff comparison). */
+export async function readText(filePath: string): Promise<string> {
+  return readFile(filePath, 'utf8')
+}
+
+/**
+ * Create a timestamped backup of `target` in the same directory.
+ * Returns the backup file path. Format:
+ *   SystemConfig.json -> SystemConfig.YYYYMMDD_HHmmss.bak.json
+ *
+ * Also rotates backups so at most MAX_BACKUPS are kept.
+ */
+export async function createBackup(target: string): Promise<string> {
+  const dir = dirname(target)
+  const base = basename(target, '.json')
+  const stamp = formatTimestamp(new Date())
+  const bak = join(dir, `${base}.${stamp}.bak.json`)
+  const text = await readFile(target, 'utf8')
+  await writeFile(bak, text, 'utf8')
+  await rotateBackups(target)
+  return bak
+}
+
+function formatTimestamp(d: Date): string {
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return (
+    `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}` +
+    `_${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`
+  )
+}
+
+/**
+ * List backups for `target`, newest first.
+ * Only includes files matching `<basename>.*.bak.json`.
+ */
+export async function listBackups(target: string): Promise<string[]> {
+  const dir = dirname(target)
+  const base = basename(target, '.json')
+  let entries: string[]
+  try {
+    entries = await readdir(dir)
+  } catch {
+    return []
+  }
+  const matched = entries.filter((n) => n.startsWith(`${base}.`) && n.endsWith('.bak.json'))
+  const fullPaths = await Promise.all(
+    matched.map(async (n) => {
+      const full = join(dir, n)
+      try {
+        const s = await stat(full)
+        return { full, mtime: s.mtimeMs }
+      } catch {
+        return null
+      }
+    }),
+  )
+  return fullPaths
+    .filter((x): x is { full: string; mtime: number } => x !== null)
+    .sort((a, b) => b.mtime - a.mtime)
+    .map((x) => x.full)
+}
+
+/** Rotate backups so at most MAX_BACKUPS exist (deletes oldest). */
+export async function rotateBackups(target: string, max = MAX_BACKUPS): Promise<number> {
+  const list = await listBackups(target)
+  if (list.length <= max) return 0
+  const toDelete = list.slice(max)
+  const { unlink } = await import('node:fs/promises')
+  await Promise.all(toDelete.map((p) => unlink(p).catch(() => undefined)))
+  return toDelete.length
+}
+
+/** Restore a backup file to `targetPath`. Returns { ok, error? }. */
+export async function restoreBackup(
+  backupPath: string,
+  targetPath: string,
+): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const text = await readFile(backupPath, 'utf8')
+    await mkdir(dirname(targetPath), { recursive: true })
+    await writeFile(targetPath, text, 'utf8')
+    return { ok: true }
+  } catch (err) {
+    return { ok: false, error: (err as Error).message }
+  }
+}
+
+/**
+ * Returns true if writing `newText` to `targetPath` would change the file
+ * (i.e. bytes differ from current disk content).
+ */
+export async function hasMeaningfulChange(targetPath: string, newText: string): Promise<boolean> {
+  try {
+    const current = await readFile(targetPath, 'utf8')
+    return current !== newText
+  } catch {
+    // File doesn't exist yet — definitely a change
+    return true
+  }
+}
+
+/**
+ * Save JSON to a backup file. Creates backup if file exists.
+ * Returns { ok, backupPath? }.
+ */
+export async function saveJsonWithBackup(
+  targetPath: string,
+  data: unknown,
+  options: { backup?: boolean; maxBackups?: number } = {},
+): Promise<{ ok: boolean; backupPath?: string; changed: boolean; error?: string }> {
+  try {
+    const text = JSON.stringify(data, null, 2)
+    const changed = await hasMeaningfulChange(targetPath, text)
+    let backupPath: string | undefined
+    if (changed && options.backup !== false) {
+      try {
+        backupPath = await createBackup(targetPath)
+        await rotateBackups(targetPath, options.maxBackups ?? MAX_BACKUPS)
+      } catch {
+        // backup failed (e.g. file didn't exist yet) — continue writing
+        backupPath = undefined
+      }
+    }
+    await mkdir(dirname(targetPath), { recursive: true })
+    await writeFile(targetPath, text, 'utf8')
+    return { ok: true, backupPath, changed }
+  } catch (err) {
+    return { ok: false, changed: false, error: (err as Error).message }
+  }
+}
