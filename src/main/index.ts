@@ -115,6 +115,11 @@ ipcMain.handle('process:detectMainProgram', async () => {
 })
 
 // ----- WINDOW -----
+const DEBUG_PORT = process.env.E2E_DEBUG_PORT ? Number(process.env.E2E_DEBUG_PORT) : 0
+if (DEBUG_PORT > 0) {
+  app.commandLine.appendSwitch('remote-debugging-port', String(DEBUG_PORT))
+}
+
 function createWindow() {
   const win = new BrowserWindow({
     width: 1280,
@@ -125,7 +130,7 @@ function createWindow() {
     autoHideMenuBar: true,
     title: '系统配置编辑工具',
     webPreferences: {
-      preload: join(__dirname, '../preload/index.mjs'),
+      preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
       contextIsolation: true,
       nodeIntegration: false,

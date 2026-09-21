@@ -2,18 +2,7 @@ import { test, expect, _electron as electron } from '@playwright/test'
 import { writeFile, mkdir, rm } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
-
-/**
- * End-to-end smoke covering the happy-path flow:
- *  1. Launch Electron
- *  2. Authenticate (admin123)
- *  3. Pick a directory containing a stub SystemConfig.json
- *  4. Verify the tree renders with 10 top-level sub-configs
- *  5. Expand a sub-config and modify a value
- *  6. Save (auto-backup)
- *  7. Verify backup file exists
- *  8. Restore from backup
- */
+import { existsSync } from 'node:fs'
 
 const STUB_CONFIG = {
   SoftwareConfig: {
@@ -33,58 +22,91 @@ const STUB_CONFIG = {
   WarningSettingsConfig: {},
 }
 
+const DEV_ELECTRON = join('node_modules', 'electron', 'dist', 'electron.exe')
+
 let workDir: string
-let configPath: string
 
 test.beforeAll(async () => {
-  workDir = join(tmpdir(), `e2e-${Date.now()}-${Math.random().toString(36).slice(2)}`)
+  workDir = join(tmpdir(), `e2e-${Date.now()}`)
   await mkdir(workDir, { recursive: true })
-  configPath = join(workDir, 'SystemConfig.json')
-  await writeFile(configPath, JSON.stringify(STUB_CONFIG, null, 2), 'utf8')
+  await writeFile(join(workDir, 'SystemConfig.json'), JSON.stringify(STUB_CONFIG, null, 2), 'utf8')
 })
 
 test.afterAll(async () => {
   await rm(workDir, { recursive: true, force: true })
 })
 
-test('full edit flow: login → open → modify → save → backup → restore', async () => {
-  // Launch the Electron app
-  const app = await electron.launch({
-    args: ['.', '--no-sandbox'],
+async function launchApp() {
+  // Use unpackaged dev electron (accepts --remote-debugging-port)
+  return electron.launch({
+    executablePath: DEV_ELECTRON,
+    args: ['.'],
+    cwd: process.cwd(),
   })
+}
+
+test.skip(!existsSync(DEV_ELECTRON), 'electron dev binary not found')
+
+test('full edit flow: login → load → verify tree', async () => {
+  const app = await launchApp()
   const win = await app.firstWindow()
 
-  // Wait for login
   await win.waitForSelector('input[type="password"]', { timeout: 30_000 })
 
-  // Inject the workDir into the picker by mocking pickDirectory via the renderer.
-  // For a real test we'd mock the IPC channel. Here we just type the password.
   await win.fill('input[type="password"]', 'admin123')
   await win.click('button:has-text("登录")')
 
-  // Wait for the picker
   await win.waitForSelector('button:has-text("浏览")', { timeout: 15_000 })
 
-  // Stub the directory picker via JS injection
   await win.evaluate((path: string) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ;(window as any).api.file.pickDirectory = async () => path
+    ;(
+      window as { api: { file: { pickDirectory: () => Promise<string> } } }
+    ).api.file.pickDirectory = async () => path
   }, workDir)
 
   await win.click('button:has-text("浏览")')
 
-  // Wait for editor view (TopBar)
   await win.waitForSelector('header.topbar', { timeout: 15_000 })
 
-  // Verify topbar shows filename
   const fileName = await win.locator('header.topbar strong').textContent()
   expect(fileName).toContain('SystemConfig.json')
 
-  // Verify tree shows top-level sub-configs
-  const treeNodes = await win.locator('.config-tree .node-row .key').allTextContents()
-  expect(treeNodes.length).toBeGreaterThan(0)
-  expect(treeNodes).toContain('SoftwareConfig')
-  expect(treeNodes).toContain('IHCConfig')
+  const treeKeys = await win.locator('.config-tree .node-row .key').allTextContents()
+  expect(treeKeys).toContain('SoftwareConfig')
+  expect(treeKeys).toContain('IHCConfig')
+
+  await win.screenshot({ path: 'e2e-screenshot.png' })
 
   await app.close()
+})
+
+test('BOM file (Notepad-saved) is parsed correctly', async () => {
+  const bomWorkDir = join(tmpdir(), `e2e-bom-${Date.now()}`)
+  await mkdir(bomWorkDir, { recursive: true })
+  const bomBytes = Buffer.from([0xef, 0xbb, 0xbf])
+  const body = Buffer.from(JSON.stringify(STUB_CONFIG, null, 2), 'utf8')
+  await writeFile(join(bomWorkDir, 'SystemConfig.json'), Buffer.concat([bomBytes, body]))
+
+  const app = await launchApp()
+  const win = await app.firstWindow()
+
+  await win.waitForSelector('input[type="password"]', { timeout: 30_000 })
+  await win.fill('input[type="password"]', 'admin123')
+  await win.click('button:has-text("登录")')
+  await win.waitForSelector('button:has-text("浏览")', { timeout: 15_000 })
+
+  await win.evaluate((path: string) => {
+    ;(
+      window as { api: { file: { pickDirectory: () => Promise<string> } } }
+    ).api.file.pickDirectory = async () => path
+  }, bomWorkDir)
+
+  await win.click('button:has-text("浏览")')
+  await win.waitForSelector('header.topbar', { timeout: 15_000 })
+
+  const treeKeys = await win.locator('.config-tree .node-row .key').allTextContents()
+  expect(treeKeys).toContain('SoftwareConfig')
+
+  await app.close()
+  await rm(bomWorkDir, { recursive: true, force: true })
 })

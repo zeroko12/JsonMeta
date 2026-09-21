@@ -9,6 +9,7 @@ export default defineConfig({
       outDir: 'out/main',
       rollupOptions: {
         input: { index: resolve(__dirname, 'src/main/index.ts') },
+        output: { format: 'cjs', entryFileNames: 'index.js' },
       },
     },
   },
@@ -18,6 +19,7 @@ export default defineConfig({
       outDir: 'out/preload',
       rollupOptions: {
         input: { index: resolve(__dirname, 'src/preload/index.ts') },
+        output: { format: 'cjs', entryFileNames: 'index.js' },
       },
     },
   },
