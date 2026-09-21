@@ -8,6 +8,10 @@ import EditPanel from '../components/EditPanel.vue'
 import SearchBar from '../components/SearchBar.vue'
 import CommandPalette from '../components/CommandPalette.vue'
 import TopBar from '../components/TopBar.vue'
+import ChangeListDialog from '../components/ChangeListDialog.vue'
+import DeleteConfirmDialog from '../components/DeleteConfirmDialog.vue'
+import BackupRestoreDialog from '../components/BackupRestoreDialog.vue'
+import ExternalChangeDialog from '../components/ExternalChangeDialog.vue'
 
 const configStore = useConfigStore()
 const schemaStore = useSchemaStore()
@@ -47,6 +51,10 @@ onUnmounted(() => {
       </main>
     </div>
     <CommandPalette v-if="uiStore.commandPaletteOpen" />
+    <ChangeListDialog />
+    <DeleteConfirmDialog path="" :whole-subtree="true" />
+    <BackupRestoreDialog />
+    <ExternalChangeDialog />
   </div>
 </template>
 
