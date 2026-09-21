@@ -80,9 +80,9 @@ const commands = computed<CmdItem[]>(() => {
     },
     {
       id: 'schema-editor',
-      label: '打开 schema 编辑器',
+      label: '打开字段说明编辑器',
       action: () => {
-        uiStore.showSchemaEditor = true
+        window.dispatchEvent(new CustomEvent('app:toggle-schema-editor'))
         close()
       },
     },
