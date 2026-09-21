@@ -9,7 +9,9 @@ pnpm-debug.log*
 # Build output
 out/
 dist/
+release/
 *.tsbuildinfo
+*.exe
 
 # Electron
 .vscode/

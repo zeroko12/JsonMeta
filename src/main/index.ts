@@ -92,7 +92,7 @@ function createWindow() {
     autoHideMenuBar: true,
     title: '系统配置编辑工具',
     webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
+      preload: join(__dirname, '../preload/index.mjs'),
       sandbox: false,
       contextIsolation: true,
       nodeIntegration: false,
