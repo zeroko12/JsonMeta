@@ -200,12 +200,15 @@ const PROP_REGEX =
 /**
  * Parse all properties from a class body. Returns one entry per matched
  * declaration (with attributes, /// comment, and inline comment if present).
+ *
+ * Skips:
+ *  - Private fields (they are usually backing fields for a public property)
+ *  - Lines that don't match an auto-property OR public field with initializer
  */
 export function parsePropertiesFromBody(body: string, _sourceFile: string): CSharpProperty[] {
   const lines = body.split(/\r?\n/)
   const props: CSharpProperty[] = []
   // Accumulator for attributes / leading decorators from preceding lines.
-  // Cleared after each consumed property.
   let pendingAttrs: CSharpAttribute[] = []
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i]!
@@ -216,46 +219,83 @@ export function parsePropertiesFromBody(body: string, _sourceFile: string): CSha
       pendingAttrs.push(...attrs)
       continue
     }
-    const fullLine = collectContinuation(lines, i)
-    const { attrs: lineAttrs, rest } = captureAttributes(fullLine.text)
-    const combinedAttrs = pendingAttrs.length > 0 ? [...pendingAttrs, ...lineAttrs] : lineAttrs
-    const propMatch = rest.match(PROP_REGEX)
-    if (!propMatch) {
-      // Not a property — reset accumulator and skip.
+    // Skip private fields — they're backing storage for public properties.
+    if (/^(?:private|protected|internal)\s+/.test(trimmed)) {
       pendingAttrs = []
       continue
     }
-
-    const split = splitTypeAndName(rest)
+    // Multi-line public property declaration (explicit get/set body):
+    //   `public T Name`  followed by  `{`  on next line
+    // We capture type/name from this line; ignore body.
+    const split = splitTypeAndName(trimmed)
     if (!split) {
       pendingAttrs = []
       continue
     }
     const { type, name } = split
-    const accessor = propMatch[3]
-    const defaultValue = propMatch[4]?.trim()
-    const isInitOnly = accessor === 'init'
-    const inlineComment = captureInlineComment(fullLine.text)
+    // Reject obviously non-property lines (constructors, methods, fields).
+    // Heuristic: method/constructor declarations usually include '('.
+    if (type.includes('(') || name.includes('(')) {
+      pendingAttrs = []
+      continue
+    }
+    // Look at this line and continuation to decide whether it's a property:
+    //   - Auto-property:    ends with `{ get; set; }` (or init)
+    //   - Field w/init:     ends with `= ... ;`
+    //   - Explicit body:    next non-empty line starts with `{` or this line
+    //                       ends with `{` (multi-line)
+    const fullLine = collectContinuation(lines, i)
+    const joined = fullLine.text
+    const isAutoProp = /\{\s*get;\s*(set|init)?\s*;\s*\}/.test(joined)
+    const isField = /=\s*[^;]+;?\s*$/.test(joined.trim())
+    const nextNonEmpty = nextNonEmptyLine(lines, i + 1)
+    const explicitBody =
+      !isAutoProp &&
+      !isField &&
+      (joined.trimEnd().endsWith('{') || nextNonEmpty?.trim().startsWith('{') === true)
 
+    if (!isAutoProp && !isField && !explicitBody) {
+      pendingAttrs = []
+      continue
+    }
+
+    // Default value extraction (for auto-property and field forms)
+    let defaultValue: string | undefined
+    if (isField) {
+      const m = joined.match(/=\s*([^;]+);?/)
+      if (m) defaultValue = m[1]!.trim()
+    }
+
+    // Inline comment (only if not part of attribute list, simplified)
+    const inlineComment = captureInlineComment(joined)
     const xmlComment = captureXmlCommentBefore(lines, i)
+
+    const isInitOnly = /\binit\s*;\s*\}/.test(joined)
 
     props.push({
       name,
       type,
       isInitOnly,
       defaultValue,
-      attributes: combinedAttrs,
+      attributes: pendingAttrs.length > 0 ? pendingAttrs : [],
       xmlComment,
       inlineComment,
       line: i + 1,
     })
-
     pendingAttrs = []
 
-    // Skip the continuation lines we already consumed
+    // Skip the lines we consumed
     i += fullLine.consumed - 1
   }
   return props
+}
+
+function nextNonEmptyLine(lines: string[], startIdx: number): string | null {
+  for (let i = startIdx; i < lines.length; i++) {
+    const t = lines[i]!.trim()
+    if (t !== '') return lines[i]!
+  }
+  return null
 }
 
 /**

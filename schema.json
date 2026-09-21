@@ -1,0 +1,3422 @@
+{
+  "_meta": {
+    "version": 1,
+    "rootClass": "SystemConfigModel",
+    "generatedAt": "2026-09-21T02:54:15.794Z",
+    "generatorVersion": "1.0.0",
+    "sourceFiles": [
+      "BuildInfo.cs",
+      "Core.AlarmEngine\\AlarmEngine.cs",
+      "Core.AlarmEngine\\AlarmRule.cs",
+      "Core.AlarmEngine\\DynamicExpressionCompiler.cs",
+      "Core.AlarmEngine\\QueuedAlarmEngine.cs",
+      "Core.Tools\\Converters\\DisplayDataConverter.cs",
+      "Core.Tools\\CustomContainer\\ObservableDictionary.cs",
+      "Core.Tools\\Helper\\AESHelper.cs",
+      "Core.Tools\\Helper\\AppPathConfig.cs",
+      "Core.Tools\\Helper\\AsyncExecutor.cs",
+      "Core.Tools\\Helper\\BitEncodingHelper.cs",
+      "Core.Tools\\Helper\\BoolJsonConverter.cs",
+      "Core.Tools\\Helper\\ConfigReaderWriter.cs",
+      "Core.Tools\\Helper\\ConfigSetCompareHelper.cs",
+      "Core.Tools\\Helper\\DebounceTimer.cs",
+      "Core.Tools\\Helper\\JsonHelper.cs",
+      "Core.Tools\\Helper\\MiniDump.cs",
+      "Core.Tools\\Helper\\NotifyDataErrorBindableBase.cs",
+      "Core.Tools\\Helper\\ReconnectionHelper.cs",
+      "Core.Tools\\Helper\\ReconnectionOptions.cs",
+      "Core.Tools\\Helper\\RetryHelper.cs",
+      "Core.Tools\\Helper\\RetryOptions.cs",
+      "Core.Tools\\Helper\\Utils.cs",
+      "Core.Tools\\Selectors\\TypeWithConfig.cs",
+      "Core.UI\\Behaviors\\ListViewScrollToBottomBehavior.cs",
+      "Core.UI\\Behaviors\\PasswordBoxHelper.cs",
+      "Core.UI\\Behaviors\\TabHeaderSync.cs",
+      "Core.UI\\CommonDialog\\AlertDialog.xaml.cs",
+      "Core.UI\\CommonDialog\\AlertDialogViewModel.cs",
+      "Core.UI\\CommonDialog\\CustomWindowView.xaml.cs",
+      "Core.UI\\CommonDialog\\InputDialog.xaml.cs",
+      "Core.UI\\CommonDialog\\InputDialogViewModel.cs",
+      "Core.UI\\CommonDialog\\Models\\InputItemConfig.cs",
+      "Core.UI\\Converters\\BooleanToBrushConverter.cs",
+      "Core.UI\\Converters\\DisplayDataConverter.cs",
+      "Core.UI\\Converters\\PasswordConverter.cs",
+      "Core.UI\\CustomContainer\\ObservableDictionary.cs",
+      "Core.UI\\Selectors\\DevicePortTemplateSelector.cs",
+      "Core.UI\\Selectors\\InputTemplateSelector.cs",
+      "Core.UI\\Selectors\\MemberItem.cs",
+      "Core.UI\\Selectors\\MemberItemTemplateSelector.cs",
+      "Core.UI\\Selectors\\PropertyItem.cs",
+      "Core.UI\\Selectors\\PropertyItemTemplateSelector.cs",
+      "Core.UI\\UserControls\\AInfoShowGridUnit.xaml.cs",
+      "Core.UI\\UserControls\\CacheTextBox.xaml.cs",
+      "Core.UI\\UserControls\\InfoShowGridUnit.xaml.cs",
+      "Core.UI\\UserControls\\LeftWaferRobotControl.cs",
+      "Core.UI\\UserControls\\LightLabel.xaml.cs",
+      "Core.UI\\UserControls\\NumericControl.xaml.cs",
+      "Core.UI\\UserControls\\PowerGridUnit.xaml.cs",
+      "Core.UI\\UserControls\\RightWaferRobotControl.cs",
+      "Core.UI\\UserControls\\StartAndStopGroupBox.xaml.cs",
+      "Core.UI\\UserControls\\WaferRobotControl.cs",
+      "Database.SQLServer\\ContextEntity\\MyContextEntity.cs",
+      "Database.SQLServer\\DatabaseSQLServerModule.cs",
+      "Database.SQLServer\\Migrations\\Configuration.cs",
+      "Database.SQLServer\\Models\\DbControlJob.cs",
+      "Database.SQLServer\\Models\\DbEventInfo.cs",
+      "Database.SQLServer\\Models\\DbPermission.cs",
+      "Database.SQLServer\\Models\\DbProcessJob.cs",
+      "Database.SQLServer\\Models\\DbRecipe.cs",
+      "Database.SQLServer\\Models\\DbRole.cs",
+      "Database.SQLServer\\Models\\DbRoleTabPermission.cs",
+      "Database.SQLServer\\Models\\DbTabDefinition.cs",
+      "Database.SQLServer\\Models\\DbUser.cs",
+      "Database.SQLServer\\Models\\DbWaferImplantInfo.cs",
+      "Database.SQLServer\\Repositories\\DbControlJobRepository.cs",
+      "Database.SQLServer\\Repositories\\DbEventInfoRepository.cs",
+      "Database.SQLServer\\Repositories\\DbProcessJobRepository.cs",
+      "Database.SQLServer\\Repositories\\DbRecipeRepository.cs",
+      "Database.SQLServer\\Repositories\\DbRoleTabPermissionRepository.cs",
+      "Database.SQLServer\\Repositories\\DbUserRepository.cs",
+      "Database.SQLServer\\Repositories\\DbWaferImplantInfoRepository.cs",
+      "Designer\\App.xaml.cs",
+      "Designer\\MainWindow.xaml.cs",
+      "Hardware.BokePump.Bokai\\CsvMap\\BokePumpDataCsvMap.cs",
+      "Hardware.BokePump.Bokai\\HardwareBokePumpModule.cs",
+      "Hardware.BokePump.Bokai\\Models\\BokePumpController.cs",
+      "Hardware.BokePump\\Config\\BokePumpSerialPortConfig.cs",
+      "Hardware.BokePump\\Data\\BokePumpData.cs",
+      "Hardware.BokePump\\Data\\BokePumpDataRecord.cs",
+      "Hardware.Chiller.SMC\\Protocol\\SmcModbusAsciiHandler.cs",
+      "Hardware.Chiller.SMC\\SmcHrwChillerController.cs",
+      "Hardware.Chiller\\Config\\ChillerConfig.cs",
+      "Hardware.Chiller\\Implementations\\NullChillerController.cs",
+      "Hardware.DoseControl.NationalInstrument\\HardwareDoseControlNationalInstrumentModule.cs",
+      "Hardware.DoseControl.NationalInstrument\\Models\\DoseController.cs",
+      "Hardware.DoseControl.NationalInstrument\\Services\\NiDoseProtocolParser.cs",
+      "Hardware.DoseControl\\Config\\DoseControlConfig.cs",
+      "Hardware.DoseControl\\Data\\DoseControlData.cs",
+      "Hardware.IHC.LoopMaster\\LoopMasterModule.cs",
+      "Hardware.IHC.LoopMaster\\Models\\LoopMasterIHCControl.cs",
+      "Hardware.IHC.lightlink\\CsvMap\\IHCDataCsvMap.cs",
+      "Hardware.IHC.lightlink\\Models\\IHCControl.cs",
+      "Hardware.IHC\\Config\\IHCConfig.cs",
+      "Hardware.IHC\\Config\\IHCMappingParam.cs",
+      "Hardware.IHC\\Data\\IHCData.cs",
+      "Hardware.IHC\\Data\\IHCDataRecord.cs",
+      "Hardware.IndustrialComputer.Advantech\\CsvMap\\DataCsvMap.cs",
+      "Hardware.IndustrialComputer.Advantech\\Events\\FaradayCupRangeAdjustedEvent.cs",
+      "Hardware.IndustrialComputer.Advantech\\Events\\MonitorUDPDataEvent.cs",
+      "Hardware.IndustrialComputer.Advantech\\Events\\UDPDataEventPayload.cs",
+      "Hardware.IndustrialComputer.Advantech\\HardwareIndustrialComputerModule.cs",
+      "Hardware.IndustrialComputer.Advantech\\Models\\CombineDataProvider.cs",
+      "Hardware.IndustrialComputer.Advantech\\Models\\CommandSender.cs",
+      "Hardware.IndustrialComputer\\Config\\CombineDataConfig.cs",
+      "Hardware.IndustrialComputer\\Config\\CommandSenderConfig.cs",
+      "Hardware.IndustrialComputer\\Data\\AnalogTypeData.cs",
+      "Hardware.IndustrialComputer\\Data\\ControllerTypeData.cs",
+      "Hardware.IndustrialComputer\\Data\\DataRecord.cs",
+      "Hardware.IndustrialComputer\\Data\\DeviceData.cs",
+      "Hardware.IndustrialComputer\\Data\\DigitalTypeData.cs",
+      "Hardware.IndustrialComputer\\Data\\FaradayCupTypeData.cs",
+      "Hardware.IndustrialComputer\\Data\\LogicData.cs",
+      "Hardware.IndustrialComputer\\Data\\ModelData.cs",
+      "Hardware.IndustrialComputer\\Data\\PowerTypeData.cs",
+      "Hardware.IndustrialComputer\\Data\\SwitchTypeData.cs",
+      "Hardware.IndustrialComputer\\Data\\TurboPumpTypeData.cs",
+      "Hardware.IndustrialComputer\\Data\\TypeDataBase.cs",
+      "Hardware.IndustrialComputer\\Data\\UDPData.cs",
+      "Hardware.IonSourceController.KingStone\\HardwareIonSourceControllerKingStoneModule.cs",
+      "Hardware.IonSourceController.KingStone\\Models\\KingStoneISC.cs",
+      "Hardware.IonSourceController\\Config\\IonSourceControlConfig.cs",
+      "Hardware.LoopMaster.MIDE\\HardwareLoopMasterMIDEModule.cs",
+      "Hardware.LoopMaster.MIDE\\Models\\LoopMastersManager.cs",
+      "Hardware.LoopMaster\\Config\\LoopMasterConfig.cs",
+      "Hardware.LoopMaster\\Config\\LoopMasterXMLConfig.cs",
+      "Hardware.LoopMaster\\Config\\LoopMastersXMLConfig.cs",
+      "Hardware.LoopMaster\\Config\\SubControlConfig.cs",
+      "Hardware.LoopMaster\\Data\\DeviceHeader.cs",
+      "Hardware.LoopMaster\\Data\\DeviceInfo.cs",
+      "Hardware.LoopMaster\\Data\\DevicePortHelper.cs",
+      "Hardware.LoopMaster\\Data\\JsonData.cs",
+      "Hardware.LoopMaster\\Data\\LoopMasterInfo.cs",
+      "Hardware.LoopMaster\\Handler\\LoopMasterHandler.cs",
+      "Hardware.LoopMaster\\Handler\\SocketClientManager.cs",
+      "Hardware.LoopMaster\\utils\\PortConverter.cs",
+      "Hardware.LoopMaster\\utils\\TypeWithConfigConverter.cs",
+      "Hardware.LoopMaster\\utils\\UshortWrapper.cs",
+      "Hardware.PLC_Control.Beckhoff\\HardwarePLCControlBeckhoffModule.cs",
+      "Hardware.PLC_Control.Beckhoff\\Models\\BSG.cs",
+      "Hardware.PLC_Control.Beckhoff\\Models\\Beckhoff_PLC.cs",
+      "Hardware.PLC_Control.Beckhoff\\Models\\EchuckA.cs",
+      "Hardware.PLC_Control.Beckhoff\\Models\\EchuckB.cs",
+      "Hardware.PLC_Control.Beckhoff\\Models\\LeftCoolingMotor.cs",
+      "Hardware.PLC_Control.Beckhoff\\Models\\LeftElevatorMotor.cs",
+      "Hardware.PLC_Control.Beckhoff\\Models\\LeftRobot.cs",
+      "Hardware.PLC_Control.Beckhoff\\Models\\OrientLiftMotor.cs",
+      "Hardware.PLC_Control.Beckhoff\\Models\\OrientTwistMotor.cs",
+      "Hardware.PLC_Control.Beckhoff\\Models\\PlcCtrl.cs",
+      "Hardware.PLC_Control.Beckhoff\\Models\\PlcCtrlData.cs",
+      "Hardware.PLC_Control.Beckhoff\\Models\\RightCoolingMotor.cs",
+      "Hardware.PLC_Control.Beckhoff\\Models\\RightElevatorMotor.cs",
+      "Hardware.PLC_Control.Beckhoff\\Models\\RightRobot.cs",
+      "Hardware.PLC_Control.Beckhoff\\Models\\TargetPinMotor.cs",
+      "Hardware.PLC_Control.Beckhoff\\Models\\TargetPressMotor.cs",
+      "Hardware.PLC_Control.Beckhoff\\Models\\TargetRotateMotor.cs",
+      "Hardware.PLC_Control.Beckhoff\\Models\\TargetSwitchMotor.cs",
+      "Hardware.PLC_Control.Beckhoff\\Models\\TargetTiltMotor.cs",
+      "Hardware.PLC_Control.Beckhoff\\Models\\TransferControl.cs",
+      "Hardware.PLC_Control\\Config\\PLCControlConfig.cs",
+      "Hardware.PLC_Control\\Models\\BSGReadData.cs",
+      "Hardware.PLC_Control\\Models\\EChuckReadData.cs",
+      "Hardware.PLC_Control\\Models\\ElevatorWaferInfo.cs",
+      "Hardware.PLC_Control\\Models\\IOData.cs",
+      "Hardware.PLC_Control\\Models\\InterlockData.cs",
+      "Hardware.PLC_Control\\Models\\MotionFsmData.cs",
+      "Hardware.PLC_Control\\Models\\MotorAxisReadData.cs",
+      "Hardware.PLC_Control\\Models\\MotorAxisSetData.cs",
+      "Hardware.PLC_Control\\Models\\PLCData.cs",
+      "Hardware.PLC_Control\\Models\\PersistentData.cs",
+      "Hardware.PLC_Control\\Models\\RobotParameters.cs",
+      "Hardware.PLC_Control\\Models\\RobotReadData.cs",
+      "Hardware.PLC_Control\\Models\\WaferData.cs",
+      "Hardware.TemperatureController.ZTIO\\CsvMap\\TemperatureControllerDataCsvMap.cs",
+      "Hardware.TemperatureController.ZTIO\\HardwareTemperatureControllerZTIOModule.cs",
+      "Hardware.TemperatureController.ZTIO\\ModbusHandler.cs",
+      "Hardware.TemperatureController.ZTIO\\Models\\TemperatureControllerController.cs",
+      "Hardware.TemperatureController\\Config\\TemperatureControllerConfig.cs",
+      "Hardware.TemperatureController\\Data\\TemperatureControllerData.cs",
+      "Hardware.TemperatureController\\Data\\TemperatureControllerDataRecord.cs",
+      "Hardware.TemperatureController\\Implementations\\NullTemperatureControllerController.cs",
+      "Hardware.TemperatureController\\TemperatureControllerModule.cs",
+      "IonImplantationSystem\\App.xaml.cs",
+      "IonImplantationSystem\\ViewModels\\ShellViewModel.cs",
+      "IonImplantationSystem\\Views\\Shell.xaml.cs",
+      "UI.Application.AlarmInfo\\ApplicationAlarmInfoModule.cs",
+      "UI.Application.AlarmInfo\\ViewModels\\AlarmInfoViewModel.cs",
+      "UI.Application.AlarmInfo\\Views\\AlarmInfoView.xaml.cs",
+      "UI.Application.Analysis\\ApplicationAnalysisModule.cs",
+      "UI.Application.Analysis\\Events\\ClearRealTimeDataWpfPlotEvent.cs",
+      "UI.Application.Analysis\\Events\\ClearWpfPlotEvent.cs",
+      "UI.Application.Analysis\\Events\\HistoryDataEvent.cs",
+      "UI.Application.Analysis\\Events\\HistoryDataPlotDataEvent.cs",
+      "UI.Application.Analysis\\Events\\HistoryDataSelectModelEvent.cs",
+      "UI.Application.Analysis\\Events\\HistoryJournalEvent.cs",
+      "UI.Application.Analysis\\Events\\RealTimeDataPlotDataEvent.cs",
+      "UI.Application.Analysis\\Models\\DataSelectModel.cs",
+      "UI.Application.Analysis\\Models\\DataSelectViewModel.cs",
+      "UI.Application.Analysis\\ViewModels\\AnalysisViewModel.cs",
+      "UI.Application.Analysis\\ViewModels\\HistoryDataViewModel.cs",
+      "UI.Application.Analysis\\ViewModels\\HistoryJournalViewModel.cs",
+      "UI.Application.Analysis\\ViewModels\\JobJournalViewModel.cs",
+      "UI.Application.Analysis\\ViewModels\\RealTimeDataViewModel.cs",
+      "UI.Application.Analysis\\ViewModels\\WaferTransmissionLogViewModel.cs",
+      "UI.Application.Analysis\\Views\\AnalysisView.xaml.cs",
+      "UI.Application.Analysis\\Views\\HistoryDataView.xaml.cs",
+      "UI.Application.Analysis\\Views\\HistoryJournalView.xaml.cs",
+      "UI.Application.Analysis\\Views\\JobJournalView.xaml.cs",
+      "UI.Application.Analysis\\Views\\RealTimeDataView.xaml.cs",
+      "UI.Application.Analysis\\Views\\WaferTransmissionLogView.xaml.cs",
+      "UI.Application.Config\\ApplicationConfigModule.cs",
+      "UI.Application.Config\\ViewModels\\AddAlarmViewModel.cs",
+      "UI.Application.Config\\ViewModels\\ConfigViewModel.cs",
+      "UI.Application.Config\\ViewModels\\InterlockSelectionViewModel.cs",
+      "UI.Application.Config\\ViewModels\\SoftwareConfigViewModel.cs",
+      "UI.Application.Config\\ViewModels\\WarningSettingsViewModel.cs",
+      "UI.Application.Config\\Views\\AddAlarmWindow.xaml.cs",
+      "UI.Application.Config\\Views\\ConfigView.xaml.cs",
+      "UI.Application.Config\\Views\\InterlockSelectionView.xaml.cs",
+      "UI.Application.Config\\Views\\SoftwareConfigView.xaml.cs",
+      "UI.Application.Config\\Views\\WarningSettingsView.xaml.cs",
+      "UI.Application.Initialize\\ApplicationInitializeModule.cs",
+      "UI.Application.Initialize\\Auto\\AutoCloseLoadLockDoor.cs",
+      "UI.Application.Initialize\\Auto\\AutoCloseSystem.cs",
+      "UI.Application.Initialize\\Auto\\AutoCloseVacuum.cs",
+      "UI.Application.Initialize\\Auto\\AutoEntireInflation.cs",
+      "UI.Application.Initialize\\Auto\\AutoEntireVacuum.cs",
+      "UI.Application.Initialize\\Auto\\AutoInitPLCMotorsAndRobots.cs",
+      "UI.Application.Initialize\\Auto\\AutoInitSystem.cs",
+      "UI.Application.Initialize\\Auto\\AutoIonSourceInflation.cs",
+      "UI.Application.Initialize\\Auto\\AutoIonSourceVacuum.cs",
+      "UI.Application.Initialize\\Auto\\AutoJob.cs",
+      "UI.Application.Initialize\\Auto\\AutoLoadLockInflation.cs",
+      "UI.Application.Initialize\\Auto\\AutoLoadLockVacuum.cs",
+      "UI.Application.Initialize\\Auto\\AutoMainBodyInflation.cs",
+      "UI.Application.Initialize\\Auto\\AutoMainBodyVacuum.cs",
+      "UI.Application.Initialize\\Auto\\AutoOpenLoadLockDoor.cs",
+      "UI.Application.Initialize\\Auto\\AutoRetrieve.cs",
+      "UI.Application.Initialize\\Auto\\AutoSetUpUniformity.cs",
+      "UI.Application.Initialize\\Auto\\AutoSetupBeam.cs",
+      "UI.Application.Initialize\\Auto\\AutoShutdownBeam.cs",
+      "UI.Application.Initialize\\Auto\\AutoTransfer.cs",
+      "UI.Application.Initialize\\Auto\\StateMachineInfoHelper.cs",
+      "UI.Application.Initialize\\Services\\AutoOperationProvider.cs",
+      "UI.Application.Initialize\\Services\\DoseControlParamsHelper.cs",
+      "UI.Application.Initialize\\Services\\FilamentUseTime.cs",
+      "UI.Application.Initialize\\Services\\GasTotalVolume.cs",
+      "UI.Application.Initialize\\Services\\HardwareManager.cs",
+      "UI.Application.Initialize\\Services\\PowerInfoHelper.cs",
+      "UI.Application.Initialize\\Services\\WaferInfoHelper.cs",
+      "UI.Application.Initialize\\ViewModels\\InitializeViewModel.cs",
+      "UI.Application.Initialize\\Views\\InitializeView.xaml.cs",
+      "UI.Application.Login\\ApplicationLoginModule.cs",
+      "UI.Application.Login\\Models\\UserSession.cs",
+      "UI.Application.Login\\ViewModels\\LoginViewModel.cs",
+      "UI.Application.Login\\Views\\LoginView.xaml.cs",
+      "UI.Application.Main\\ApplicationMainModule.cs",
+      "UI.Application.Main\\Services\\AsyncAlarmEventLogger.cs",
+      "UI.Application.Main\\ViewModels\\AboutAppViewModel.cs",
+      "UI.Application.Main\\ViewModels\\ConnectionViewModel.cs",
+      "UI.Application.Main\\ViewModels\\MainWindowViewModel.cs",
+      "UI.Application.Main\\ViewModels\\RegisterAppViewModel.cs",
+      "UI.Application.Main\\Views\\AboutAppView.xaml.cs",
+      "UI.Application.Main\\Views\\ConnectionView.xaml.cs",
+      "UI.Application.Main\\Views\\MainWindow.xaml.cs",
+      "UI.Application.Main\\Views\\RegisterAppView.xaml.cs",
+      "UI.Application.Maintain\\ApplicationMaintainModule.cs",
+      "UI.Application.Maintain\\Behaviors\\WebView2HtmlBehavior.cs",
+      "UI.Application.Maintain\\Dialog\\SelectLinkPointDialogView.xaml.cs",
+      "UI.Application.Maintain\\Dialog\\SelectLinkPointDialogViewModel.cs",
+      "UI.Application.Maintain\\Helper\\ChillerConverters.cs",
+      "UI.Application.Maintain\\Helper\\ObservablePointAccessor.cs",
+      "UI.Application.Maintain\\Models\\LeftRobotActionConverter.cs",
+      "UI.Application.Maintain\\Models\\MonitorItem.cs",
+      "UI.Application.Maintain\\Models\\ReferenceLineItem.cs",
+      "UI.Application.Maintain\\Models\\RightRobotActionConverter.cs",
+      "UI.Application.Maintain\\Services\\MermaidHtmlBuilder.cs",
+      "UI.Application.Maintain\\ViewModels\\AutomaticProcViewModel.cs",
+      "UI.Application.Maintain\\ViewModels\\ChillerControlViewModel.cs",
+      "UI.Application.Maintain\\ViewModels\\ControlTemperatureViewModel.cs",
+      "UI.Application.Maintain\\ViewModels\\CryoPumpControlViewModel.cs",
+      "UI.Application.Maintain\\ViewModels\\DatabaseMaintainViewModel.cs",
+      "UI.Application.Maintain\\ViewModels\\DoseControlViewModel.cs",
+      "UI.Application.Maintain\\ViewModels\\ElectrostaticChuckViewModel.cs",
+      "UI.Application.Maintain\\ViewModels\\GlobalMonitorViewModel.cs",
+      "UI.Application.Maintain\\ViewModels\\GlobalValueMonitorViewModel.cs",
+      "UI.Application.Maintain\\ViewModels\\IHCControlViewModel.cs",
+      "UI.Application.Maintain\\ViewModels\\InfraRedMeasureViewModel.cs",
+      "UI.Application.Maintain\\ViewModels\\IonSourceControlViewModel.cs",
+      "UI.Application.Maintain\\ViewModels\\LoopMasterComViewModel.cs",
+      "UI.Application.Maintain\\ViewModels\\LoopMasterConfigViewModel.cs",
+      "UI.Application.Maintain\\ViewModels\\LoopMasterControlViewModel.cs",
+      "UI.Application.Maintain\\ViewModels\\LoopMasterDebugViewModel.cs",
+      "UI.Application.Maintain\\ViewModels\\MaintainViewModel.cs",
+      "UI.Application.Maintain\\ViewModels\\MotorControlViewModel.cs",
+      "UI.Application.Maintain\\ViewModels\\PIDGlobalDebugViewModel.cs",
+      "UI.Application.Maintain\\ViewModels\\PLCParametersViewModel.cs",
+      "UI.Application.Maintain\\ViewModels\\RobotArmControlViewModel.cs",
+      "UI.Application.Maintain\\ViewModels\\TargetHeatControlViewModel.cs",
+      "UI.Application.Maintain\\ViewModels\\TransferControlViewModel.cs",
+      "UI.Application.Maintain\\Views\\AutomaticProcView.xaml.cs",
+      "UI.Application.Maintain\\Views\\ChillerControlView.xaml.cs",
+      "UI.Application.Maintain\\Views\\ControlTemperatureView.xaml.cs",
+      "UI.Application.Maintain\\Views\\CryoPumpControlView.xaml.cs",
+      "UI.Application.Maintain\\Views\\DatabaseMaintainView.xaml.cs",
+      "UI.Application.Maintain\\Views\\DoseControlView.xaml.cs",
+      "UI.Application.Maintain\\Views\\ElectrostaticChuckView.xaml.cs",
+      "UI.Application.Maintain\\Views\\GlobalMonitorView.xaml.cs",
+      "UI.Application.Maintain\\Views\\GlobalValueMonitorView.xaml.cs",
+      "UI.Application.Maintain\\Views\\IHCControlView.xaml.cs",
+      "UI.Application.Maintain\\Views\\InfraRedMeasureView.xaml.cs",
+      "UI.Application.Maintain\\Views\\IonSourceControlView.xaml.cs",
+      "UI.Application.Maintain\\Views\\LoopMasterComView.xaml.cs",
+      "UI.Application.Maintain\\Views\\LoopMasterConfigView.xaml.cs",
+      "UI.Application.Maintain\\Views\\LoopMasterControlView.xaml.cs",
+      "UI.Application.Maintain\\Views\\LoopMasterDebugView.xaml.cs",
+      "UI.Application.Maintain\\Views\\MaintainView.xaml.cs",
+      "UI.Application.Maintain\\Views\\MotorControlView.xaml.cs",
+      "UI.Application.Maintain\\Views\\PIDGlobalDebugView.xaml.cs",
+      "UI.Application.Maintain\\Views\\PLCParametersView.xaml.cs",
+      "UI.Application.Maintain\\Views\\RobotArmControlView.xaml.cs",
+      "UI.Application.Maintain\\Views\\TargetHeatControlView.xaml.cs",
+      "UI.Application.Maintain\\Views\\TransferControlView.xaml.cs",
+      "UI.Application.Operation\\ApplicationOperationModule.cs",
+      "UI.Application.Operation\\Models\\CurrentRecipeProvider.cs",
+      "UI.Application.Operation\\Models\\LeftRobotActionConverter.cs",
+      "UI.Application.Operation\\Models\\PeakFwhmInfo.cs",
+      "UI.Application.Operation\\Models\\RightRobotActionConverter.cs",
+      "UI.Application.Operation\\ViewModels\\AuxiliaryOperationViewModel.cs",
+      "UI.Application.Operation\\ViewModels\\BeamOperationViewModel.cs",
+      "UI.Application.Operation\\ViewModels\\BeamPosAnalyzeViewModel.cs",
+      "UI.Application.Operation\\ViewModels\\BokePumpControlWindowViewModel.cs",
+      "UI.Application.Operation\\ViewModels\\DoseModificationWindowViewModel.cs",
+      "UI.Application.Operation\\ViewModels\\DynamicDialogViewModel.cs",
+      "UI.Application.Operation\\ViewModels\\FocusAnalyzeViewModel.cs",
+      "UI.Application.Operation\\ViewModels\\MFCEditWindowViewModel.cs",
+      "UI.Application.Operation\\ViewModels\\MolecularPumpPurgeViewModel.cs",
+      "UI.Application.Operation\\ViewModels\\OperationViewModel.cs",
+      "UI.Application.Operation\\ViewModels\\PFGEditWindowViewModel.cs",
+      "UI.Application.Operation\\ViewModels\\PowerEditWindowViewModel.cs",
+      "UI.Application.Operation\\ViewModels\\SpectrumAnalyzeViewModel.cs",
+      "UI.Application.Operation\\ViewModels\\VacuumOperationViewModel.cs",
+      "UI.Application.Operation\\Views\\AuxiliaryOperationView.xaml.cs",
+      "UI.Application.Operation\\Views\\BeamOperationView.xaml.cs",
+      "UI.Application.Operation\\Views\\BeamPosAnalyzeView.xaml.cs",
+      "UI.Application.Operation\\Views\\BokePumpControlWindowView.xaml.cs",
+      "UI.Application.Operation\\Views\\DoseModificationWindowView.xaml.cs",
+      "UI.Application.Operation\\Views\\DynamicDialogView.xaml.cs",
+      "UI.Application.Operation\\Views\\FocusAnalyzeView.xaml.cs",
+      "UI.Application.Operation\\Views\\MFCEditWindowView.xaml.cs",
+      "UI.Application.Operation\\Views\\MolecularPumpPurgeView.xaml.cs",
+      "UI.Application.Operation\\Views\\OperationView.xaml.cs",
+      "UI.Application.Operation\\Views\\PFGEditWindowView.xaml.cs",
+      "UI.Application.Operation\\Views\\PowerEditWindowView.xaml.cs",
+      "UI.Application.Operation\\Views\\SpectrumAnalyzeView.xaml.cs",
+      "UI.Application.Operation\\Views\\VacuumOperationView.xaml.cs",
+      "UI.Application.RecipeEdit\\ApplicationRecipeEditModule.cs",
+      "UI.Application.RecipeEdit\\Events\\WaferImplantInfoEvent.cs",
+      "UI.Application.RecipeEdit\\Models\\CurrentRecipeProvider.cs",
+      "UI.Application.RecipeEdit\\Models\\LeftRobotActionConverter.cs",
+      "UI.Application.RecipeEdit\\Models\\RightRobotActionConverter.cs",
+      "UI.Application.RecipeEdit\\ViewModels\\AddJobsViewModel.cs",
+      "UI.Application.RecipeEdit\\ViewModels\\BeamAnalyzeViewModel.cs",
+      "UI.Application.RecipeEdit\\ViewModels\\BeamTuneViewModel.cs",
+      "UI.Application.RecipeEdit\\ViewModels\\EditWaferIdViewModel.cs",
+      "UI.Application.RecipeEdit\\ViewModels\\ImplantOperationViewModel.cs",
+      "UI.Application.RecipeEdit\\ViewModels\\JobEditViewModel.cs",
+      "UI.Application.RecipeEdit\\ViewModels\\JobMonitorViewModel.cs",
+      "UI.Application.RecipeEdit\\ViewModels\\JobsMonitorViewModel.cs",
+      "UI.Application.RecipeEdit\\ViewModels\\LoadJobsViewModel.cs",
+      "UI.Application.RecipeEdit\\ViewModels\\PrismUserControl1ViewModel.cs",
+      "UI.Application.RecipeEdit\\ViewModels\\ProcessStartViewModel.cs",
+      "UI.Application.RecipeEdit\\ViewModels\\RecipeCreateViewModel.cs",
+      "UI.Application.RecipeEdit\\ViewModels\\RecipeEditViewModel.cs",
+      "UI.Application.RecipeEdit\\ViewModels\\RecipeSaveAsWindowViewModel.cs",
+      "UI.Application.RecipeEdit\\ViewModels\\SaveJobViewModel.cs",
+      "UI.Application.RecipeEdit\\ViewModels\\SelectRecipeWindowViewModel.cs",
+      "UI.Application.RecipeEdit\\ViewModels\\SystemStartViewModel.cs",
+      "UI.Application.RecipeEdit\\ViewModels\\WaferInfoViewModel.cs",
+      "UI.Application.RecipeEdit\\Views\\AddJobsView.xaml.cs",
+      "UI.Application.RecipeEdit\\Views\\BeamAnalyzeView.xaml.cs",
+      "UI.Application.RecipeEdit\\Views\\BeamTuneView.xaml.cs",
+      "UI.Application.RecipeEdit\\Views\\EditWaferIdView.xaml.cs",
+      "UI.Application.RecipeEdit\\Views\\ImplantOperationView.xaml.cs",
+      "UI.Application.RecipeEdit\\Views\\JobEditView.xaml.cs",
+      "UI.Application.RecipeEdit\\Views\\JobMonitorView.xaml.cs",
+      "UI.Application.RecipeEdit\\Views\\JobsMonitorView.xaml.cs",
+      "UI.Application.RecipeEdit\\Views\\LoadJobsView.xaml.cs",
+      "UI.Application.RecipeEdit\\Views\\ProcessStart.xaml.cs",
+      "UI.Application.RecipeEdit\\Views\\RecipeCreateView.xaml.cs",
+      "UI.Application.RecipeEdit\\Views\\RecipeEditView.xaml.cs",
+      "UI.Application.RecipeEdit\\Views\\RecipeSaveAsWindowView.xaml.cs",
+      "UI.Application.RecipeEdit\\Views\\SaveJobView.xaml.cs",
+      "UI.Application.RecipeEdit\\Views\\SelectRecipeWindowView.xaml.cs",
+      "UI.Application.RecipeEdit\\Views\\SystemStartView.xaml.cs",
+      "UI.Application.RecipeEdit\\Views\\WaferInfoView.xaml.cs",
+      "UI.Application.Share\\Attributes\\TabPermissionAttribute.cs",
+      "UI.Application.Share\\Behavior\\ColorPickerBehavior.cs",
+      "UI.Application.Share\\Behavior\\DraggableBehavior.cs",
+      "UI.Application.Share\\Behavior\\GridViewColumnsBehavior.cs",
+      "UI.Application.Share\\Behavior\\ListViewSortBehavior.cs",
+      "UI.Application.Share\\Behavior\\LiveChartsZoomResetBehavior.cs",
+      "UI.Application.Share\\Behavior\\NumericUpDownEnterBehavior.cs",
+      "UI.Application.Share\\Behavior\\NumericUpDownIncrementBehavior.cs",
+      "UI.Application.Share\\Behavior\\TextBoxEnterBehavior.cs",
+      "UI.Application.Share\\Events\\AlarmConfigUpdatedEvent.cs",
+      "UI.Application.Share\\Events\\AlarmRelatedEvent.cs",
+      "UI.Application.Share\\Events\\AutoJobEvent.cs",
+      "UI.Application.Share\\Events\\AutoOperationInformEvent.cs",
+      "UI.Application.Share\\Events\\AutoProceduresMessageEvent.cs",
+      "UI.Application.Share\\Events\\AutoTransferInformAutoJobEvent.cs",
+      "UI.Application.Share\\Events\\ChargeNumChangeEvent.cs",
+      "UI.Application.Share\\Events\\ConfigChangeEvent.cs",
+      "UI.Application.Share\\Events\\ConfigRestoredEvent.cs",
+      "UI.Application.Share\\Events\\DoseControlImplantMsgEvent.cs",
+      "UI.Application.Share\\Events\\DoseControlUniformityEvent.cs",
+      "UI.Application.Share\\Events\\DoseRenewEvent.cs",
+      "UI.Application.Share\\Events\\ExitAppEvent.cs",
+      "UI.Application.Share\\Events\\HandingOrLoadingWaferCassetteEvent.cs",
+      "UI.Application.Share\\Events\\InformWaferSizeEvent.cs",
+      "UI.Application.Share\\Events\\InitializeSuccessEvent.cs",
+      "UI.Application.Share\\Events\\IonSourceHeatProgessEvent.cs",
+      "UI.Application.Share\\Events\\LoginSuccessEvent.cs",
+      "UI.Application.Share\\Events\\MainCupBeamMeasurementEvent.cs",
+      "UI.Application.Share\\Events\\OperationRelatedEvent.cs",
+      "UI.Application.Share\\Events\\PermissionsChangedEvent.cs",
+      "UI.Application.Share\\Events\\SaveRecipeRelateEvent.cs",
+      "UI.Application.Share\\Events\\SetupUniformityEvent.cs",
+      "UI.Application.Share\\Events\\TransferCycleTestAddRoundEvent.cs",
+      "UI.Application.Share\\Helper\\AnalyzerHelper.cs",
+      "UI.Application.Share\\Helper\\AutoJobBackupHandler.cs",
+      "UI.Application.Share\\Helper\\BeamSettlingDetector.cs",
+      "UI.Application.Share\\Helper\\BindingProxy.cs",
+      "UI.Application.Share\\Helper\\ChartPointOptimizer.cs",
+      "UI.Application.Share\\Helper\\CurveAlignResult.cs",
+      "UI.Application.Share\\Helper\\DoubleToleranceComparer.cs",
+      "UI.Application.Share\\Helper\\EdgeDetector.cs",
+      "UI.Application.Share\\Helper\\EdgeDetectorProvider.cs",
+      "UI.Application.Share\\Helper\\FocusScanModels.cs",
+      "UI.Application.Share\\Helper\\LogHelper.cs",
+      "UI.Application.Share\\Helper\\MonitorManager.cs",
+      "UI.Application.Share\\Helper\\ObservableBatchUpdater.cs",
+      "UI.Application.Share\\Helper\\PIDControlManager.cs",
+      "UI.Application.Share\\Helper\\PIDController.cs",
+      "UI.Application.Share\\Helper\\PIDMonitorPerformance.cs",
+      "UI.Application.Share\\Helper\\ParameterRampHelper.cs",
+      "UI.Application.Share\\Helper\\PeakDetectionHelper.cs",
+      "UI.Application.Share\\Helper\\RecursiveLowPassFilter.cs",
+      "UI.Application.Share\\Helper\\TxtSave.cs",
+      "UI.Application.Share\\Models\\CacheManager.cs",
+      "UI.Application.Share\\Models\\ChartAnnotationPoint.cs",
+      "UI.Application.Share\\Models\\CheckInterlock.cs",
+      "UI.Application.Share\\Models\\ControlJobData.cs",
+      "UI.Application.Share\\Models\\CurrentAlarmWarning.cs",
+      "UI.Application.Share\\Models\\EventInfo.cs",
+      "UI.Application.Share\\Models\\GlobalJobData.cs",
+      "UI.Application.Share\\Models\\HardwareSignalDefinition.cs",
+      "UI.Application.Share\\Models\\InitializationProgress.cs",
+      "UI.Application.Share\\Models\\JobDataView.cs",
+      "UI.Application.Share\\Models\\LogMessage.cs",
+      "UI.Application.Share\\Models\\ObservableValue.cs",
+      "UI.Application.Share\\Models\\Permission.cs",
+      "UI.Application.Share\\Models\\ProcessJobData.cs",
+      "UI.Application.Share\\Models\\RecipeData.cs",
+      "UI.Application.Share\\Models\\RecipeInfo.cs",
+      "UI.Application.Share\\Models\\Role.cs",
+      "UI.Application.Share\\Models\\SignalRegistry.cs",
+      "UI.Application.Share\\Models\\SoftwareConfig.cs",
+      "UI.Application.Share\\Models\\SystemConfigManager.cs",
+      "UI.Application.Share\\Models\\SystemConfigModel.cs",
+      "UI.Application.Share\\Models\\SystemConfigProvider.cs",
+      "UI.Application.Share\\Models\\TabPermission.cs",
+      "UI.Application.Share\\Models\\User.cs",
+      "UI.Application.Share\\Models\\UserInputDataProvider.cs",
+      "UI.Application.Share\\Models\\WaferTransmissionLog.cs",
+      "UI.Application.Share\\Models\\WarningSettingsConfig.cs",
+      "UI.Application.Share\\Names\\DialogNames.cs",
+      "UI.Application.Share\\Names\\ModuleNames.cs",
+      "UI.Application.Share\\Names\\NavigationConstants.cs",
+      "UI.Application.Share\\Names\\RegionNames.cs",
+      "UI.Application.Share\\Names\\TabKeys.cs",
+      "UI.Application.Share\\Names\\ViewNames.cs",
+      "UI.Application.Share\\Services\\AlarmEngineExtensions.cs",
+      "UI.Application.Share\\Services\\AlarmModuleRegistry.cs",
+      "UI.Application.Share\\Services\\CustomAlarmRegistrar.cs",
+      "UI.Application.Share\\Services\\DeviceOperationService.cs",
+      "UI.Application.Share\\Services\\PermissionService.cs",
+      "UI.Application.Share\\Services\\PermissionTabExtensions.cs",
+      "UI.Application.Share\\Services\\PrerequisiteEvaluator.cs",
+      "UI.Application.Share\\Services\\PropertyAccessService.cs",
+      "UI.Application.Share\\Services\\TabHeaderExtractor.cs",
+      "UI.Application.Share\\Services\\TabHeaderSync.cs",
+      "UI.Application.Share\\Services\\TabPermissionScanner.cs",
+      "UI.Application.Share\\Services\\UserSessionExtensions.cs",
+      "UI.Application.Share\\SoftwareConfigs\\AnalogTypeConfig.cs",
+      "UI.Application.Share\\SoftwareConfigs\\ConcatenateObjectsConverter.cs",
+      "UI.Application.Share\\SoftwareConfigs\\ControllerTypeConfig.cs",
+      "UI.Application.Share\\SoftwareConfigs\\DigitalTypeConfig.cs",
+      "UI.Application.Share\\SoftwareConfigs\\FaradayCupTypeConfig.cs",
+      "UI.Application.Share\\SoftwareConfigs\\ImplantElementConfig.cs",
+      "UI.Application.Share\\SoftwareConfigs\\InterlockConditionConfig.cs",
+      "UI.Application.Share\\SoftwareConfigs\\PowerTypeConfig.cs",
+      "UI.Application.Share\\SoftwareConfigs\\SpectrumAnalyzeElementConfig.cs",
+      "UI.Application.Share\\SoftwareConfigs\\SwitchTypeConfig.cs",
+      "UI.Application.Share\\SoftwareConfigs\\TurboPumpTypeConfig.cs",
+      "UI.Application.Share\\SpecificConverters\\AccessLevelConverters.cs",
+      "UI.Application.Share\\SpecificConverters\\AllOnToBoolMultiConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\AllOnToBoolMultiConverterForDoor.cs",
+      "UI.Application.Share\\SpecificConverters\\BokePumpStatusEndColorConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\BokePumpStatusMidColorConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\BokePumpStatusStartColorConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\Bool2Color.cs",
+      "UI.Application.Share\\SpecificConverters\\Bool2ColorsConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\BoolToStringConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\Boolean2ColorConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\Boolean2StringConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\ByteCollectionToStringConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\CalculateAnalyzeCurrentConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\CalculateParallelLensConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\ChineseConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\DisplayBooleanConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\DisplayDataConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\DoseDisplayConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\ElevatorMotorReadData2ColorConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\ElevatorMotorReadData2StringConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\ElevatorWaferData2ColorConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\ElevatorWaferMapInfo2StringConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\EvenOddConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\GasFlowMonitorConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\GaugeStatus2ColorConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\HexBindingConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\IGStatus2ColorCvt.cs",
+      "UI.Application.Share\\SpecificConverters\\IHCMultiConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\ImplantEnergyAutoCalculateConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\IndexAndListToBoolConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\IndexAndListToStringConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\IndexConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\InverseBooleanConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\IsValueChangedDifferenceMultiConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\IsValuesChangedDifferenceMultiConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\JobWaferSerialNumberConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\LimitBoundConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\LoopMasterValueAfterTransMultiConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\LoopMasterValueByIndexConfigConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\LoopMasterValueConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\MaintainPowerControlConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\MapFsmData2ColorConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\MapFsmData2StringConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\Mode2BoolConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\MotorMotionFsmData2StringConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\MotorPosition2StringConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\MultiValueConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\PercentDisplayConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\RangeToScaleConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\RobotArrPosConvertor.cs",
+      "UI.Application.Share\\SpecificConverters\\RobotStatus2StringConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\RobotTransferMotionFsmData2StringConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\SKColorToBrushConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\Short4StringConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\SimulateSwitchStringMultiConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\Status2Bool.cs",
+      "UI.Application.Share\\SpecificConverters\\String2IntConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\StringConcatConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\StringConcatenationConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\SwitchStatus2ColorConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\TurboPumpStatus2ColorConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\TwistorStatus2StringConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\TwoStringConcatenateConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\UserRoleConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\VSAndIGStatus2ColorConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\ValueGreaterThan0ToOpacityConverter.cs",
+      "UI.Application.Share\\SpecificConverters\\WaferTotalNumber2VisibilityConverter.cs",
+      "UI.Application.UserManage\\ApplicationUserManageModule.cs",
+      "UI.Application.UserManage\\ViewModels\\ChangePwdViewModel.cs",
+      "UI.Application.UserManage\\ViewModels\\PermissionSetViewModel.cs",
+      "UI.Application.UserManage\\ViewModels\\SwitchoverUserViewModel.cs",
+      "UI.Application.UserManage\\ViewModels\\UserManageMergedViewModel.cs",
+      "UI.Application.UserManage\\Views\\ChangePwdView.xaml.cs",
+      "UI.Application.UserManage\\Views\\PermissionSetView.xaml.cs",
+      "UI.Application.UserManage\\Views\\SwitchoverUserView.xaml.cs",
+      "UI.Application.UserManage\\Views\\UserManageMergedView.xaml.cs",
+      "UI.Application.UserManage\\Views\\UserManageView.xaml.cs",
+      "UnitTests.Core.Alarm\\DynamicExpressionCompilerTests.cs",
+      "UnitTests.Core.Alarm\\MissingSignalValidationTests.cs",
+      "UnitTests.Core.Alarm\\OtherTriggersTests.cs",
+      "UnitTests.Core.Alarm\\PrerequisiteEvaluatorTests.cs",
+      "UnitTests.Core.Alarm\\QueuedAlarmEngineTests.cs",
+      "UnitTests.Core.Alarm\\SyntaxValidationAndShieldingTests.cs",
+      "UnitTests.Core.Alarm\\TabHeaderExtractorTests.cs",
+      "UnitTests.Core.Alarm\\WaterTempResistanceTests.cs"
+    ]
+  },
+  "_templates": {
+    "ValueTypeWithConfig": {
+      "_type": "object",
+      "_fields": {
+        "Value": {
+          "_type": "string"
+        },
+        "OriginValue": {
+          "_type": "string"
+        },
+        "TransWay": {
+          "_type": "int"
+        },
+        "boolsDouble": {
+          "_type": "double"
+        },
+        "Func": {
+          "_type": "object",
+          "_desc": "逆转换函数数组，提供统一的逆转换接口",
+          "_useTemplate": "static",
+          "_instanceDesc": "Type 0: 线性映射的逆函数\n            (x, _, _, _, _, _) => LGConvertInverse(x),                            // Type 1: LG转换的逆函数\n            (x, _, _, _, _, _) => HGConvertInverse(x),                            // Type 2: HG转换的逆函数\n            (x, _, _, _, _, _) => VSConvertInverse(x),                            // Type 3: VS转换的逆函数\n            (convertedValue, _, _, _, _, boolsFlag) => CUPConvertInverse(convertedValue, boolsFlag),\n        };"
+        },
+        "Config": {
+          "_type": "string"
+        },
+        "RightPhysicRange": {
+          "_type": "int"
+        },
+        "LeftPhysicRange": {
+          "_type": "int"
+        },
+        "LeftLogicRange": {
+          "_type": "double"
+        },
+        "RightLogicRange": {
+          "_type": "double"
+        },
+        "double": {
+          "_type": "object",
+          "_desc": "VSConvert 的逆函数，将压差值转换回原始数值",
+          "_useTemplate": "static"
+        }
+      }
+    },
+    "BoolTypeWithConfig": {
+      "_type": "object",
+      "_fields": {
+        "OriginValue": {
+          "_type": "string"
+        },
+        "Invert": {
+          "_type": "bool"
+        },
+        "Value": {
+          "_type": "string"
+        },
+        "Config": {
+          "_type": "string"
+        }
+      }
+    },
+    "DbRole": {
+      "_type": "object",
+      "_fields": {
+        "RoleId": {
+          "_type": "int"
+        },
+        "RoleName": {
+          "_type": "string",
+          "_desc": "角色名称"
+        },
+        "Users": {
+          "_type": "array",
+          "_elementTemplate": {
+            "_type": "object",
+            "_fields": {
+              "UserId": {
+                "_type": "int"
+              },
+              "UserName": {
+                "_type": "string"
+              },
+              "Password": {
+                "_type": "string"
+              },
+              "InsertDateTime": {
+                "_type": "object",
+                "_useTemplate": "DateTime"
+              },
+              "RoleId": {
+                "_type": "int"
+              },
+              "Role": {
+                "_type": "object",
+                "_useTemplate": "DbRole"
+              }
+            }
+          }
+        },
+        "Permissions": {
+          "_type": "array",
+          "_elementTemplate": {
+            "_type": "object",
+            "_fields": {
+              "PermissionId": {
+                "_type": "int"
+              },
+              "Name": {
+                "_type": "string",
+                "_desc": "名称"
+              },
+              "DbRolesInThisPermission": {
+                "_type": "array",
+                "_desc": "该权限下的角色列表",
+                "_elementTemplate": {
+                  "_type": "object",
+                  "_fields": {}
+                }
+              }
+            }
+          }
+        },
+        "TabPermissions": {
+          "_type": "array",
+          "_elementTemplate": {
+            "_type": "object",
+            "_fields": {
+              "Id": {
+                "_type": "int"
+              },
+              "RoleId": {
+                "_type": "int"
+              },
+              "TabId": {
+                "_type": "int"
+              },
+              "AccessLevel": {
+                "_type": "int",
+                "_desc": "0=不可见, 1=只读, 2=可操作"
+              },
+              "Role": {
+                "_type": "object",
+                "_useTemplate": "DbRole"
+              },
+              "TabDefinition": {
+                "_type": "object",
+                "_fields": {
+                  "TabId": {
+                    "_type": "int"
+                  },
+                  "TabKey": {
+                    "_type": "string",
+                    "_desc": "唯一标识，二级Tab包含所属一级Tab前缀"
+                  },
+                  "DisplayName": {
+                    "_type": "string",
+                    "_desc": "显示名称"
+                  },
+                  "ParentTabKey": {
+                    "_type": "string",
+                    "_desc": "父Tab的TabKey；null表示一级Tab"
+                  },
+                  "SortOrder": {
+                    "_type": "int"
+                  },
+                  "RoleTabPermissions": {
+                    "_type": "array",
+                    "_elementTemplate": {
+                      "_type": "object",
+                      "_fields": {}
+                    }
+                  }
+                },
+                "_desc": "Tab定义表：登记软件中所有受权限控制的一级/二级Tab"
+              }
+            },
+            "_desc": "角色-Tab权限关联表：AccessLevel 0=不可见 1=只读 2=可操作"
+          }
+        }
+      }
+    },
+    "DbUser": {
+      "_type": "object",
+      "_fields": {
+        "UserId": {
+          "_type": "int"
+        },
+        "UserName": {
+          "_type": "string"
+        },
+        "Password": {
+          "_type": "string"
+        },
+        "InsertDateTime": {
+          "_type": "object",
+          "_useTemplate": "DateTime"
+        },
+        "RoleId": {
+          "_type": "int"
+        },
+        "Role": {
+          "_type": "object",
+          "_useTemplate": "DbRole"
+        }
+      }
+    },
+    "DbRoleTabPermission": {
+      "_type": "object",
+      "_fields": {
+        "Id": {
+          "_type": "int"
+        },
+        "RoleId": {
+          "_type": "int"
+        },
+        "TabId": {
+          "_type": "int"
+        },
+        "AccessLevel": {
+          "_type": "int",
+          "_desc": "0=不可见, 1=只读, 2=可操作"
+        },
+        "Role": {
+          "_type": "object",
+          "_useTemplate": "DbRole"
+        },
+        "TabDefinition": {
+          "_type": "object",
+          "_fields": {
+            "TabId": {
+              "_type": "int"
+            },
+            "TabKey": {
+              "_type": "string",
+              "_desc": "唯一标识，二级Tab包含所属一级Tab前缀"
+            },
+            "DisplayName": {
+              "_type": "string",
+              "_desc": "显示名称"
+            },
+            "ParentTabKey": {
+              "_type": "string",
+              "_desc": "父Tab的TabKey；null表示一级Tab"
+            },
+            "SortOrder": {
+              "_type": "int"
+            },
+            "RoleTabPermissions": {
+              "_type": "array",
+              "_elementTemplate": {
+                "_type": "object",
+                "_fields": {}
+              }
+            }
+          },
+          "_desc": "Tab定义表：登记软件中所有受权限控制的一级/二级Tab"
+        }
+      },
+      "_desc": "角色-Tab权限关联表：AccessLevel 0=不可见 1=只读 2=可操作"
+    },
+    "DbControlJob": {
+      "_type": "object",
+      "_fields": {
+        "ControlJobID": {
+          "_type": "int"
+        },
+        "ControlJobName": {
+          "_type": "string"
+        },
+        "ProcessJobIDs": {
+          "_type": "string"
+        }
+      }
+    },
+    "DbEventInfo": {
+      "_type": "object",
+      "_fields": {
+        "ID": {
+          "_type": "int"
+        },
+        "DateTime": {
+          "_type": "object",
+          "_useTemplate": "DateTime"
+        },
+        "ResolveDateTime": {
+          "_type": "object",
+          "_useTemplate": "DateTime"
+        },
+        "Code": {
+          "_type": "string"
+        },
+        "Name": {
+          "_type": "string"
+        },
+        "Type": {
+          "_type": "string"
+        },
+        "Description": {
+          "_type": "string"
+        },
+        "UserName": {
+          "_type": "string"
+        }
+      }
+    },
+    "DbProcessJob": {
+      "_type": "object",
+      "_fields": {
+        "ProcessJobID": {
+          "_type": "int"
+        },
+        "ProcessJobName": {
+          "_type": "string"
+        },
+        "RecipeID": {
+          "_type": "string"
+        },
+        "RecipeName": {
+          "_type": "string"
+        },
+        "Left_WaferInfo": {
+          "_type": "string"
+        },
+        "Right_WaferInfo": {
+          "_type": "string"
+        },
+        "LoadPort": {
+          "_type": "string"
+        }
+      }
+    },
+    "DbWaferImplantInfo": {
+      "_type": "object",
+      "_fields": {
+        "ID": {
+          "_type": "int",
+          "_desc": "数据库中的ID"
+        },
+        "WaferID": {
+          "_type": "string",
+          "_desc": "晶圆本身的ID"
+        },
+        "Size": {
+          "_type": "string"
+        },
+        "LoadPordID": {
+          "_type": "string",
+          "_desc": "片库号"
+        },
+        "SlotNo": {
+          "_type": "int",
+          "_desc": "槽位"
+        },
+        "CassetteID": {
+          "_type": "string",
+          "_desc": "片盒ID"
+        },
+        "Energy": {
+          "_type": "string"
+        },
+        "Element": {
+          "_type": "string"
+        },
+        "BeamCurrent": {
+          "_type": "string"
+        },
+        "Parallelism": {
+          "_type": "string"
+        },
+        "Uniformity": {
+          "_type": "string"
+        },
+        "Dose": {
+          "_type": "string"
+        },
+        "ImplantedAngle": {
+          "_type": "string"
+        },
+        "TwistAngle": {
+          "_type": "string"
+        },
+        "OrientationAngle": {
+          "_type": "string"
+        },
+        "RecipeName": {
+          "_type": "string"
+        },
+        "RecipeID": {
+          "_type": "string"
+        },
+        "ControlJobID": {
+          "_type": "string"
+        },
+        "ControlJobName": {
+          "_type": "string"
+        },
+        "waferType": {
+          "_type": "string",
+          "_desc": "晶圆类型"
+        },
+        "WaferHistory": {
+          "_type": "string",
+          "_desc": "晶圆履历"
+        },
+        "EqID": {
+          "_type": "string"
+        },
+        "VacuumInfo": {
+          "_type": "string"
+        },
+        "DetailedInfo": {
+          "_type": "string",
+          "_desc": "全部信息（包含机台其他信息）"
+        },
+        "RecordTime": {
+          "_type": "object",
+          "_useTemplate": "DateTime"
+        },
+        "ImplantTimeBegin": {
+          "_type": "string"
+        },
+        "ImplantTimeFinish": {
+          "_type": "string"
+        },
+        "Operator": {
+          "_type": "string"
+        },
+        "item1": {
+          "_type": "string"
+        },
+        "item2": {
+          "_type": "string"
+        },
+        "item3": {
+          "_type": "string"
+        },
+        "item4": {
+          "_type": "string"
+        },
+        "item5": {
+          "_type": "string"
+        },
+        "item6": {
+          "_type": "string"
+        },
+        "item7": {
+          "_type": "string"
+        },
+        "item8": {
+          "_type": "string"
+        },
+        "item9": {
+          "_type": "string"
+        },
+        "item10": {
+          "_type": "string"
+        }
+      }
+    },
+    "BokePumpData": {
+      "_type": "object",
+      "_fields": {
+        "DisplayName": {
+          "_type": "string"
+        },
+        "RegenerateStatus": {
+          "_type": "bool",
+          "_desc": "再生状态"
+        },
+        "PressureGaugeStatus": {
+          "_type": "bool",
+          "_desc": "真空计状态"
+        },
+        "RoughValveStatus": {
+          "_type": "bool",
+          "_desc": "抽气阀状态"
+        },
+        "PurgeValveStatus": {
+          "_type": "bool",
+          "_desc": "充气阀状态"
+        },
+        "CryopumpMotorStatus": {
+          "_type": "bool",
+          "_desc": "冷头电机状态"
+        },
+        "RegenerateCode": {
+          "_type": "string",
+          "_desc": "再生状态码"
+        },
+        "RegenerateDescription": {
+          "_type": "string",
+          "_desc": "再生状态码描述"
+        },
+        "Pressure": {
+          "_type": "double",
+          "_desc": "真空度，mT"
+        },
+        "FirstTemp": {
+          "_type": "double",
+          "_desc": "一级温度"
+        },
+        "SecondTemp": {
+          "_type": "double",
+          "_desc": "二级温度"
+        }
+      }
+    },
+    "IHCData": {
+      "_type": "object",
+      "_fields": {
+        "double": {
+          "_type": "object",
+          "_useTemplate": "static"
+        },
+        "ArcMaxVoltage": {
+          "_type": "double"
+        },
+        "ArcVoltage": {
+          "_type": "double"
+        },
+        "FilaMaxVoltage": {
+          "_type": "double"
+        },
+        "FilaVoltage": {
+          "_type": "double"
+        },
+        "FilaCurrent": {
+          "_type": "double"
+        },
+        "CathodeCurrentSetPoint": {
+          "_type": "double"
+        },
+        "CathodeCurrent": {
+          "_type": "double"
+        },
+        "IsFilaControlEnable": {
+          "_type": "bool"
+        },
+        "FilaCurrentAdjustAmp": {
+          "_type": "double"
+        },
+        "FilaCurrentAdjustAmp_Default": {
+          "_type": "double"
+        },
+        "FilaCurrentIntegralTime": {
+          "_type": "double"
+        },
+        "FilaCurrentIntegralTime_Default": {
+          "_type": "double"
+        },
+        "CathodeMaxVoltage": {
+          "_type": "double"
+        },
+        "CathodeVoltage": {
+          "_type": "double"
+        },
+        "ArcCurrentSetPoint": {
+          "_type": "double"
+        },
+        "ArcCurrent": {
+          "_type": "double"
+        },
+        "IsCathodeControlEnable": {
+          "_type": "bool"
+        },
+        "CathodeVolAdjustAmp": {
+          "_type": "double"
+        },
+        "CathodeVolAdjustAmp_Default": {
+          "_type": "double"
+        },
+        "CathodeVolIntegralTime": {
+          "_type": "double"
+        },
+        "CathodeVolIntegralTime_Default": {
+          "_type": "double"
+        },
+        "Clone": {
+          "_type": "object",
+          "_desc": "克隆当前对象",
+          "_useTemplate": "IHCData"
+        }
+      }
+    },
+    "SwitchTypeData": {
+      "_type": "object",
+      "_fields": {
+        "Port": {
+          "_type": "object",
+          "_fields": {
+            "FirstCtrl": {
+              "_type": "bool"
+            },
+            "SecondCtrl": {
+              "_type": "bool"
+            },
+            "FirstFeedback": {
+              "_type": "bool"
+            },
+            "SecondFeedback": {
+              "_type": "bool"
+            }
+          }
+        }
+      }
+    },
+    "AnalogTypeData": {
+      "_type": "object",
+      "_fields": {
+        "Port": {
+          "_type": "object",
+          "_fields": {
+            "Port": {
+              "_type": "double"
+            }
+          }
+        }
+      }
+    },
+    "DigitalTypeData": {
+      "_type": "object",
+      "_fields": {
+        "Port": {
+          "_type": "object",
+          "_fields": {
+            "Port": {
+              "_type": "bool"
+            }
+          }
+        }
+      }
+    },
+    "PowerTypeData": {
+      "_type": "object",
+      "_fields": {
+        "Port": {
+          "_type": "object",
+          "_fields": {
+            "OpenSet": {
+              "_type": "bool"
+            },
+            "OpenFeedback": {
+              "_type": "bool"
+            },
+            "CloseSet": {
+              "_type": "bool"
+            },
+            "CloseFeedback": {
+              "_type": "bool"
+            },
+            "EnableSet": {
+              "_type": "bool"
+            },
+            "EnableFeedback": {
+              "_type": "bool"
+            },
+            "AlarmFeedback": {
+              "_type": "bool"
+            },
+            "ControlSet": {
+              "_type": "double"
+            },
+            "ControlFeedback": {
+              "_type": "double"
+            },
+            "LoadSet": {
+              "_type": "double"
+            },
+            "LoadFeedback": {
+              "_type": "double"
+            }
+          }
+        }
+      }
+    },
+    "TurboPumpTypeData": {
+      "_type": "object",
+      "_fields": {
+        "Port": {
+          "_type": "object",
+          "_fields": {
+            "OpenSet": {
+              "_type": "bool"
+            },
+            "Normal": {
+              "_type": "bool"
+            },
+            "Alarm": {
+              "_type": "bool"
+            }
+          }
+        }
+      }
+    },
+    "ControllerTypeData": {
+      "_type": "object",
+      "_fields": {
+        "Port": {
+          "_type": "object",
+          "_fields": {
+            "ControlSet": {
+              "_type": "double"
+            },
+            "ControlFeedback": {
+              "_type": "double"
+            }
+          }
+        }
+      }
+    },
+    "TypeDataBase": {
+      "_type": "object",
+      "_fields": {
+        "Name": {
+          "_type": "string",
+          "_readOnly": true
+        },
+        "Status": {
+          "_type": "string"
+        },
+        "TransStatus": {
+          "_type": "string"
+        }
+      }
+    },
+    "LoopMasterConfig": {
+      "_type": "object",
+      "_fields": {
+        "model": {
+          "_type": "object",
+          "_useTemplate": "ObservableDictionary<string, DeviceConfig>"
+        },
+        "Clone": {
+          "_type": "object",
+          "_useTemplate": "LoopMasterConfig"
+        },
+        "FindDeviceByName": {
+          "_type": "object",
+          "_desc": "通过名字找设备",
+          "_fields": {
+            "model": {
+              "_type": "object",
+              "_useTemplate": "ObservableDictionary<string, DeviceConfig>"
+            },
+            "Clone": {
+              "_type": "object",
+              "_fields": {
+                "model": {
+                  "_type": "object",
+                  "_useTemplate": "ObservableDictionary<string, DeviceConfig>"
+                },
+                "Clone": {
+                  "_type": "object",
+                  "_fields": {}
+                }
+              }
+            }
+          }
+        },
+        "EnsurePortNames": {
+          "_type": "object",
+          "_desc": "确保每个DeviceConfig.port携带其在model中的键名到Name属性（若存在）。",
+          "_useTemplate": "void"
+        }
+      }
+    },
+    "DeviceInfo": {
+      "_type": "object",
+      "_fields": {
+        "DeviceHeader": {
+          "_type": "object",
+          "_fields": {
+            "DeviceAddress": {
+              "_type": "int"
+            },
+            "IsAddressValid": {
+              "_type": "bool"
+            },
+            "IsPSI": {
+              "_type": "bool"
+            },
+            "DeviceType": {
+              "_type": "int"
+            },
+            "DeviceTypeStr": {
+              "_type": "string"
+            },
+            "Description": {
+              "_type": "string"
+            },
+            "ToUShort": {
+              "_type": "int",
+              "_desc": "根据成员组合回ushort"
+            },
+            "string": {
+              "_type": "object",
+              "_useTemplate": "override"
+            },
+            "bool": {
+              "_type": "object",
+              "_useTemplate": "override"
+            },
+            "int": {
+              "_type": "object",
+              "_useTemplate": "override"
+            }
+          },
+          "_desc": "设备头信息类"
+        },
+        "Aout": {
+          "_type": "object",
+          "_fields": {}
+        },
+        "Ain": {
+          "_type": "object",
+          "_fields": {}
+        },
+        "Do": {
+          "_type": "object",
+          "_useTemplate": "ObservableCollection<bool>"
+        },
+        "ExpectedDo": {
+          "_type": "object",
+          "_desc": "期望的Do状态，Key: linkIndex, Value: 期望值",
+          "_fields": {
+            "_dictValue": {
+              "_type": "bool"
+            }
+          }
+        },
+        "ExpectedAout": {
+          "_type": "object",
+          "_desc": "期望的Aout状态，Key: linkIndex, Value: 期望值",
+          "_fields": {
+            "_dictValue": {
+              "_type": "int"
+            }
+          }
+        },
+        "ExpectedLock": {
+          "_type": "object",
+          "_desc": "用于保护 ExpectedDo/ExpectedAout 的同步锁",
+          "_useTemplate": "object"
+        },
+        "Di": {
+          "_type": "object",
+          "_useTemplate": "ObservableCollection<bool>"
+        },
+        "NotifyPropertyChanged": {
+          "_type": "object",
+          "_desc": "【公开方法】手动触发PropertyChanged通知，用于索引赋值后通知UI刷新",
+          "_useTemplate": "void"
+        },
+        "DiNameList": {
+          "_type": "object",
+          "_useTemplate": "ObservableCollection<string>"
+        },
+        "DoNameList": {
+          "_type": "object",
+          "_useTemplate": "ObservableCollection<string>"
+        },
+        "AoutNameList": {
+          "_type": "object",
+          "_useTemplate": "ObservableCollection<string>"
+        },
+        "AinNameList": {
+          "_type": "object",
+          "_useTemplate": "ObservableCollection<string>"
+        },
+        "PRIOk": {
+          "_type": "bool"
+        },
+        "SECOk": {
+          "_type": "bool"
+        },
+        "ErrorCounter": {
+          "_type": "int"
+        },
+        "AoutConvert": {
+          "_type": "object",
+          "_useTemplate": "ObservableCollection<string>"
+        },
+        "AinConvert": {
+          "_type": "object",
+          "_useTemplate": "ObservableCollection<string>"
+        },
+        "DeviceBytes": {
+          "_type": "object",
+          "_useTemplate": "ObservableCollection<byte>"
+        },
+        "AoutMapUplimits": {
+          "_type": "object",
+          "_useTemplate": "ObservableCollection<int>"
+        },
+        "AinMapUplimits": {
+          "_type": "object",
+          "_useTemplate": "ObservableCollection<int>"
+        },
+        "ToOutListUshorts": {
+          "_type": "array",
+          "_elementTemplate": {
+            "_type": "int"
+          }
+        },
+        "Clone": {
+          "_type": "object",
+          "_useTemplate": "DeviceInfo"
+        },
+        "CreateWriteSnapshot": {
+          "_type": "object",
+          "_desc": "创建用于写入的快照（合并期望状态） 与 Clone 不同，此方法会将 ExpectedDo 和 ExpectedAout 合并到快照中",
+          "_useTemplate": "DeviceInfo"
+        },
+        "string": {
+          "_type": "object",
+          "_useTemplate": "override"
+        }
+      }
+    },
+    "WaferData": {
+      "_type": "object",
+      "_fields": {
+        "ImplantFail": {
+          "_type": "bool"
+        },
+        "IfImplanted": {
+          "_type": "bool"
+        },
+        "IfFromLElevator": {
+          "_type": "bool"
+        },
+        "IfTwisted": {
+          "_type": "bool"
+        },
+        "IfHeated": {
+          "_type": "bool"
+        },
+        "IfCooledDown": {
+          "_type": "bool"
+        },
+        "WaferNumber": {
+          "_type": "int"
+        },
+        "WaferType": {
+          "_type": "int"
+        },
+        "WaferID": {
+          "_type": "int"
+        }
+      }
+    },
+    "TriggerModeItem": {
+      "_type": "object",
+      "_fields": {
+        "Key": {
+          "_type": "string"
+        },
+        "Name": {
+          "_type": "string"
+        },
+        "ToolTip": {
+          "_type": "string"
+        }
+      }
+    },
+    "PIDController": {
+      "_type": "object",
+      "_fields": {
+        "Kp": {
+          "_type": "double"
+        },
+        "Ki": {
+          "_type": "double"
+        },
+        "Kd": {
+          "_type": "double"
+        },
+        "OriginControlValue": {
+          "_type": "double"
+        },
+        "ControlUpperLimit": {
+          "_type": "double"
+        },
+        "ControlLowerLimit": {
+          "_type": "double"
+        },
+        "SetPoint": {
+          "_type": "double"
+        },
+        "ControlRangeAnchorPoint": {
+          "_type": "double"
+        },
+        "IntegralLimit": {
+          "_type": "double"
+        },
+        "OriginIntegral": {
+          "_type": "double"
+        },
+        "PerformanceMonitor": {
+          "_type": "object",
+          "_useTemplate": "PIDMonitorPerformance"
+        },
+        "Overshoot": {
+          "_type": "double",
+          "_desc": "超调量（百分比）"
+        },
+        "RiseTime": {
+          "_type": "double",
+          "_desc": "上升时间（毫秒）"
+        },
+        "SettlingTime": {
+          "_type": "double",
+          "_desc": "调节时间（毫秒）"
+        },
+        "SteadyStateError": {
+          "_type": "double",
+          "_desc": "稳态误差"
+        },
+        "PeakTime": {
+          "_type": "double",
+          "_desc": "峰值时间（毫秒）"
+        },
+        "SetSetpoint": {
+          "_type": "object",
+          "_desc": "设置目标值",
+          "_useTemplate": "void"
+        },
+        "SetControlUpperLimit": {
+          "_type": "object",
+          "_desc": "设置控制上限幅",
+          "_useTemplate": "void"
+        },
+        "SetControlLowerLimit": {
+          "_type": "object",
+          "_desc": "设置控制下限幅",
+          "_useTemplate": "void"
+        },
+        "Compute": {
+          "_type": "double",
+          "_desc": "计算控制输出"
+        },
+        "Reset": {
+          "_type": "object",
+          "_desc": "重置控制器状态",
+          "_useTemplate": "void"
+        }
+      }
+    },
+    "PIDMonitorPerformance": {
+      "_type": "object",
+      "_fields": {
+        "SettlingBandPercentage": {
+          "_type": "double"
+        },
+        "RiseTimeStartPercentage": {
+          "_type": "double"
+        },
+        "RiseTimeEndPercentage": {
+          "_type": "double"
+        },
+        "AddDataPoint": {
+          "_type": "object",
+          "_useTemplate": "void"
+        },
+        "Reset": {
+          "_type": "object",
+          "_useTemplate": "void"
+        },
+        "Overshoot": {
+          "_type": "double"
+        },
+        "RiseTime": {
+          "_type": "double"
+        },
+        "SettlingTime": {
+          "_type": "double"
+        },
+        "SteadyStateError": {
+          "_type": "double"
+        },
+        "PeakTime": {
+          "_type": "double"
+        },
+        "Tu": {
+          "_type": "double"
+        }
+      }
+    },
+    "TypeDataDisplayItem": {
+      "_type": "object",
+      "_fields": {
+        "TypeData": {
+          "_type": "object",
+          "_useTemplate": "TypeDataBase"
+        },
+        "Config": {
+          "_type": "object",
+          "_useTemplate": "object"
+        }
+      }
+    },
+    "RecipeInfo": {
+      "_type": "object",
+      "_fields": {
+        "ID": {
+          "_type": "int"
+        }
+      }
+    },
+    "PowerTypeConfig": {
+      "_type": "object",
+      "_fields": {
+        "ControlDisplayUnit": {
+          "_type": "string",
+          "_desc": "Control值显示的单位"
+        },
+        "ControlConvertCoefficient": {
+          "_type": "double",
+          "_desc": "Control值显示与接收的转换系数"
+        },
+        "ControlDigits": {
+          "_type": "int",
+          "_desc": "Control值保留小数点后几位"
+        },
+        "IsControlScientificNotation": {
+          "_type": "bool",
+          "_desc": "是否用科学计数法显示Control值"
+        },
+        "ControlMinValue": {
+          "_type": "double",
+          "_desc": "Control值最小值",
+          "_readOnly": true
+        },
+        "ControlMaxValue": {
+          "_type": "double",
+          "_desc": "Control值最大值",
+          "_readOnly": true
+        },
+        "LoadDisplayUnit": {
+          "_type": "string",
+          "_desc": "Load值显示的单位"
+        },
+        "LoadConvertCoefficient": {
+          "_type": "double",
+          "_desc": "Load值显示与接收的转换系数"
+        },
+        "LoadDigits": {
+          "_type": "int",
+          "_desc": "Load值保留小数点后几位"
+        },
+        "IsLoadScientificNotation": {
+          "_type": "bool",
+          "_desc": "是否用科学计数法显示Control值"
+        },
+        "LoadMinValue": {
+          "_type": "double",
+          "_desc": "Load值最小值",
+          "_readOnly": true
+        },
+        "LoadMaxValue": {
+          "_type": "double",
+          "_desc": "Load值最大值",
+          "_readOnly": true
+        },
+        "IsOpenSetInvert": {
+          "_type": "bool"
+        },
+        "IsOpenFeedbackInvert": {
+          "_type": "bool"
+        },
+        "IsCloseSetInvert": {
+          "_type": "bool"
+        },
+        "IsCloseFeedbackInvert": {
+          "_type": "bool"
+        },
+        "IsEnableSetInvert": {
+          "_type": "bool"
+        },
+        "IsEnableFeedbackInvert": {
+          "_type": "bool"
+        },
+        "IsAlarmFeedbackInvert": {
+          "_type": "bool"
+        }
+      }
+    },
+    "ControllerTypeConfig": {
+      "_type": "object",
+      "_fields": {
+        "DisplayUnit": {
+          "_type": "string",
+          "_desc": "显示的单位"
+        },
+        "ConvertCoefficient": {
+          "_type": "double",
+          "_desc": "显示与接收的转换系数"
+        },
+        "Digits": {
+          "_type": "int",
+          "_desc": "保留小数点后几位"
+        },
+        "IsScientificNotation": {
+          "_type": "bool",
+          "_desc": "是否用科学计数法显示"
+        },
+        "MinValue": {
+          "_type": "double",
+          "_desc": "器件最小值",
+          "_readOnly": true
+        },
+        "MaxValue": {
+          "_type": "double",
+          "_desc": "器件最大值",
+          "_readOnly": true
+        }
+      }
+    },
+    "ControlJobData": {
+      "_type": "object",
+      "_fields": {
+        "ListProcessJob_Used": {
+          "_type": "object",
+          "_fields": {}
+        },
+        "Name": {
+          "_type": "string"
+        },
+        "FinishFlag": {
+          "_type": "bool"
+        },
+        "ID": {
+          "_type": "string"
+        },
+        "ClearControlJobs": {
+          "_type": "object",
+          "_useTemplate": "void"
+        }
+      }
+    },
+    "EdgeDetector": {
+      "_type": "object",
+      "_fields": {
+        "EdgeType": {
+          "_type": "object",
+          "_fields": {}
+        },
+        "HasAlarmed": {
+          "_type": "bool"
+        },
+        "CurrentStableState": {
+          "_type": "bool",
+          "_desc": "获取当前的稳定状态（经过去抖动处理后的状态）"
+        },
+        "SetDebounceTime": {
+          "_type": "object",
+          "_desc": "动态更新去抖时间，不会丢失已有状态",
+          "_useTemplate": "void"
+        },
+        "UpdateState": {
+          "_type": "object",
+          "_useTemplate": "void"
+        }
+      }
+    },
+    "FocusScanPoint": {
+      "_type": "object",
+      "_fields": {
+        "X": {
+          "_type": "double"
+        },
+        "Y": {
+          "_type": "double"
+        },
+        "Value": {
+          "_type": "double"
+        }
+      },
+      "_desc": "二维聚焦扫描单个采样点"
+    },
+    "SwitchTypeConfig": {
+      "_type": "object",
+      "_fields": {
+        "IsFirstCtrlInvert": {
+          "_type": "bool"
+        },
+        "IsSecondCtrlInvert": {
+          "_type": "bool"
+        },
+        "IsFirstFeedbackInvert": {
+          "_type": "bool"
+        },
+        "IsSecondFeedbackInvert": {
+          "_type": "bool"
+        }
+      }
+    },
+    "AnalogTypeConfig": {
+      "_type": "object",
+      "_fields": {
+        "DisplayUnit": {
+          "_type": "string",
+          "_desc": "显示的单位"
+        },
+        "ConvertCoefficient": {
+          "_type": "double",
+          "_desc": "显示与接收的转换系数"
+        },
+        "Digits": {
+          "_type": "int",
+          "_desc": "保留小数点后几位"
+        },
+        "IsScientificNotation": {
+          "_type": "bool",
+          "_desc": "是否用科学计数法显示"
+        },
+        "LowLimit": {
+          "_type": "double",
+          "_desc": "下限值Alarm"
+        },
+        "LowWarning": {
+          "_type": "double",
+          "_desc": "下限值Warning"
+        },
+        "HighWarning": {
+          "_type": "double",
+          "_desc": "上限值Warning"
+        },
+        "HighLimit": {
+          "_type": "double",
+          "_desc": "上限值Alarm"
+        },
+        "MinValue": {
+          "_type": "double",
+          "_desc": "器件最小值",
+          "_readOnly": true
+        },
+        "MaxValue": {
+          "_type": "double",
+          "_desc": "器件最大值"
+        }
+      }
+    },
+    "DigitalTypeConfig": {
+      "_type": "object",
+      "_fields": {
+        "IsInvert": {
+          "_type": "bool"
+        }
+      }
+    },
+    "TurboPumpTypeConfig": {
+      "_type": "object",
+      "_fields": {
+        "IsOpenSetInvert": {
+          "_type": "bool"
+        },
+        "IsNormalInvert": {
+          "_type": "bool"
+        },
+        "IsAlarmInvert": {
+          "_type": "bool"
+        }
+      }
+    }
+  },
+  "SoftwareConfig": {
+    "_type": "object",
+    "_fields": {
+      "EnableTermPower": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "TerminalPower": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "V51": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "Setup": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "V48": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "DoorLock1": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "DoorLock2": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "DoorLock3": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "DoorLock4": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "DoorLock5": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "DoorLock6": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "DoorLock7": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "DoorLock8": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "DoorLock9": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "DoorLock10": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "DoorLock11": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "LampRed": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "LampGreen": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "LampYellow": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "LampAlarm": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "WaterPumpEnable": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "Rp2Enable": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "Rp3Enable": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "AccelPowerEnable": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "DoorLock": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "TargetPanelWarm": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "V59": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "V19": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "V72A": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "V72B": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "V69B": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "V69A": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "V22A": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "V49": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "V58": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "V18": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "V71A": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "V71B": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "V68B": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "V68A": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "V21A": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "FocusFarad": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "V53": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "V55": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "V15": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "V13": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "V43": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "V62": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "ScanBackSuppSwitch": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "AcceSuppSwitch": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "PL1": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "SI1": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "VL1": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "PG1": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "PL2": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "SI2": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "VL2": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "PG2": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "PL3": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "SI3": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "VL3": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "PG3": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "PL4": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "SI4": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "VL4": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "PG4": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "PG5": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "ExtractPowerSwtich": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "ExtractSuppPowerSwitch": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "IonSourceEnable": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "TLValveIsland": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "ExtractPowerEnable": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "Rp1Power": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "AnalyzeBar": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "V61": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "SetUp": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "V42": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "V41": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "Rp1Open": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "P1": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "P2": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "P3": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "P4": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "V44": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "CoolingWater": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "VTP1": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "VTP2": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "VTP3": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "VTP4": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "VTP8": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "VTP9": {
+        "_type": "object",
+        "_useTemplate": "SwitchTypeConfig"
+      },
+      "G19": {
+        "_type": "object",
+        "_useTemplate": "AnalogTypeConfig"
+      },
+      "G18": {
+        "_type": "object",
+        "_useTemplate": "AnalogTypeConfig"
+      },
+      "G13": {
+        "_type": "object",
+        "_useTemplate": "AnalogTypeConfig"
+      },
+      "IG3": {
+        "_type": "object",
+        "_useTemplate": "AnalogTypeConfig"
+      },
+      "IG2": {
+        "_type": "object",
+        "_useTemplate": "AnalogTypeConfig"
+      },
+      "G12": {
+        "_type": "object",
+        "_useTemplate": "AnalogTypeConfig"
+      },
+      "G11": {
+        "_type": "object",
+        "_useTemplate": "AnalogTypeConfig"
+      },
+      "IG1": {
+        "_type": "object",
+        "_useTemplate": "AnalogTypeConfig"
+      },
+      "IG4": {
+        "_type": "object",
+        "_useTemplate": "AnalogTypeConfig"
+      },
+      "VS8": {
+        "_type": "object",
+        "_useTemplate": "AnalogTypeConfig"
+      },
+      "VS9": {
+        "_type": "object",
+        "_useTemplate": "AnalogTypeConfig"
+      },
+      "VS4": {
+        "_type": "object",
+        "_useTemplate": "AnalogTypeConfig"
+      },
+      "VS2": {
+        "_type": "object",
+        "_useTemplate": "AnalogTypeConfig"
+      },
+      "VS1": {
+        "_type": "object",
+        "_useTemplate": "AnalogTypeConfig"
+      },
+      "DIWaterResistance": {
+        "_type": "object",
+        "_useTemplate": "AnalogTypeConfig"
+      },
+      "DIWaterTemp": {
+        "_type": "object",
+        "_useTemplate": "AnalogTypeConfig"
+      },
+      "PTE1": {
+        "_type": "object",
+        "_useTemplate": "AnalogTypeConfig"
+      },
+      "PTE2": {
+        "_type": "object",
+        "_useTemplate": "AnalogTypeConfig"
+      },
+      "PTE3": {
+        "_type": "object",
+        "_useTemplate": "AnalogTypeConfig"
+      },
+      "PTE4": {
+        "_type": "object",
+        "_useTemplate": "AnalogTypeConfig"
+      },
+      "PteResetStabilizationTimeMs": {
+        "_type": "int"
+      },
+      "PteResetStabilizationThreshold": {
+        "_type": "double"
+      },
+      "PteResetMinPressure": {
+        "_type": "double"
+      },
+      "LeftDoor": {
+        "_type": "object",
+        "_desc": "靶台左窗口",
+        "_useTemplate": "DigitalTypeConfig",
+        "_instanceDesc": "靶台左窗口"
+      },
+      "RightDoor": {
+        "_type": "object",
+        "_desc": "靶台右窗口",
+        "_useTemplate": "DigitalTypeConfig",
+        "_instanceDesc": "靶台右窗口"
+      },
+      "N2Press": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "SmokeSignal": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "PiosonGas": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "CompressAir": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "ParallBeamTemp": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "DischargeRodUp": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "DischargeRodDown": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "EmoSignal": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "MoterOpen": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "HighVoltOpen": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "Phase": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "GasboxDischageRodDown": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "ProfileFaradWater": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "AngleFaradWater": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "CloseFaradWater": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "TargetPanelWater": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "LoadLockTurboWater": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "FocusFaradWater": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "ParallelLensWater": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "BeamTuborWater": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "WaterLeak": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "FloorWaterLeak": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "WaterDrainLeak": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "WaterFittingLeak": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "WaterMid": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "WaterLow": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "ResinSandWater": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "CompressorWater": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "IonSourDischargeup": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "IonSourDischargedown": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "ChangeBarWater": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "MagFourPoleLensWater": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "SourceMagCoilWater": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "Rp1Water": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "Tp1Water": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "ExtractAndSetupWater": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "IonSourceWater": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "IonSourceRoomWater": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "IonSourceFlangeWater": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "AnalyzeMagCoilWater": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "GroundHighPowerOpen": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "GasboxDoorClose": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "HighVoltAreaDoorClose": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "SourceMagTemp": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "AnalyzeTemp": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "FocusLensTemp": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "TLLeftDoorClose": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "TLBackDoorClose": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "TLRightDoorClose": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "TLFrontDoorClose": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "Rp1Warn": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "Rp1Alarm": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "DFPumpEnable": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "Rp2Alarm": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "Rp3Alarm": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "PreheatPanelWater": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "WaterHigh": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "Scrubber": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "DifferentialPressure": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "H2Detector": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "DryPumpAlarm": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "BeamLineLeak": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "SetUpCupLeak": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "TargetDrainLeak": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "TargetFloorLeak": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "FocusCupLeak": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "HeliumCompressorLeak": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "HightPowerAreaLeak": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "MainCoolingWaterInOutLeak": {
+        "_type": "object",
+        "_useTemplate": "DigitalTypeConfig"
+      },
+      "Gas1Name": {
+        "_type": "string"
+      },
+      "Gas2Name": {
+        "_type": "string"
+      },
+      "Gas3Name": {
+        "_type": "string"
+      },
+      "Gas4Name": {
+        "_type": "string"
+      },
+      "IsPLCDataBooleanInvert": {
+        "_type": "bool"
+      },
+      "ScanBackSuppPower": {
+        "_type": "object",
+        "_useTemplate": "PowerTypeConfig"
+      },
+      "ParallelLens": {
+        "_type": "object",
+        "_useTemplate": "PowerTypeConfig"
+      },
+      "AccePower": {
+        "_type": "object",
+        "_useTemplate": "PowerTypeConfig"
+      },
+      "AcceSuppPower": {
+        "_type": "object",
+        "_useTemplate": "PowerTypeConfig"
+      },
+      "FilamentPower": {
+        "_type": "object",
+        "_useTemplate": "PowerTypeConfig"
+      },
+      "AnodePower": {
+        "_type": "object",
+        "_useTemplate": "PowerTypeConfig"
+      },
+      "BiasPower": {
+        "_type": "object",
+        "_useTemplate": "PowerTypeConfig"
+      },
+      "AnodeIHC": {
+        "_type": "object",
+        "_useTemplate": "PowerTypeConfig"
+      },
+      "BiasIHC": {
+        "_type": "object",
+        "_useTemplate": "PowerTypeConfig"
+      },
+      "FilaIHC": {
+        "_type": "object",
+        "_useTemplate": "PowerTypeConfig"
+      },
+      "XFocusPower": {
+        "_type": "object",
+        "_useTemplate": "PowerTypeConfig"
+      },
+      "YFocusPower": {
+        "_type": "object",
+        "_useTemplate": "PowerTypeConfig"
+      },
+      "SourceMagPower": {
+        "_type": "object",
+        "_useTemplate": "PowerTypeConfig"
+      },
+      "XPole": {
+        "_type": "object",
+        "_useTemplate": "PowerTypeConfig"
+      },
+      "YPole": {
+        "_type": "object",
+        "_useTemplate": "PowerTypeConfig"
+      },
+      "ZPole": {
+        "_type": "object",
+        "_useTemplate": "PowerTypeConfig"
+      },
+      "ExtractPower": {
+        "_type": "object",
+        "_useTemplate": "PowerTypeConfig"
+      },
+      "ExtractSuppPower": {
+        "_type": "object",
+        "_useTemplate": "PowerTypeConfig"
+      },
+      "AnalyzePower": {
+        "_type": "object",
+        "_useTemplate": "PowerTypeConfig"
+      },
+      "Mfc1": {
+        "_type": "object",
+        "_useTemplate": "ControllerTypeConfig"
+      },
+      "Mfc2": {
+        "_type": "object",
+        "_useTemplate": "ControllerTypeConfig"
+      },
+      "Mfc3": {
+        "_type": "object",
+        "_useTemplate": "ControllerTypeConfig"
+      },
+      "Mfc4": {
+        "_type": "object",
+        "_useTemplate": "ControllerTypeConfig"
+      },
+      "TargetHeater": {
+        "_type": "object",
+        "_useTemplate": "ControllerTypeConfig"
+      },
+      "FocusFaradayCup": {
+        "_type": "object",
+        "_fields": {
+          "IsRange1Invert": {
+            "_type": "bool"
+          },
+          "IsRange2Invert": {
+            "_type": "bool"
+          },
+          "IsRange3Invert": {
+            "_type": "bool"
+          },
+          "DisplayUnit": {
+            "_type": "string",
+            "_desc": "显示的单位"
+          },
+          "ConvertCoefficient": {
+            "_type": "double",
+            "_desc": "显示与接收的转换系数"
+          },
+          "Digits": {
+            "_type": "int",
+            "_desc": "保留小数点后几位"
+          },
+          "IsScientificNotation": {
+            "_type": "bool",
+            "_desc": "是否用科学计数法显示"
+          }
+        }
+      },
+      "SetUpCup": {
+        "_type": "object",
+        "_fields": {}
+      },
+      "Tp8": {
+        "_type": "object",
+        "_useTemplate": "TurboPumpTypeConfig"
+      },
+      "Tp9": {
+        "_type": "object",
+        "_useTemplate": "TurboPumpTypeConfig"
+      },
+      "Tp3": {
+        "_type": "object",
+        "_useTemplate": "TurboPumpTypeConfig"
+      },
+      "Tp1": {
+        "_type": "object",
+        "_useTemplate": "TurboPumpTypeConfig"
+      },
+      "Tp2": {
+        "_type": "object",
+        "_useTemplate": "TurboPumpTypeConfig"
+      },
+      "Tp4": {
+        "_type": "object",
+        "_useTemplate": "TurboPumpTypeConfig"
+      },
+      "ImplantElementConfigs": {
+        "_type": "array",
+        "_elementTemplate": {
+          "_type": "object",
+          "_fields": {
+            "Element": {
+              "_type": "string",
+              "_desc": "注入元素"
+            },
+            "Mass": {
+              "_type": "double",
+              "_desc": "元素质量数"
+            },
+            "ChargeNum": {
+              "_type": "int",
+              "_desc": "元素电荷数"
+            }
+          }
+        }
+      },
+      "AnalyzePowerWaitInterval": {
+        "_type": "int",
+        "_desc": "分析器反馈循环等待时间(ms)"
+      },
+      "AnalyzePowerWaitTimeout": {
+        "_type": "int",
+        "_desc": "分析器反馈等待超时时间(ms)"
+      },
+      "AnalyzePowerSteadyDelay": {
+        "_type": "int",
+        "_desc": "分析器反馈到位后稳态延时(ms)"
+      },
+      "AnalyzePowerFeedbackPrecision": {
+        "_type": "double",
+        "_desc": "分析器反馈到位精度"
+      },
+      "WaferSizeRefLineMap": {
+        "_type": "object",
+        "_fields": {
+          "_dictValue": {
+            "_type": "double"
+          }
+        }
+      },
+      "EnableBiDirectionalScan": {
+        "_type": "bool",
+        "_desc": "是否启用正反扫循环补偿机制（消除磁滞效应）"
+      },
+      "EnableGaussianFitting": {
+        "_type": "bool",
+        "_desc": "波峰识别：是否启用高斯拟合寻找真实物理中心（解决峰形不对称问题）"
+      },
+      "GaussianFitPoints": {
+        "_type": "int",
+        "_desc": "波峰识别：高斯拟合采样点数（波峰及左右的采样点总数，推荐奇数，如5或7）"
+      },
+      "PeakDetectionSmoothingWindow": {
+        "_type": "int",
+        "_desc": "波峰识别：平滑滤波窗口大小，0或1代表不平滑"
+      },
+      "PeakDetectionProminenceThreshold": {
+        "_type": "double",
+        "_desc": "波峰识别：绝对显著度阈值百分比 (0-1)。如 0.05 代表波峰必须大于全局最高峰的 5%"
+      },
+      "PeakNmsMinSeparationSteps": {
+        "_type": "int",
+        "_desc": "波峰识别 NMS：最小峰间距，单位为\"采样步长的倍数\"。 两个候选峰的 X 距离若小于（步长 × 此值），则认为是同一个峰，仅保留最高点。 推荐设为 3~6；步长越大（粗扫）可适当减小，步长越小（细扫）可适当增大。"
+      },
+      "SpectrumPeakDriftPercent": {
+        "_type": "double",
+        "_desc": "波峰偏移限制百分比 (%)，默认 100.0"
+      },
+      "SpectrumPeakAmplitudeMultiplier": {
+        "_type": "double",
+        "_desc": "波峰拟合振幅合理倍数限制，默认 1.5"
+      },
+      "IsShowPeakLabels": {
+        "_type": "bool",
+        "_desc": "是否在图表上显示波峰标注文字，默认关闭"
+      },
+      "IsShowPeakResolution": {
+        "_type": "bool",
+        "_desc": "是否在图表上显示波峰分辨率"
+      },
+      "UnknownPeakLabel": {
+        "_type": "string",
+        "_desc": "未知波峰的显示文本，默认为空字符串"
+      },
+      "IsShowSpectrumElementsList": {
+        "_type": "bool",
+        "_desc": "是否显示扫描成分列表，默认隐藏"
+      },
+      "SpectrumAnalyzeElements": {
+        "_type": "array",
+        "_desc": "质谱分析元素配置列表（多组，每组含：相对原子质量、描述、半径大小、采样步长）",
+        "_elementTemplate": {
+          "_type": "object",
+          "_fields": {
+            "AtomicMass": {
+              "_type": "double",
+              "_desc": "相对原子质量"
+            },
+            "Description": {
+              "_type": "string",
+              "_desc": "元素描述（如 \"B11+\", \"P31+\"）"
+            },
+            "ChargeNumber": {
+              "_type": "int",
+              "_desc": "电荷数"
+            },
+            "IsEnabled": {
+              "_type": "bool",
+              "_desc": "是否启动：用于保存扫描成分列表的用户勾选设置 (决定是否参与寻峰与扫描)"
+            },
+            "IsShowReferenceLine": {
+              "_type": "bool",
+              "_desc": "是否显示参考线：决定该元素是否在图表中绘制红色垂直参考线"
+            },
+            "Radius": {
+              "_type": "double",
+              "_desc": "半径大小：在该原子质量附近多大范围内使用精细步长"
+            },
+            "ScanStep": {
+              "_type": "double",
+              "_desc": "该元素对应的精细采样步长"
+            }
+          },
+          "_desc": "质谱分析元素配置项：每组包含相对原子质量、描述、半径大小和采样步长"
+        }
+      },
+      "SpectrumScanMaxMQ": {
+        "_type": "double",
+        "_desc": "最大扫描质荷比"
+      },
+      "SpectrumScanMinMQ": {
+        "_type": "double",
+        "_desc": "最小扫描质荷比"
+      },
+      "SpectrumScanDefaultStep": {
+        "_type": "double",
+        "_desc": "默认采样步长"
+      },
+      "AnalyzePowerFactor": {
+        "_type": "double",
+        "_desc": "分析器电源校正系数"
+      },
+      "IsShowGaussianCurve": {
+        "_type": "bool",
+        "_desc": "是否显示高斯拟合曲线（默认开启）。关闭时显示原始采样曲线。"
+      },
+      "IsShowForwardCurve": {
+        "_type": "bool",
+        "_desc": "是否显示正向扫描曲线"
+      },
+      "IsShowBackwardCurve": {
+        "_type": "bool",
+        "_desc": "是否显示反向扫描曲线"
+      },
+      "IsShowForwardGaussianCurve": {
+        "_type": "bool",
+        "_desc": "是否显示正向高斯拟合曲线"
+      },
+      "IsShowBackwardGaussianCurve": {
+        "_type": "bool",
+        "_desc": "是否显示反向高斯拟合曲线"
+      },
+      "EnableBeamSettlingDetection": {
+        "_type": "bool",
+        "_desc": "是否启用智能束流稳定检测（关闭则退回固定延时模式 AnalyzePowerSteadyDelay）"
+      },
+      "BeamSettlingWindowSize": {
+        "_type": "int",
+        "_desc": "滑动窗口大小（采样点数），用于计算CV变异系数"
+      },
+      "BeamSettlingSamplingInterval": {
+        "_type": "int",
+        "_desc": "稳定检测期间的采样间隔(ms)"
+      },
+      "BeamSettlingCvThreshold": {
+        "_type": "double",
+        "_desc": "CV（变异系数）阈值，低于此值认为波动足够小（如 0.02 = 2%）"
+      },
+      "BeamSettlingTrendThreshold": {
+        "_type": "double",
+        "_desc": "EMA 趋势阈值，低于此值认为信号无漂移"
+      },
+      "BeamSettlingEmaAlpha": {
+        "_type": "double",
+        "_desc": "EMA 平滑系数（0~1，越大越灵敏）"
+      },
+      "BeamSettlingTimeout": {
+        "_type": "int",
+        "_desc": "稳定检测总超时(ms)，超时后降级采集"
+      },
+      "BeamSettlingPostDelay": {
+        "_type": "int",
+        "_desc": "判定稳定后的额外等待(ms)，确保磁场完全建立"
+      },
+      "BeamSettlingZeroThreshold": {
+        "_type": "double",
+        "_desc": "均值接近零的判定阈值（避免 CV 除零问题）"
+      },
+      "BeamSettlingAbsStdThreshold": {
+        "_type": "double",
+        "_desc": "均值接近零时使用的绝对标准差阈值"
+      },
+      "InterlockDics": {
+        "_type": "object",
+        "_fields": {
+          "_dictValue": {
+            "_type": "object",
+            "_fields": {}
+          }
+        }
+      }
+    }
+  },
+  "LoopMasterConfig": {
+    "_type": "object",
+    "_useTemplate": "LoopMasterConfig"
+  },
+  "DoseControlConfig": {
+    "_type": "object",
+    "_fields": {
+      "RemoteIPAddress": {
+        "_type": "string"
+      },
+      "RemotePort": {
+        "_type": "int"
+      },
+      "MainCupUnit": {
+        "_type": "string"
+      }
+    }
+  },
+  "IonSourceControlConfig": {
+    "_type": "object",
+    "_fields": {}
+  },
+  "PLCControlConfig": {
+    "_type": "object",
+    "_fields": {
+      "RemoteAdsAddress": {
+        "_type": "string"
+      },
+      "RemotePort": {
+        "_type": "int"
+      },
+      "TransferTimeMultiplier": {
+        "_type": "double"
+      }
+    }
+  },
+  "BokePumpSerialPortConfig": {
+    "_type": "object",
+    "_fields": {
+      "Pump1Addr": {
+        "_type": "string"
+      },
+      "Pump2Addr": {
+        "_type": "string"
+      },
+      "PortName": {
+        "_type": "string"
+      },
+      "BaudRate": {
+        "_type": "int"
+      },
+      "ParityStopBitsDataBis": {
+        "_type": "string"
+      }
+    }
+  },
+  "TemperatureControllerConfig": {
+    "_type": "object",
+    "_fields": {
+      "IsEnable": {
+        "_type": "bool"
+      },
+      "ControllerType": {
+        "_type": "string"
+      },
+      "PortName": {
+        "_type": "string"
+      },
+      "BaudRate": {
+        "_type": "int"
+      },
+      "ParityStopBitsDataBis": {
+        "_type": "string"
+      },
+      "SlaveNumber": {
+        "_type": "int"
+      }
+    }
+  },
+  "ChillerConfig": {
+    "_type": "object",
+    "_fields": {
+      "IsEnable": {
+        "_type": "bool"
+      },
+      "ChillerType": {
+        "_type": "string"
+      },
+      "PortName": {
+        "_type": "string"
+      },
+      "BaudRate": {
+        "_type": "int"
+      },
+      "ParityStopBitsDataBits": {
+        "_type": "string"
+      },
+      "SlaveNumber": {
+        "_type": "int"
+      },
+      "PollIntervalMs": {
+        "_type": "int"
+      },
+      "TimeoutMs": {
+        "_type": "int"
+      }
+    }
+  },
+  "IHCConfig": {
+    "_type": "object",
+    "_fields": {
+      "DeviceName": {
+        "_type": "string"
+      },
+      "DriverType": {
+        "_type": "string",
+        "_desc": "IHC 驱动模式: \"LoopMaster\" (新 LoopMaster 适配器) 或 \"Lightlink\" (原IHC)"
+      },
+      "IsEnable": {
+        "_type": "bool"
+      },
+      "Kp": {
+        "_type": "double"
+      },
+      "Ki": {
+        "_type": "double"
+      },
+      "Kd": {
+        "_type": "double"
+      },
+      "ControlInterval": {
+        "_type": "int"
+      },
+      "IntegralLimit": {
+        "_type": "double"
+      },
+      "DefaultFilaCurrentAdjustAmp": {
+        "_type": "double"
+      },
+      "DefaultFilaCurrentIntegralTime": {
+        "_type": "double"
+      },
+      "DefaultCathodeVolAdjustAmp": {
+        "_type": "double"
+      },
+      "DefaultCathodeVolIntegralTime": {
+        "_type": "double"
+      },
+      "MappingConfigs": {
+        "_type": "object",
+        "_fields": {}
+      },
+      "this": {
+        "_type": "object",
+        "_fields": {
+          "PropertyName": {
+            "_type": "string"
+          },
+          "DisplayName": {
+            "_type": "string"
+          },
+          "ConvertCoefficient": {
+            "_type": "double"
+          },
+          "RawMin": {
+            "_type": "double"
+          },
+          "RawMax": {
+            "_type": "double"
+          },
+          "MappedMin": {
+            "_type": "double"
+          },
+          "MappedMax": {
+            "_type": "double"
+          },
+          "Digits": {
+            "_type": "int"
+          },
+          "IsScientificNotation": {
+            "_type": "bool"
+          }
+        }
+      }
+    }
+  },
+  "WarningSettingsConfig": {
+    "_type": "object",
+    "_fields": {
+      "readonly": {
+        "_type": "object",
+        "_desc": "从默认警报列表中筛选出来危险的信号",
+        "_useTemplate": "static"
+      },
+      "ColumnDefinitions": {
+        "_type": "array",
+        "_desc": "列配置定义列表",
+        "_elementTemplate": {
+          "_type": "object",
+          "_fields": {
+            "Key": {
+              "_type": "string"
+            },
+            "Header": {
+              "_type": "string"
+            },
+            "ToolTip": {
+              "_type": "string"
+            },
+            "Width": {
+              "_type": "double"
+            }
+          },
+          "_desc": "警告动作的配置列定义"
+        }
+      },
+      "WarningEntries": {
+        "_type": "object",
+        "_fields": {
+          "_dictValue": {
+            "_type": "object",
+            "_fields": {
+              "ActionSettings": {
+                "_type": "object",
+                "_desc": "动作项设置字典 (Key -> 是否启用)",
+                "_fields": {
+                  "_dictValue": {
+                    "_type": "bool"
+                  }
+                }
+              },
+              "LowBound": {
+                "_type": "double"
+              },
+              "HighBound": {
+                "_type": "double"
+              },
+              "SustainMs": {
+                "_type": "int"
+              },
+              "IsUserCustom": {
+                "_type": "bool"
+              },
+              "IsShielded": {
+                "_type": "bool",
+                "_desc": "是否被屏蔽（若屏蔽则完全不参与评估与触发，0 CPU损耗）"
+              },
+              "SignalKey": {
+                "_type": "string"
+              },
+              "ModuleSource": {
+                "_type": "string"
+              },
+              "DataType": {
+                "_type": "object",
+                "_fields": {}
+              },
+              "PropertyPath": {
+                "_type": "string"
+              },
+              "TriggerType": {
+                "_type": "string"
+              },
+              "AlarmStatusValue": {
+                "_type": "string"
+              },
+              "Severity": {
+                "_type": "string"
+              },
+              "HasPrerequisite": {
+                "_type": "bool"
+              },
+              "PrerequisiteSignalKey": {
+                "_type": "string"
+              },
+              "PrerequisitePropertyPath": {
+                "_type": "string"
+              },
+              "PrerequisiteTargetValue": {
+                "_type": "string"
+              },
+              "PrerequisiteExpression": {
+                "_type": "string"
+              },
+              "TriggerExpression": {
+                "_type": "string"
+              },
+              "NotifyAllChanged": {
+                "_type": "object",
+                "_useTemplate": "void"
+              }
+            },
+            "_desc": "单个警告项的配置：动作项数据字典"
+          }
+        }
+      },
+      "EnsureAllWarningsPresent": {
+        "_type": "object",
+        "_desc": "确保所有默认警告项都在映射中存在，且拥有完整匹配硬件驱动的参数定义",
+        "_useTemplate": "void"
+      },
+      "bool": {
+        "_type": "object",
+        "_useTemplate": "static"
+      },
+      "GetEntry": {
+        "_type": "object",
+        "_desc": "获取某个警告的配置项，若不存在返回默认（全部启用）",
+        "_fields": {}
+      },
+      "IsActionEnabled": {
+        "_type": "bool",
+        "_desc": "通用的配置项启用判断"
+      },
+      "AddCustomEntry": {
+        "_type": "bool",
+        "_desc": "添加自定义新增报警项"
+      },
+      "RemoveEntry": {
+        "_type": "bool",
+        "_desc": "删除已有的报警项"
+      }
+    },
+    "_desc": "警告设置配置，存储每个警告/报警的声光报警和自动流程中断开关"
+  }
+}
