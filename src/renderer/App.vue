@@ -1,62 +1,32 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
+import LoginView from './views/LoginView.vue'
+import FilePickerView from './views/FilePickerView.vue'
+import EditorView from './views/EditorView.vue'
 
-const phase = ref<string>('Phase 1 — 基础设施')
-const message = ref<string>('骨架已就绪。后续 Phase 会依次接入 IPC、Vue 编辑器、schema 分析器。')
-const mainProgram = ref<{ running: boolean; pids: number[] } | null>(null)
+const authed = ref(false)
+const fileLoaded = ref(false)
 
-async function detectMainProgram() {
-  mainProgram.value = await window.api.process.detectMainProgram()
+function onAuthSuccess() {
+  authed.value = true
 }
+
+function onFileLoaded() {
+  fileLoaded.value = true
+}
+
+function onOpenAnother() {
+  fileLoaded.value = false
+}
+
+onMounted(() => {
+  window.addEventListener('auth:success', onAuthSuccess)
+  window.addEventListener('app:open-another', onOpenAnother)
+})
 </script>
 
 <template>
-  <div class="app">
-    <header class="topbar">
-      <h1>{{ phase }}</h1>
-    </header>
-    <main class="content">
-      <p>{{ message }}</p>
-      <button class="btn" @click="detectMainProgram">检测主程序进程</button>
-      <pre v-if="mainProgram" class="result">{{ JSON.stringify(mainProgram, null, 2) }}</pre>
-    </main>
-  </div>
+  <LoginView v-if="!authed" />
+  <FilePickerView v-else-if="!fileLoaded" @loaded="onFileLoaded" />
+  <EditorView v-else />
 </template>
-
-<style scoped>
-.app {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
-}
-.topbar {
-  padding: 16px 24px;
-  background: #2c3e50;
-  color: white;
-}
-.topbar h1 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 500;
-}
-.btn {
-  margin-top: 16px;
-  padding: 8px 16px;
-  background: #42b883;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-.btn:hover {
-  background: #369870;
-}
-.result {
-  margin-top: 12px;
-  padding: 12px;
-  background: #f5f5f5;
-  border-radius: 4px;
-  font-size: 12px;
-}
-</style>
