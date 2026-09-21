@@ -19,6 +19,23 @@ export const useSchemaStore = defineStore('schema', () => {
     return schema.value?._templates ?? {}
   })
 
+  async function loadDefault() {
+    isLoading.value = true
+    lastError.value = null
+    try {
+      const data = await window.api.schema.loadDefault<
+        SchemaDocument & { _resolvedPath?: string }
+      >()
+      schemaPath.value = data._resolvedPath ?? null
+      schema.value = data
+    } catch (err) {
+      lastError.value = (err as Error).message
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   async function load(path: string) {
     isLoading.value = true
     lastError.value = null
@@ -66,6 +83,7 @@ export const useSchemaStore = defineStore('schema', () => {
     templates,
     isLoading,
     lastError,
+    loadDefault,
     load,
     save,
     getField,

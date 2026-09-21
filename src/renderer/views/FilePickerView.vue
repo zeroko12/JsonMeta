@@ -9,13 +9,9 @@ const schemaStore = useSchemaStore()
 const emit = defineEmits<{ loaded: [] }>()
 
 onMounted(async () => {
-  configStore.initExternalChangeListener()
-  // Auto-load bundled schema (in tool install dir)
+  // Auto-load bundled schema via main-process IPC (works in dev + packaged)
   try {
-    // Use main process to find the schema next to the executable
-    // For now, try the current working directory
-    const schemaPath = `${window.location.pathname.replace(/[^/]+$/, '')}schema.json`
-    await schemaStore.load(schemaPath)
+    await schemaStore.loadDefault()
   } catch (err) {
     console.warn('schema.json not loaded yet:', err)
   }
@@ -33,11 +29,15 @@ async function pickAndOpen() {
   <div class="picker-view">
     <h2>选择 SystemConfig.json 所在目录</h2>
     <p class="hint">
-      SystemConfig.json 通常位于
+      系统配置通常位于
       <code>&lt;DataRoot&gt;/Config/SystemConfig.json</code>
-      ,DataRoot 默认为
+      。 你可以选择
+      <strong>DataRoot</strong>
+      (如
       <code>D:/IonImplantationSystemData</code>
-      。
+      ) 或直接选
+      <strong>Config</strong>
+      子目录,工具会自动找文件。
     </p>
     <button class="primary" @click="pickAndOpen">浏览...</button>
     <div v-if="configStore.lastError" class="error">{{ configStore.lastError }}</div>
