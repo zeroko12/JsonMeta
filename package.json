@@ -23,6 +23,7 @@
     "format": "prettier --write \"**/*.{ts,js,vue,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,js,vue,json,md}\"",
     "extract-schema": "node scripts/extract-schema.mjs",
+    "audit-schema": "tsx tests/manual/audit-schema.ts",
     "prepare": "husky"
   },
   "dependencies": {
