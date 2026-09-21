@@ -126,6 +126,25 @@ export async function hasMeaningfulChange(targetPath: string, newText: string): 
 }
 
 /**
+ * Find SystemConfig.json in a directory the user picked.
+ * Tries <dir>/SystemConfig.json, then <dir>/Config/SystemConfig.json.
+ * Returns the resolved path or null.
+ */
+export async function resolveConfigPath(pickedDir: string): Promise<string | null> {
+  const norm = pickedDir.replace(/[\\/]+$/, '')
+  const candidates = [join(norm, 'SystemConfig.json'), join(norm, 'Config', 'SystemConfig.json')]
+  for (const c of candidates) {
+    try {
+      await stat(c)
+      return c
+    } catch {
+      // try next
+    }
+  }
+  return null
+}
+
+/**
  * Save JSON to a backup file. Creates backup if file exists.
  * Returns { ok, backupPath? }.
  */

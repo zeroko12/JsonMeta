@@ -33,6 +33,7 @@ declare global {
       }
       file: {
         pickDirectory(): Promise<string | null>
+        resolveConfigPath(pickedDir: string): Promise<string | null>
         readJson<T = unknown>(path: string): Promise<T>
         writeJson(
           path: string,
@@ -51,6 +52,7 @@ declare global {
       }
       schema: {
         load<T = unknown>(path: string): Promise<T>
+        loadDefault<T = unknown>(): Promise<T>
         save(path: string, schema: unknown): Promise<{ ok: boolean }>
       }
       process: {

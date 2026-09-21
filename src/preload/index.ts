@@ -10,6 +10,9 @@ const api = {
     async pickDirectory(): Promise<string | null> {
       return ipcRenderer.invoke('file:pickDirectory')
     },
+    async resolveConfigPath(pickedDir: string): Promise<string | null> {
+      return ipcRenderer.invoke('file:resolveConfigPath', pickedDir)
+    },
     async readJson<T = unknown>(path: string): Promise<T> {
       return ipcRenderer.invoke('file:readJson', path)
     },
@@ -48,6 +51,9 @@ const api = {
   schema: {
     async load<T = unknown>(path: string): Promise<T> {
       return ipcRenderer.invoke('schema:load', path)
+    },
+    async loadDefault<T = unknown>(): Promise<T> {
+      return ipcRenderer.invoke('schema:loadDefault')
     },
     async save(path: string, schema: unknown): Promise<{ ok: boolean }> {
       return ipcRenderer.invoke('schema:save', path, schema)

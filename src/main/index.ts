@@ -1,7 +1,14 @@
 import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron'
 import { join } from 'node:path'
 import { checkPassword } from './auth'
-import { readJson, saveJsonWithBackup, createBackup, listBackups, restoreBackup } from './ipc/file'
+import {
+  readJson,
+  saveJsonWithBackup,
+  createBackup,
+  listBackups,
+  restoreBackup,
+  resolveConfigPath,
+} from './ipc/file'
 import { watchFile, stopWatching } from './ipc/file-watch'
 import { loadSchema, saveSchema } from './ipc/schema'
 import { detectMainProgram } from './ipc/process'
@@ -16,11 +23,15 @@ ipcMain.handle('file:pickDirectory', async (event) => {
   const win = BrowserWindow.fromWebContents(event.sender)
   if (!win) return null
   const result = await dialog.showOpenDialog(win, {
-    title: '选择 SystemConfig.json 所在目录',
+    title: '选择 SystemConfig.json 所在目录(或 DataRoot / Config 子目录)',
     properties: ['openDirectory'],
   })
   if (result.canceled || result.filePaths.length === 0) return null
   return result.filePaths[0]
+})
+
+ipcMain.handle('file:resolveConfigPath', async (_event, pickedDir: string) => {
+  return resolveConfigPath(pickedDir)
 })
 
 ipcMain.handle('file:readJson', async (_event, path: string) => {
@@ -67,6 +78,28 @@ ipcMain.handle('file:watchStop', async () => {
 })
 
 // ----- SCHEMA -----
+ipcMain.handle('schema:loadDefault', async () => {
+  const { app } = await import('electron')
+  const candidates = [
+    join(app.getAppPath(), 'schema.json'),
+    join(process.resourcesPath, 'app.asar', 'schema.json'),
+    join(process.resourcesPath, 'schema.json'),
+    join(app.getAppPath(), '..', 'schema.json'),
+  ]
+  let lastErr: unknown = null
+  for (const path of candidates) {
+    try {
+      const result = await loadSchema(path)
+      return { ...result, _resolvedPath: path }
+    } catch (err) {
+      lastErr = err
+    }
+  }
+  throw new Error(
+    `schema.json not found in any of: ${candidates.join(', ')} (${(lastErr as Error)?.message ?? 'unknown'})`,
+  )
+})
+
 ipcMain.handle('schema:load', async (_event, schemaPath: string) => {
   return loadSchema(schemaPath)
 })

@@ -27,8 +27,13 @@ export const useConfigStore = defineStore('config', () => {
     try {
       const dir = await window.api.file.pickDirectory()
       if (!dir) return false
-      const path = `${dir}\\SystemConfig.json`.replace(/\\\\/g, '\\')
-      await loadFile(path)
+      // Resolve SystemConfig.json — may be at <dir>/SystemConfig.json OR <dir>/Config/SystemConfig.json
+      const resolved = await window.api.file.resolveConfigPath(dir)
+      if (!resolved) {
+        lastError.value = `在 ${dir} 或 ${dir}\\Config 下找不到 SystemConfig.json`
+        return false
+      }
+      await loadFile(resolved)
       return true
     } catch (err) {
       lastError.value = (err as Error).message
