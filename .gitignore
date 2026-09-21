@@ -49,3 +49,6 @@ logs/
 *.log
 
 # Backup files (we don't keep them here; backups go to user data dir)
+
+# Stray debug artifacts from CDP test scripts
+index.js

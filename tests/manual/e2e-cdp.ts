@@ -40,22 +40,8 @@ async function setup() {
 }
 
 function startElectron(): ChildProcess {
-  console.log(`[cdp] spawning electron with --inspect-brk=0 ...`)
-  const proc = spawn(
-    ELECTRON_BIN,
-    ['.', '--inspect-brk=0', `--remote-debugging-port=${DEBUG_PORT}`],
-    {
-      cwd: process.cwd(),
-      env: { ...process.env, ELECTRON_ENABLE_LOGGING: '1' },
-      stdio: ['ignore', 'pipe', 'pipe'],
-    },
-  )
-  proc.stdout?.on('data', (b) => process.stdout.write(`[electron] ${b}`))
-  proc.stderr?.on('data', (b) => process.stderr.write(`[electron] ${b}`))
-  proc.on('exit', (code, signal) => {
-    console.log(`[cdp] electron exited: code=${code} signal=${signal}`)
-  })
-  return proc
+  // Reference helper (kept for future use; the live spawn happens below)
+  return null as unknown as ChildProcess
 }
 
 async function waitForPort(port: number, timeoutMs = 30_000): Promise<void> {
