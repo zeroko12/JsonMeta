@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { diff, type ChangeMap } from '@shared/utils/diff'
+import { get, set, remove, type JsonValue } from '@shared/utils/json-path'
 
 /**
  * Holds the currently loaded SystemConfig.json (current + original snapshot),
@@ -105,6 +106,16 @@ export const useConfigStore = defineStore('config', () => {
     await loadFile(filePath.value)
   }
 
+  function revertField(path: string) {
+    if (originalSnapshot.value === null) return
+    const original = get(originalSnapshot.value, path)
+    if (original === undefined) {
+      current.value = remove(current.value as JsonValue, path)
+    } else {
+      current.value = set(current.value as JsonValue, path, original as JsonValue)
+    }
+  }
+
   return {
     filePath,
     current,
@@ -119,6 +130,7 @@ export const useConfigStore = defineStore('config', () => {
     loadFile,
     save,
     discardChanges,
+    revertField,
     detectMainProgram,
     initExternalChangeListener,
     reloadFromDisk,

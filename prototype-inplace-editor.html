@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>就地编辑 UX prototype</title>
+<style>
+  :root {
+    --bg: #fafafa;
+    --fg: #2c3e50;
+    --muted: #8c8c8c;
+    --accent: #1890ff;
+    --warn: #faad14;
+    --danger: #ff4d4f;
+    --ok: #389e0d;
+    --modified: #fff7e6;
+    --selected: #91d5ff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+    font-size: 13px;
+    color: var(--fg);
+    background: white;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  /* ───── Top bar ───── */
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px;
+    background: var(--bg);
+    border-bottom: 1px solid #e8e8e8;
+    flex-shrink: 0;
+  }
+  .topbar h1 { margin: 0; font-size: 14px; font-weight: 500; }
+  .topbar .file-name { font-weight: 600; margin-left: 12px; }
+  .topbar .dirty { color: var(--warn); margin-left: 8px; }
+  .topbar .actions button {
+    margin-left: 8px;
+    padding: 6px 12px;
+    border: 1px solid #d9d9d9;
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .topbar .actions .primary {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+  .topbar .actions button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .topbar .changes {
+    margin-right: 12px;
+    color: var(--warn);
+    font-size: 12px;
+  }
+  /* ───── Search bar ───── */
+  .search {
+    padding: 8px 16px;
+    border-bottom: 1px solid #e8e8e8;
+    background: white;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .search input {
+    flex: 1;
+    padding: 6px 10px;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+    font-size: 13px;
+  }
+  .search .hint {
+    font-size: 11px;
+    color: var(--muted);
+  }
+  /* ───── Body (left tree + main) ───── */
+  .body {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+  }
+  .tree {
+    width: 280px;
+    border-right: 1px solid #e8e8e8;
+    overflow: auto;
+    background: var(--bg);
+    flex-shrink: 0;
+  }
+  .tree .node {
+    padding: 4px 8px;
+    cursor: pointer;
+    font-family: "Consolas", "Monaco", monospace;
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .tree .node:hover { background: #e6f7ff; }
+  .tree .node.selected { background: var(--selected); }
+  .tree .node .caret { color: var(--muted); margin-right: 4px; }
+  .tree .node .instance { color: var(--muted); font-size: 10px; margin-left: 6px; }
+  /* ───── Main editor ───── */
+  .main {
+    flex: 1;
+    overflow: auto;
+    padding: 16px 24px;
+  }
+  .section {
+    margin-bottom: 12px;
+    border: 1px solid #f0f0f0;
+    border-radius: 6px;
+    background: white;
+    overflow: hidden;
+  }
+  .section-header {
+    padding: 10px 14px;
+    background: #fafafa;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .section-header h3 {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    flex: 1;
+  }
+  .section-header .instance-desc {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: normal;
+  }
+  .section-header .modified-dot {
+    color: var(--warn);
+    font-size: 14px;
+  }
+  .section-header .delete-btn {
+    margin-left: auto;
+    padding: 4px 8px;
+    border: 1px solid #ffccc7;
+    color: var(--danger);
+    background: white;
+    border-radius: 3px;
+    font-size: 11px;
+    cursor: pointer;
+  }
+  .section-header .delete-btn:hover {
+    background: var(--danger);
+    color: white;
+  }
+  .field {
+    display: grid;
+    grid-template-columns: minmax(180px, 240px) 1fr;
+    gap: 12px;
+    padding: 8px 14px;
+    border-bottom: 1px solid #f5f5f5;
+    align-items: center;
+    transition: background 0.1s;
+  }
+  .field:last-child { border-bottom: none; }
+  .field:hover { background: #fafbfc; }
+  .field.modified { background: var(--modified); }
+  .field.modified:hover { background: #ffe7ba; }
+  .field.deleted { color: #aaa; text-decoration: line-through; }
+  .field .name {
+    font-family: "Consolas", "Monaco", monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: #003eb3;
+  }
+  .field .name small {
+    font-weight: normal;
+    color: var(--muted);
+    font-size: 10px;
+    margin-left: 6px;
+  }
+  .field .desc {
+    font-size: 11px;
+    color: #666;
+    margin-top: 2px;
+  }
+  .field input[type=text],
+  .field input[type=number],
+  .field select {
+    width: 100%;
+    padding: 4px 8px;
+    border: 1px solid #d9d9d9;
+    border-radius: 3px;
+    font-family: "Consolas", monospace;
+    font-size: 12px;
+    box-sizing: border-box;
+  }
+  .field input:focus, .field select:focus {
+    border-color: var(--accent);
+    outline: none;
+  }
+  .field input[type=checkbox] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+  }
+  .field input:disabled,
+  .field select:disabled {
+    background: #f5f5f5;
+    color: var(--muted);
+    cursor: not-allowed;
+  }
+  .field .value-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .field .reset-btn {
+    padding: 2px 6px;
+    border: none;
+    background: transparent;
+    color: var(--accent);
+    font-size: 11px;
+    cursor: pointer;
+  }
+  .field .reset-btn:hover { text-decoration: underline; }
+  /* ───── Save bar (sticky) ───── */
+  .save-bar {
+    position: sticky;
+    bottom: 0;
+    background: var(--modified);
+    border-top: 2px solid var(--warn);
+    padding: 8px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .save-bar button {
+    padding: 6px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .save-bar .primary {
+    background: var(--accent);
+    color: white;
+  }
+  /* ───── Hint ───── */
+  .demo-hint {
+    background: #fffbe6;
+    border-left: 3px solid var(--warn);
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    color: #874d00;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>系统配置编辑工具 <span class="file-name">SystemConfig.json</span><span class="dirty" id="dirty-marker">● 3 处变更</span></h1>
+  <div class="actions">
+    <button>📂 打开其他</button>
+    <button>📦 备份</button>
+    <button>📖 编辑字段说明</button>
+    <button class="primary">💾 保存</button>
+  </div>
+</div>
+
+<div class="search">
+  <input id="search-input" placeholder="🔍 Ctrl+F 搜索字段名或说明,如:一控 / DoorLock / Kp" autofocus />
+  <span class="hint">改了字段任何位置会立刻变橙 · Enter 跳到下一匹配</span>
+</div>
+
+<div class="body">
+  <div class="tree">
+    <div class="node"><span class="caret">▼</span>SoftwareConfig</div>
+    <div class="node" style="padding-left: 24px"><span class="caret">▼</span>DoorLock1<span class="instance">1#门禁</span></div>
+    <div class="node" style="padding-left: 40px; background: var(--selected)">IsFirstCtrlInvert</div>
+    <div class="node" style="padding-left: 40px">IsSecondCtrlInvert</div>
+    <div class="node" style="padding-left: 24px"><span class="caret">▶</span>DoorLock2</div>
+    <div class="node" style="padding-left: 24px"><span class="caret">▼</span>Mfc1<span class="instance">1#流量计</span></div>
+    <div class="node" style="padding-left: 40px">MinValue</div>
+    <div class="node" style="padding-left: 40px">MaxValue</div>
+    <div class="node"><span class="caret">▶</span>IHCConfig</div>
+    <div class="node"><span class="caret">▶</span>DoseControlConfig</div>
+  </div>
+
+  <div class="main">
+    <div class="demo-hint">
+      <strong>🎯 这是一个 HTML prototype,展示"就地编辑"UX。</strong>
+      真实字段值已经填好,试着:
+      <br>① 在搜索框输入 "<b>DoorLock</b>" 或 "<b>一控</b>" — 中间立即过滤
+      <br>② 改任意字段(checkbox / 数字)— 字段行变橙,顶部"● X 处变更"实时计数
+      <br>③ 点字段右侧 ↻ 还原默认
+      <br>④ 底部橙色条固定显示,点 [查看变更详情] 看 JSON Patch
+      <br>⑤ 字段描述挂在字段名下面(子标题),不再分离
+    </div>
+
+    <!-- DoorLock1 section -->
+    <div class="section">
+      <div class="section-header">
+        <span class="caret">▼</span>
+        <h3>DoorLock1</h3>
+        <span class="instance-desc">1#门禁联锁(使用模板:开关量点位)</span>
+        <button class="delete-btn">🗑 删除</button>
+      </div>
+
+      <div class="field">
+        <div>
+          <div class="name">IsFirstCtrlInvert <small>bool · 默认 false</small></div>
+          <div class="desc">一控取反</div>
+        </div>
+        <div class="value-cell">
+          <input type="checkbox" id="f1" />
+          <label for="f1">false</label>
+          <button class="reset-btn" title="还原默认">↻</button>
+        </div>
+      </div>
+
+      <div class="field modified">
+        <div>
+          <div class="name">IsSecondCtrlInvert <small>bool · 默认 false</small></div>
+          <div class="desc">二控取反</div>
+        </div>
+        <div class="value-cell">
+          <input type="checkbox" id="f2" checked />
+          <label for="f2">true</label>
+          <button class="reset-btn" title="还原默认">↻</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <div>
+          <div class="name">IsFirstFeedbackInvert <small>bool · 默认 false</small></div>
+          <div class="desc">一反馈取反</div>
+        </div>
+        <div class="value-cell">
+          <input type="checkbox" />
+          <label>false</label>
+          <button class="reset-btn">↻</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <div>
+          <div class="name">IsSecondFeedbackInvert <small>bool · 默认 false</small></div>
+          <div class="desc">二反馈取反</div>
+        </div>
+        <div class="value-cell">
+          <input type="checkbox" />
+          <label>false</label>
+          <button class="reset-btn">↻</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DoorLock3 section -->
+    <div class="section">
+      <div class="section-header">
+        <span class="caret">▼</span>
+        <h3>DoorLock3</h3>
+        <span class="instance-desc">3#门禁联锁</span>
+        <button class="delete-btn">🗑 删除</button>
+      </div>
+
+      <div class="field">
+        <div>
+          <div class="name">IsFirstCtrlInvert <small>bool</small></div>
+          <div class="desc">一控取反</div>
+        </div>
+        <div class="value-cell">
+          <input type="checkbox" />
+          <label>false</label>
+        </div>
+      </div>
+      <div class="field">
+        <div>
+          <div class="name">IsSecondCtrlInvert <small>bool</small></div>
+          <div class="desc">二控取反</div>
+        </div>
+        <div class="value-cell">
+          <input type="checkbox" />
+          <label>false</label>
+        </div>
+      </div>
+      <div class="field">
+        <div>
+          <div class="name">IsFirstFeedbackInvert <small>bool</small></div>
+          <div class="desc">一反馈取反</div>
+        </div>
+        <div class="value-cell">
+          <input type="checkbox" />
+          <label>false</label>
+        </div>
+      </div>
+      <div class="field">
+        <div>
+          <div class="name">IsSecondFeedbackInvert <small>bool</small></div>
+          <div class="desc">二反馈取反</div>
+        </div>
+        <div class="value-cell">
+          <input type="checkbox" />
+          <label>false</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mfc1 section -->
+    <div class="section">
+      <div class="section-header">
+        <span class="caret">▼</span>
+        <h3>Mfc1</h3>
+        <span class="instance-desc">1#质量流量控制器(0~5 sccm)</span>
+        <button class="delete-btn">🗑 删除</button>
+      </div>
+
+      <div class="field">
+        <div>
+          <div class="name">DisplayUnit <small>string · 默认 "sccm"</small></div>
+          <div class="desc">显示单位</div>
+        </div>
+        <div class="value-cell">
+          <input type="text" value="sccm" />
+        </div>
+      </div>
+
+      <div class="field modified">
+        <div>
+          <div class="name">MinValue <small>double · ⚠ 当前 5(已被改)</small></div>
+          <div class="desc">最小值 — 原始默认 0</div>
+        </div>
+        <div class="value-cell">
+          <input type="number" step="any" value="5" />
+          <button class="reset-btn">↻</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <div>
+          <div class="name">MaxValue <small>double · 默认 5</small></div>
+          <div class="desc">最大值(sccm)</div>
+        </div>
+        <div class="value-cell">
+          <input type="number" step="any" value="5" />
+        </div>
+      </div>
+    </div>
+
+    <div style="height: 60px"></div> <!-- spacer -->
+
+  </div>
+</div>
+
+<div class="save-bar">
+  <div>● <b>3</b> 处变更 (DoorLock1.IsSecondSwitching, Mfc1.MinValue, ...)</div>
+  <div>
+    <button>查看变更详情</button>
+    <button>撤销所有</button>
+    <button class="primary">💾 保存到 SystemConfig.json</button>
+  </div>
+</div>
+
+<script>
+  // Minimal interactivity for prototype:
+  // 1. search filter
+  // 2. toggle modified state on input change
+  // 3. count changes in dirty marker + save bar
+
+  const searchInput = document.getElementById('search-input')
+  const sections = document.querySelectorAll('.section')
+  const inputs = document.querySelectorAll('.field input, .field select')
+  const dirtyMarker = document.getElementById('dirty-marker')
+  const saveBarCount = document.querySelector('.save-bar div b')
+
+  function updateDirtyCount() {
+    const modified = document.querySelectorAll('.field.modified').length
+    dirtyMarker.textContent = `● ${modified} 处变更`
+    saveBarCount.textContent = modified
+    dirtyMarker.style.display = modified > 0 ? 'inline' : 'none'
+  }
+
+  searchInput.addEventListener('input', () => {
+    const q = searchInput.value.trim().toLowerCase()
+    sections.forEach((s) => {
+      const text = s.textContent.toLowerCase()
+      s.style.display = !q || text.includes(q) ? '' : 'none'
+    })
+  })
+
+  inputs.forEach((inp) => {
+    inp.addEventListener('input', () => {
+      const field = inp.closest('.field')
+      field.classList.add('modified')
+      updateDirtyCount()
+    })
+    inp.addEventListener('change', () => {
+      const field = inp.closest('.field')
+      field.classList.add('modified')
+      updateDirtyCount()
+    })
+  })
+
+  // Reset buttons
+  document.querySelectorAll('.reset-btn').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation()
+      const field = btn.closest('.field')
+      field.classList.remove('modified')
+      updateDirtyCount()
+    })
+  })
+
+  updateDirtyCount()
+</script>
+
+</body>
+</html>
