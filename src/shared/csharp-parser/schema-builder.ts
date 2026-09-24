@@ -23,7 +23,8 @@ export interface SchemaMeta {
 export interface SchemaDocument {
   _meta: SchemaMeta
   _templates?: Record<string, SchemaField>
-  [subConfig: string]: SchemaField | SchemaMeta | Record<string, SchemaField> | undefined
+  // 索引签名放宽为 unknown,避免和 SchemaField._fields 互相递归产生深类型实例化
+  [subConfig: string]: unknown
 }
 
 export interface BuildOptions {
