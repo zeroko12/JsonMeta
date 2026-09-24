@@ -48,50 +48,53 @@ interface GroupEntry {
   fields: FieldEntry[]
 }
 
-/** Walk data + schema recursively. Every layer is editable in place. */
+/** Walk the JSON file's actual contents (recursive).
+ * For every key, look up schema for richer type/description/range info.
+ * Falls back to runtime-inferred types if schema is missing the key.
+ * Skips no-ops when the JSON has no relevant data. */
 const allGroups = computed<GroupEntry[]>(() => {
   if (!schemaStore.schema || configStore.current === null) return []
   const out: GroupEntry[] = []
   const schema = schemaStore.schema as unknown as Record<string, unknown>
   for (const key of Object.keys(schema)) {
     if (key.startsWith('_')) continue
-    const top = schema[key] as
+    const topSchema = schema[key] as
       (SchemaField & { _useTemplate?: string; _elementTemplate?: SchemaField }) | null | undefined
-    if (!top || typeof top !== 'object') continue
-
+    if (!topSchema || typeof topSchema !== 'object') continue
     const topValue = (configStore.current as Record<string, unknown>)[key]
-    const topInstanceDesc = top._instanceDesc ?? top._desc ?? ''
+    const topInstanceDesc = topSchema._instanceDesc ?? topSchema._desc ?? ''
+    const subSchema = (topSchema as { _fields?: Record<string, unknown> })._fields
 
-    if (top._useTemplate) {
+    if (isDictLikeGroup(subSchema ?? {}, topValue)) {
+      const dictEntries = buildDictEntries(key, subSchema ?? {}, topValue)
+      if (dictEntries.length === 0) continue
       out.push({
         groupKey: key,
         groupInstanceDesc: topInstanceDesc,
-        fields: [buildFieldEntry(key, top, topValue)],
+        isDict: true,
+        dictEntries,
+        fields: [],
       })
       continue
     }
 
-    if (top._fields) {
-      const isDict = isDictLikeGroup(top._fields, topValue)
-      if (isDict) {
-        const dictEntries = buildDictEntries(key, top._fields, topValue)
-        if (dictEntries.length === 0) continue
-        out.push({
-          groupKey: key,
-          groupInstanceDesc: topInstanceDesc,
-          isDict: true,
-          dictEntries,
-          fields: [],
-        })
-      } else {
-        const fields = buildFieldEntriesRecursive(key, top._fields, topValue)
-        if (fields.length === 0) continue
-        out.push({
-          groupKey: key,
-          groupInstanceDesc: topInstanceDesc,
-          fields,
-        })
-      }
+    if (topSchema._useTemplate) {
+      out.push({
+        groupKey: key,
+        groupInstanceDesc: topInstanceDesc,
+        fields: [buildFieldEntry(key, topSchema, topValue, key)],
+      })
+      continue
+    }
+
+    if (subSchema) {
+      const fields = buildFieldEntriesRecursive(key, subSchema, topValue)
+      if (fields.length === 0) continue
+      out.push({
+        groupKey: key,
+        groupInstanceDesc: topInstanceDesc,
+        fields,
+      })
     }
   }
   return out
@@ -108,28 +111,37 @@ function isDictLikeGroup(fields: Record<string, unknown>, value: unknown): boole
 }
 
 /**
- * Recursively build FieldEntry[] for each child field of `groupValue`.
- * Skips fields not in the loaded JSON. For nested objects whose schema has
- * `_fields`, recursively descends so every layer is editable.
+ * Build editable FieldEntry[] by walking JSON's actual keys under `groupValue`.
+ * For each key:
+ *   - If schema has a definition: use schema._type / _desc / _enum etc.
+ *   - Otherwise: infer type from runtime value (typeof / Array.isArray).
+ * Recurses into nested objects/arrays — any nesting depth.
+ * Skips empty objects/arrays (no field to edit).
  */
 function buildFieldEntriesRecursive(
   groupPath: string,
-  childFields: Record<string, unknown>,
+  childFields: Record<string, unknown> | undefined,
   groupValue: unknown,
 ): FieldEntry[] {
+  const jsonKeys =
+    groupValue && typeof groupValue === 'object' && !Array.isArray(groupValue)
+      ? Object.keys(groupValue as Record<string, unknown>)
+      : []
+  const schemaKeys = childFields ? Object.keys(childFields).filter((k) => !k.startsWith('_')) : []
+  const allKeysSet = new Set<string>([...jsonKeys, ...schemaKeys])
+  const allKeys = [...allKeysSet].sort()
+
   const entries: FieldEntry[] = []
-  for (const [fieldName, childSchema] of Object.entries(childFields)) {
-    if (fieldName.startsWith('_')) continue
+  for (const fieldName of allKeys) {
     const fieldPath = `${groupPath}.${fieldName}`
     const fieldValue =
       groupValue && typeof groupValue === 'object' && !Array.isArray(groupValue)
         ? (groupValue as Record<string, unknown>)[fieldName]
         : undefined
-    if (fieldValue === undefined) continue // skip fields absent from JSON
-    const fe = buildFieldEntry(fieldPath, childSchema as SchemaField, fieldValue)
-    // Recurse into nested objects with sub-schema
-    const innerSchema = (childSchema as { _fields?: Record<string, unknown> })._fields
-    if (innerSchema && fieldValue && typeof fieldValue === 'object' && !Array.isArray(fieldValue)) {
+    const schema = childFields?.[fieldName] as SchemaField | undefined
+    const fe = buildFieldEntry(fieldPath, schema, fieldValue, fieldName)
+    if (fieldValue && typeof fieldValue === 'object' && !Array.isArray(fieldValue)) {
+      const innerSchema = schema?._fields as Record<string, unknown> | undefined
       const children = buildFieldEntriesRecursive(fieldPath, innerSchema, fieldValue)
       if (children.length > 0) fe.children = children
     }
@@ -138,31 +150,55 @@ function buildFieldEntriesRecursive(
   return entries
 }
 
-function buildFieldEntry(fieldPath: string, schema: SchemaField, fieldValue: unknown): FieldEntry {
+/**
+ * Build one editable FieldEntry. Type comes from schema when available,
+ * otherwise inferred from runtime value.
+ */
+function buildFieldEntry(
+  fieldPath: string,
+  schema: SchemaField | undefined,
+  fieldValue: unknown,
+  fieldName: string,
+): FieldEntry {
+  let fieldType = schema?._type
+  let enumValues = schema?._enum
+  if (!fieldType) {
+    fieldType = inferType(fieldValue)
+  }
   return {
-    fieldName: fieldPath.split('.').pop() ?? '',
+    fieldName,
     fieldPath,
-    fieldType: schema._type,
-    isReadOnly: schema._readOnly === true,
-    description: schema._desc,
-    enumValues: schema._enum,
-    enumStrValues: (schema._enum ?? []).map((v) => String(v)),
+    fieldType: fieldType as FieldEntry['fieldType'],
+    isReadOnly: schema?._readOnly === true,
+    description: schema?._desc,
+    enumValues,
+    enumStrValues: (enumValues ?? []).map((v) => String(v)),
     isModified: configStore.changes.has(fieldPath),
     existsInData: fieldValue !== undefined,
   }
 }
 
+function inferType(v: unknown): FieldEntry['fieldType'] {
+  if (v === null || v === undefined) return 'string'
+  if (Array.isArray(v)) return 'array'
+  if (typeof v === 'boolean') return 'bool'
+  if (typeof v === 'number') return Number.isInteger(v) ? 'int' : 'double'
+  if (typeof v === 'string') return 'string'
+  if (typeof v === 'object') return 'object'
+  return 'string'
+}
+
 function buildDictEntries(
   groupPath: string,
-  childFields: Record<string, unknown>,
+  childFields: Record<string, unknown> | undefined,
   groupValue: unknown,
 ): DictEntry[] {
   const out: DictEntry[] = []
   if (!groupValue || typeof groupValue !== 'object' || Array.isArray(groupValue)) {
     return out
   }
-  const dictValueSchema = (childFields._dictValue as SchemaField | undefined) ?? undefined
-  const innerSchemaFields = dictValueSchema?._fields ?? {}
+  const dictValueSchema = (childFields as { _dictValue?: SchemaField })?._dictValue
+  const innerSchemaFields = dictValueSchema?._fields as Record<string, unknown> | undefined
   const obj = groupValue as Record<string, unknown>
   for (const [key, value] of Object.entries(obj)) {
     const fieldPath = `${groupPath}.${key}`
@@ -171,8 +207,19 @@ function buildDictEntries(
   }
   return out
 }
+function onAddDictEntry(g: GroupEntry) {
+  if (!configStore.current) return
+  const path = g.groupKey
+  const cur = (configStore.current as Record<string, unknown>)[g.groupKey]
+  if (cur && typeof cur === 'object' && !Array.isArray(cur)) {
+    const newKey = `New${g.groupKey}${Object.keys(cur).length}`
+    ;(cur as Record<string, unknown>)[newKey] = {}
+    configStore.current = { ...(configStore.current as object) }
+    uiStore.selectedPath = `${path}.${newKey}`
+  }
+}
 
-/** Apply search query, recursing through children. */
+/** Recursively filter fields by search query (matches field name or description). */
 function filterFields(fields: FieldEntry[], q: string): FieldEntry[] {
   if (!q) return fields
   const out: FieldEntry[] = []
@@ -191,17 +238,18 @@ const filteredGroups = computed<GroupEntry[]>(() => {
   const q = uiStore.searchQuery.trim().toLowerCase()
   if (!q) return allGroups.value
   return allGroups.value
-    .map((g) => {
-      const fields = filterFields(g.fields, q)
-      const dictEntries = g.dictEntries?.map((d) => ({
+    .map((g: GroupEntry) => ({
+      ...g,
+      dictEntries: g.dictEntries?.map((d: DictEntry) => ({
         ...d,
         inner: filterFields(d.inner, q),
-      }))
-      return { ...g, fields, dictEntries }
-    })
+      })),
+      fields: filterFields(g.fields, q),
+    }))
     .filter(
-      (g) =>
-        g.fields.length > 0 || (g.dictEntries && g.dictEntries.some((d) => d.inner.length > 0)),
+      (g: GroupEntry) =>
+        g.fields.length > 0 ||
+        (g.dictEntries && g.dictEntries.some((d: DictEntry) => d.inner.length > 0)),
     )
 })
 
@@ -221,18 +269,6 @@ const totalMatched = computed(() => {
   }
   return n
 })
-
-function onAddDictEntry(g: GroupEntry) {
-  if (!configStore.current) return
-  const path = g.groupKey
-  const cur = (configStore.current as Record<string, unknown>)[g.groupKey]
-  if (cur && typeof cur === 'object' && !Array.isArray(cur)) {
-    const newKey = `New${g.groupKey}${Object.keys(cur).length}`
-    ;(cur as Record<string, unknown>)[newKey] = {}
-    configStore.current = { ...(configStore.current as object) }
-    uiStore.selectedPath = `${path}.${newKey}`
-  }
-}
 </script>
 
 <template>
