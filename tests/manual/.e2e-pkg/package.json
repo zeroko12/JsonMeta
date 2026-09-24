@@ -1,0 +1,4 @@
+{
+  "name": "e2e-probe-pkg",
+  "main": "main.cjs"
+}

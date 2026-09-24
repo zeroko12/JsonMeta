@@ -1,6 +1,6 @@
 import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron'
 import { join } from 'node:path'
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { writeFileSync, mkdirSync } from 'node:fs'
 import { checkPassword } from './auth'
 import {
   readJson,
@@ -122,6 +122,7 @@ if (DEBUG_PORT > 0) {
 }
 
 function createWindow() {
+  const isE2E = process.env.E2E_TEST === '1'
   const win = new BrowserWindow({
     width: 1280,
     height: 800,
@@ -133,7 +134,7 @@ function createWindow() {
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
-      contextIsolation: true,
+      contextIsolation: !isE2E,
       nodeIntegration: false,
     },
   })
@@ -156,10 +157,23 @@ function createWindow() {
   return win
 }
 
+// UNCONDITIONAL DEBUG: write a sentinel file on every launch so we
+// know main actually executes regardless of E2E_TEST branch
+try {
+  writeFileSync(
+    'D:/Temp/e2e-fired.txt',
+    `pid=${process.pid}\nargv=${process.argv.slice(0, 5).join(' | ')}\nRAN=${process.env.E2E_TEST ?? 'unset'}\n`,
+  )
+} catch {
+  // ignore
+}
+
 app.whenReady().then(async () => {
   // ── E2E self-test mode ──
   // When E2E_TEST=1 is set, validate the real user file then exit.
   // Used by tests/manual/e2e-exe-self-test.ts to verify the bundled EXE.
+  // Also when E2E_TEST=1, the window is created with contextIsolation:false
+  // so Playwright/CDP tests can stub window.api at the page level.
   if (process.env.E2E_TEST === '1') {
     const filePath = process.env.E2E_TEST_FILE
     const resultPath = process.env.E2E_TEST_RESULT

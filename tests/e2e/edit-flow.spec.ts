@@ -37,10 +37,10 @@ test.afterAll(async () => {
 })
 
 async function launchApp() {
-  // Use unpackaged dev electron (accepts --remote-debugging-port)
+  // Use unpackaged dev electron + executablePath (so Playwright skips its own loader)
   return electron.launch({
     executablePath: DEV_ELECTRON,
-    args: ['.'],
+    args: ['.', '--remote-debugging-port=9222'],
     cwd: process.cwd(),
   })
 }
