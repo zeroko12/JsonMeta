@@ -130,6 +130,9 @@ function buildFieldEntries(
 }
 
 function buildFieldEntry(fieldPath: string, schema: SchemaField, fieldValue: unknown): FieldEntry {
+  // Only surface fields that actually exist in the loaded JSON file.
+  // Fields that are pure C# defaults / hardcoded elsewhere are silently skipped.
+  const exists = fieldValue !== undefined
   return {
     groupKey: '',
     groupPath: '',
@@ -142,7 +145,7 @@ function buildFieldEntry(fieldPath: string, schema: SchemaField, fieldValue: unk
     enumValues: schema._enum,
     enumStrValues: (schema._enum ?? []).map((v) => String(v)),
     isModified: configStore.changes.has(fieldPath),
-    existsInData: fieldValue !== undefined,
+    existsInData: exists,
   }
 }
 
@@ -262,23 +265,18 @@ function isSelected(field: FieldEntry): boolean {
         v-for="f in g.fields"
         :key="f.fieldPath"
         class="field"
-        :class="{ modified: f.isModified, selected: isSelected(f), missing: !f.existsInData }"
+        :class="{ modified: f.isModified, selected: isSelected(f) }"
         @click="onSelect(f)"
       >
         <div class="field-label">
           <code class="name">{{ f.fieldName }}</code>
           <small class="type">· {{ f.fieldType }}</small>
           <span v-if="f.description" class="desc">{{ f.description }}</span>
-          <span v-if="!f.existsInData" class="missing-dot" title="该字段在当前 JSON 文件中不存在">
-            ⚠ 未设置
-          </span>
           <span v-if="f.isModified" class="modified-dot" title="已修改">●</span>
         </div>
 
         <div class="field-input">
-          <span v-if="!f.existsInData" class="not-set">JSON 中无此字段</span>
-
-          <template v-else-if="f.fieldType === 'bool'">
+          <template v-if="f.fieldType === 'bool'">
             <label>
               <input
                 type="checkbox"
