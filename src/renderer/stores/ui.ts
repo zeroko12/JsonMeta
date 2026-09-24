@@ -9,6 +9,7 @@ export const useUiStore = defineStore('ui', () => {
   const searchQuery = ref('')
   const commandPaletteOpen = ref(false)
   const selectedPath = ref<string>('')
+  const enabledCategories = ref<Set<string>>(new Set())
   const showOnlyModified = ref(false)
   const expandedKeys = ref<Set<string>>(new Set<string>())
   const showChangeListDialog = ref(false)
@@ -37,6 +38,7 @@ export const useUiStore = defineStore('ui', () => {
   }
 
   return {
+    enabledCategories,
     searchQuery,
     commandPaletteOpen,
     selectedPath,
