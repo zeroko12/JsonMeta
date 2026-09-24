@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useConfigStore } from '../stores/config'
 import { useSchemaStore } from '../stores/schema'
 
@@ -20,6 +20,9 @@ onMounted(async () => {
 async function pickAndOpen() {
   await configStore.pickAndLoad()
   if (configStore.filePath) {
+    // 记下目录(下次启动自动打开)
+    const dir = configStore.filePath.replace(/[\/][^\/]+$/, '')
+    localStorage.setItem('lastConfigDir', dir)
     emit('loaded')
   }
 }

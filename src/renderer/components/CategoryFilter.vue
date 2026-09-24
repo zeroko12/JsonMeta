@@ -67,7 +67,7 @@ function toggle(key: string) {
 
 <template>
   <div class="category-filter">
-    <div class="header">
+    <div class="header" title="勾选要在主区显示的类别">
       <span class="title">类别</span>
       <button class="toggle-all" @click="toggleAll">
         {{ isAllOn() ? '全不选' : '全选' }}
@@ -75,7 +75,7 @@ function toggle(key: string) {
     </div>
     <ul class="list">
       <li v-for="c in categories" :key="c.key" class="item">
-        <label>
+        <label :title="`勾选后主区显示 ${c.key} 字段(${c.count} 个)`">
           <input
             type="checkbox"
             :checked="isAllOn() || enabled.has(c.key)"
