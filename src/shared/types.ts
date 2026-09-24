@@ -40,6 +40,8 @@ declare global {
           data: unknown,
           options?: { backup?: boolean; maxBackups?: number },
         ): Promise<WriteJsonResult>
+        readText(path: string): Promise<string>
+        writeText(path: string, content: string): Promise<{ ok: boolean }>
         listBackups(targetPath: string): Promise<string[]>
         restoreBackup(
           backupPath: string,

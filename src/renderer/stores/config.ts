@@ -54,6 +54,13 @@ export const useConfigStore = defineStore('config', () => {
       originalSnapshot.value = structuredClone(data)
       externalChangePending.value = false
       await window.api.file.watchStart(path)
+      // 同时加载该文件下平级的 annotations.json(用户运行时写的描述/历史)
+      try {
+        const { useAnnotationsStore } = await import('./annotations')
+        await useAnnotationsStore().loadFor(path)
+      } catch {
+        // 加载失败不影响主流程
+      }
     } catch (err) {
       lastError.value = (err as Error).message
       throw err

@@ -9,6 +9,7 @@
 import { computed, ref } from 'vue'
 import { useConfigStore } from '../stores/config'
 import { useUiStore } from '../stores/ui'
+import { useAnnotationsStore } from '../stores/annotations'
 import { get, set } from '@shared/utils/json-path'
 import type { JsonValue } from '@shared/utils/json-path'
 
@@ -34,8 +35,26 @@ const emit = defineEmits<{
 
 const configStore = useConfigStore()
 const uiStore = useUiStore()
+const annotations = useAnnotationsStore()
 
 const isSelected = computed(() => uiStore.selectedPath === props.field.fieldPath)
+
+// 描述:schema 的 _desc + 用户运行时写的 _userDesc(annotations.json)
+const userDesc = computed(() => annotations.getDescription(props.field.fieldPath))
+const showDescEditor = ref(false)
+const descDraft = ref('')
+
+function openDescEditor() {
+  descDraft.value = userDesc.value ?? props.field.description ?? ''
+  showDescEditor.value = true
+}
+function saveDesc() {
+  annotations.setDescription(props.field.fieldPath, descDraft.value)
+  showDescEditor.value = false
+}
+function cancelDesc() {
+  showDescEditor.value = false
+}
 
 // 折叠/展开 object/array 子字段
 const expanded = ref(false)
@@ -82,10 +101,24 @@ function setEnum(v: string) {
           <code class="name">{{ field.fieldName }}</code>
           <small class="type">· {{ field.fieldType }}</small>
           <span v-if="field.isModified" class="modified-dot" title="已修改">●</span>
+          <button class="desc-btn" title="编辑描述" @click.stop="openDescEditor">📝</button>
         </div>
-        <span v-if="field.description" class="desc">{{ field.description }}</span>
+        <div class="desc-stack">
+          <span v-if="field.description && !userDesc" class="desc">{{ field.description }}</span>
+          <span v-if="userDesc" class="desc user-desc" :title="'用户描述: ' + userDesc">
+            📝 {{ userDesc }}
+          </span>
+          <span v-if="!field.description && !userDesc" class="desc empty">无描述 — 点 📝 添加</span>
+        </div>
       </div>
       <div class="field-input" @click.stop="onClick">
+        <div v-if="showDescEditor" class="desc-editor" @click.stop>
+          <textarea v-model="descDraft" rows="3" placeholder="输入描述..."></textarea>
+          <div class="desc-editor-actions">
+            <button @click="saveDesc">保存</button>
+            <button @click="cancelDesc">取消</button>
+          </div>
+        </div>
         <!-- bool -->
         <label v-if="field.fieldType === 'bool'" class="checkbox-row">
           <input
@@ -256,7 +289,77 @@ function setEnum(v: string) {
   height: 16px;
   cursor: pointer;
 }
-.checkbox-row {
+.desc-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0 2px;
+  color: #999;
+}
+.desc-btn:hover {
+  color: #1890ff;
+}
+.desc-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.desc-stack .desc {
+  font-size: 11px;
+  color: #555;
+  line-height: 1.4;
+}
+.desc-stack .desc.user-desc {
+  color: #2c5282;
+  background: #ebf8ff;
+  padding: 2px 6px;
+  border-radius: 3px;
+  border-left: 2px solid #3182ce;
+}
+.desc-stack .desc.empty {
+  color: #aaa;
+  font-style: italic;
+}
+.desc-editor {
+  background: white;
+  border: 1px solid #1890ff;
+  border-radius: 4px;
+  padding: 8px;
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+.desc-editor textarea {
+  width: 100%;
+  border: 1px solid #d9d9d9;
+  border-radius: 3px;
+  padding: 6px 8px;
+  font-family: inherit;
+  font-size: 12px;
+  resize: vertical;
+}
+.desc-editor-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+.desc-editor-actions button {
+  padding: 3px 10px;
+  border: 1px solid #d9d9d9;
+  background: white;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 11px;
+}
+.desc-editor-actions button:first-child {
+  background: #1890ff;
+  color: white;
+  border-color: #1890ff;
+}
+.checked-row {
   display: flex;
   align-items: center;
   gap: 8px;

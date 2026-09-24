@@ -51,6 +51,19 @@ ipcMain.handle(
   },
 )
 
+ipcMain.handle('file:readText', async (_event, path: string) => {
+  const { readFile } = await import('node:fs/promises')
+  return readFile(path, 'utf8')
+})
+
+ipcMain.handle('file:writeText', async (_event, path: string, content: string) => {
+  const { writeFile, mkdir } = await import('node:fs/promises')
+  const { dirname } = await import('node:path')
+  await mkdir(dirname(path), { recursive: true })
+  await writeFile(path, content, 'utf8')
+  return { ok: true }
+})
+
 ipcMain.handle('file:listBackups', async (_event, targetPath: string) => {
   return listBackups(targetPath)
 })

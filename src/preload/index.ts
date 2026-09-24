@@ -23,6 +23,12 @@ const api = {
     ): Promise<{ ok: boolean; backupPath?: string; changed: boolean; error?: string }> {
       return ipcRenderer.invoke('file:writeJson', path, data, options)
     },
+    async readText(path: string): Promise<string> {
+      return ipcRenderer.invoke('file:readText', path)
+    },
+    async writeText(path: string, content: string): Promise<{ ok: boolean }> {
+      return ipcRenderer.invoke('file:writeText', path, content)
+    },
     async listBackups(targetPath: string): Promise<string[]> {
       return ipcRenderer.invoke('file:listBackups', targetPath)
     },
