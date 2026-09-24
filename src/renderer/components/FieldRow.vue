@@ -37,6 +37,17 @@ const configStore = useConfigStore()
 const uiStore = useUiStore()
 const annotations = useAnnotationsStore()
 
+function pushChange(newValue: unknown) {
+  const old = currentValue()
+  if (old !== newValue)
+    annotations.pushHistory({
+      path: props.field.fieldPath,
+      oldValue: old,
+      newValue,
+      type: 'modify',
+    })
+}
+
 const isSelected = computed(() => uiStore.selectedPath === props.field.fieldPath)
 
 // 描述:schema 的 _desc + 用户运行时写的 _userDesc(annotations.json)
@@ -73,18 +84,23 @@ function currentValue(): unknown {
 }
 
 function setBool(v: boolean) {
+  pushChange(v)
   configStore.current = set(configStore.current as JsonValue, props.field.fieldPath, v as JsonValue)
 }
 function setString(v: string) {
+  pushChange(v)
   configStore.current = set(configStore.current as JsonValue, props.field.fieldPath, v as JsonValue)
 }
 function setInt(v: number) {
+  pushChange(v)
   configStore.current = set(configStore.current as JsonValue, props.field.fieldPath, v as JsonValue)
 }
 function setDouble(v: number) {
+  pushChange(v)
   configStore.current = set(configStore.current as JsonValue, props.field.fieldPath, v as JsonValue)
 }
 function setEnum(v: string) {
+  pushChange(v)
   configStore.current = set(configStore.current as JsonValue, props.field.fieldPath, v as JsonValue)
 }
 </script>

@@ -23,6 +23,7 @@ import ChangeListDialog from '../components/ChangeListDialog.vue'
 import DeleteConfirmDialog from '../components/DeleteConfirmDialog.vue'
 import BackupRestoreDialog from '../components/BackupRestoreDialog.vue'
 import ExternalChangeDialog from '../components/ExternalChangeDialog.vue'
+import HistoryPanel from '../components/HistoryPanel.vue'
 
 const configStore = useConfigStore()
 const schemaStore = useSchemaStore()
@@ -32,6 +33,7 @@ const hasFile = computed(() => configStore.filePath !== null)
 const showFocused = computed(() => !!uiStore.selectedPath)
 
 const searchRef = ref<HTMLInputElement | null>(null)
+const showHistory = ref(false)
 
 function handleKey(e: KeyboardEvent) {
   if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'f') {
@@ -92,12 +94,16 @@ onUnmounted(() => {
     <div v-if="hasFile" class="body">
       <aside class="left-pane">
         <CategoryFilter />
+        <button class="history-btn" @click="showHistory = !showHistory">📜 历史</button>
       </aside>
       <main class="data-pane">
         <FlatFieldList />
       </main>
       <aside v-if="showFocused" class="focused-pane">
         <FocusedEditPanel />
+      </aside>
+      <aside v-if="showHistory" class="history-pane">
+        <HistoryPanel />
       </aside>
     </div>
 
@@ -181,6 +187,27 @@ onUnmounted(() => {
   background: #fafbfc;
   flex-shrink: 0;
   overflow: hidden;
+}
+.history-pane {
+  width: 360px;
+  border-left: 1px solid #e8e8e8;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.history-btn {
+  padding: 6px 10px;
+  margin: 4px;
+  border: 1px solid #d9d9d9;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  color: #555;
+}
+.history-btn:hover {
+  background: #e6f7ff;
+  border-color: #1890ff;
+  color: #1890ff;
 }
 .placeholder {
   flex: 1;
