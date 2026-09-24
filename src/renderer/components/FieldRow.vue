@@ -6,7 +6,7 @@
  * - FieldRow 的 .children 数组再渲染一组 FieldRow(depth + 1)
  * - 选中 emit('select'),输入变化通过 emit 回调
  */
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useConfigStore } from '../stores/config'
 import { useUiStore } from '../stores/ui'
 import { get, set } from '@shared/utils/json-path'
@@ -36,6 +36,13 @@ const configStore = useConfigStore()
 const uiStore = useUiStore()
 
 const isSelected = computed(() => uiStore.selectedPath === props.field.fieldPath)
+
+// 折叠/展开 object/array 子字段
+const expanded = ref(false)
+// 有子字段时自动展开
+if (props.field.children && props.field.children.length > 0) {
+  expanded.value = true
+}
 
 function onClick() {
   uiStore.selectedPath = props.field.fieldPath
@@ -132,26 +139,24 @@ function setEnum(v: string) {
             {{ opt }}
           </option>
         </select>
-
-        <!-- object/array (nested) -->
-        <div
-          v-else-if="field.fieldType === 'object' || field.fieldType === 'array'"
-          class="nested-hint"
-        >
-          {{ field.fieldType === 'object' ? '{} — 展开看子字段' : '[] — 展开看子字段' }}
-        </div>
-
-        <code v-else class="unknown">类型 {{ field.fieldType }} 不支持就地编辑</code>
       </div>
     </div>
-    <!-- Recurse into nested fields -->
-    <FieldRow
-      v-for="c in field.children ?? []"
-      :key="c.fieldPath"
-      :field="c"
-      :depth="depth + 1"
-      @select="onClick"
-    />
+    <!-- 对象 / 数组:可展开看子字段(任意嵌套深度) -->
+    <div v-if="field.fieldType === 'object' || field.fieldType === 'array'" class="nested-actions">
+      <button class="expand-btn" :class="{ open: expanded }" @click="expanded = !expanded">
+        {{ field.fieldType === 'object' ? '{}' : '[]' }}
+        {{ expanded ? '收起子字段' : '展开子字段' }}
+        <span v-if="field.children?.length" class="count">{{ field.children.length }} 字段</span>
+      </button>
+      <FieldRow
+        v-for="c in field.children ?? []"
+        v-if="expanded"
+        :key="c.fieldPath"
+        :field="c"
+        :depth="depth + 1"
+        @select="onClick"
+      />
+    </div>
   </div>
 </template>
 
@@ -256,10 +261,39 @@ function setEnum(v: string) {
   align-items: center;
   gap: 8px;
 }
-.nested-hint {
-  color: #999;
+.nested-actions {
+  padding: 4px 0 8px 0;
+  background: #fafbfc;
+  border-top: 1px solid #f0f0f0;
+}
+.expand-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  margin: 4px 0 4px 0;
+  border: 1px dashed #d9d9d9;
+  background: white;
+  border-radius: 3px;
+  cursor: pointer;
   font-size: 11px;
-  font-style: italic;
+  color: #666;
+  font-family: 'Consolas', monospace;
+}
+.expand-btn:hover {
+  background: #e6f7ff;
+  border-color: #1890ff;
+  color: #1890ff;
+}
+.expand-btn.open {
+  border-style: solid;
+  border-color: #1890ff;
+  color: #1890ff;
+  background: #e6f7ff;
+}
+.expand-btn .count {
+  color: #999;
+  font-size: 10px;
 }
 .unknown {
   color: #999;
