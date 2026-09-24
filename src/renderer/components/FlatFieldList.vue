@@ -1,17 +1,18 @@
 <script setup lang="ts">
 /**
- * DataTree — 主区:走实际 JSON 数据,显示真实存在的字段
+ * DataTree — 主区:递归展示数据树的每一层(都能就地编辑)
  *
- * 每个 sub-config 按真实数据 key 列出,字段也只在 current 中存在才显示。
- * 字典按实际 key 展开。
- * 每个字段直接带 input/checkbox/select + 描述。
- * 点击字段 → 选中并 emit,让右侧 EditPanel 显示焦点编辑。
+ * 走实际 JSON + schema 递归:
+ * - 顶层 10 个 sub-config 各自成 group
+ * - 任何 object 类型的字段若 current 中存在,递归展开子字段(就地编辑)
+ * - 字典按实际 key 展开(每 key 一组,内嵌字段也能就地编辑)
+ * - 只显示 JSON 里真实存在的字段(C# 默认/硬编码跳过)
  */
 import { computed } from 'vue'
 import { useConfigStore } from '../stores/config'
 import { useSchemaStore } from '../stores/schema'
 import { useUiStore } from '../stores/ui'
-import { get, set } from '@shared/utils/json-path'
+import FieldRow from './FieldRow.vue'
 import type { JsonValue } from '@shared/utils/json-path'
 import type { SchemaField } from '@shared/utils/validation'
 
@@ -19,12 +20,7 @@ const configStore = useConfigStore()
 const schemaStore = useSchemaStore()
 const uiStore = useUiStore()
 
-const emit = defineEmits<{ select: [path: string] }>()
-
 interface FieldEntry {
-  groupKey: string
-  groupPath: string
-  groupInstanceDesc: string
   fieldName: string
   fieldPath: string
   fieldType: SchemaField['_type']
@@ -34,6 +30,7 @@ interface FieldEntry {
   enumStrValues?: string[]
   isModified: boolean
   existsInData: boolean
+  children?: FieldEntry[]
 }
 
 interface DictEntry {
@@ -45,14 +42,13 @@ interface DictEntry {
 
 interface GroupEntry {
   groupKey: string
-  groupPath: string
   groupInstanceDesc: string
   isDict?: boolean
   dictEntries?: DictEntry[]
   fields: FieldEntry[]
 }
 
-/** Build the data tree by walking current, only showing what's actually there. */
+/** Walk data + schema recursively. Every layer is editable in place. */
 const allGroups = computed<GroupEntry[]>(() => {
   if (!schemaStore.schema || configStore.current === null) return []
   const out: GroupEntry[] = []
@@ -64,15 +60,13 @@ const allGroups = computed<GroupEntry[]>(() => {
     if (!top || typeof top !== 'object') continue
 
     const topValue = (configStore.current as Record<string, unknown>)[key]
-    const topPath = key
     const topInstanceDesc = top._instanceDesc ?? top._desc ?? ''
 
     if (top._useTemplate) {
       out.push({
         groupKey: key,
-        groupPath: topPath,
         groupInstanceDesc: topInstanceDesc,
-        fields: [buildFieldEntry(topPath, top, topValue)],
+        fields: [buildFieldEntry(key, top, topValue)],
       })
       continue
     }
@@ -80,20 +74,22 @@ const allGroups = computed<GroupEntry[]>(() => {
     if (top._fields) {
       const isDict = isDictLikeGroup(top._fields, topValue)
       if (isDict) {
+        const dictEntries = buildDictEntries(key, top._fields, topValue)
+        if (dictEntries.length === 0) continue
         out.push({
           groupKey: key,
-          groupPath: topPath,
           groupInstanceDesc: topInstanceDesc,
           isDict: true,
-          dictEntries: buildDictEntries(topPath, top._fields, topValue),
+          dictEntries,
           fields: [],
         })
       } else {
+        const fields = buildFieldEntriesRecursive(key, top._fields, topValue)
+        if (fields.length === 0) continue
         out.push({
           groupKey: key,
-          groupPath: topPath,
           groupInstanceDesc: topInstanceDesc,
-          fields: buildFieldEntries(topPath, top._fields, topValue),
+          fields,
         })
       }
     }
@@ -111,7 +107,12 @@ function isDictLikeGroup(fields: Record<string, unknown>, value: unknown): boole
   return false
 }
 
-function buildFieldEntries(
+/**
+ * Recursively build FieldEntry[] for each child field of `groupValue`.
+ * Skips fields not in the loaded JSON. For nested objects whose schema has
+ * `_fields`, recursively descends so every layer is editable.
+ */
+function buildFieldEntriesRecursive(
   groupPath: string,
   childFields: Record<string, unknown>,
   groupValue: unknown,
@@ -124,19 +125,21 @@ function buildFieldEntries(
       groupValue && typeof groupValue === 'object' && !Array.isArray(groupValue)
         ? (groupValue as Record<string, unknown>)[fieldName]
         : undefined
-    entries.push(buildFieldEntry(fieldPath, childSchema as SchemaField, fieldValue))
+    if (fieldValue === undefined) continue // skip fields absent from JSON
+    const fe = buildFieldEntry(fieldPath, childSchema as SchemaField, fieldValue)
+    // Recurse into nested objects with sub-schema
+    const innerSchema = (childSchema as { _fields?: Record<string, unknown> })._fields
+    if (innerSchema && fieldValue && typeof fieldValue === 'object' && !Array.isArray(fieldValue)) {
+      const children = buildFieldEntriesRecursive(fieldPath, innerSchema, fieldValue)
+      if (children.length > 0) fe.children = children
+    }
+    entries.push(fe)
   }
   return entries
 }
 
 function buildFieldEntry(fieldPath: string, schema: SchemaField, fieldValue: unknown): FieldEntry {
-  // Only surface fields that actually exist in the loaded JSON file.
-  // Fields that are pure C# defaults / hardcoded elsewhere are silently skipped.
-  const exists = fieldValue !== undefined
   return {
-    groupKey: '',
-    groupPath: '',
-    groupInstanceDesc: '',
     fieldName: fieldPath.split('.').pop() ?? '',
     fieldPath,
     fieldType: schema._type,
@@ -145,7 +148,7 @@ function buildFieldEntry(fieldPath: string, schema: SchemaField, fieldValue: unk
     enumValues: schema._enum,
     enumStrValues: (schema._enum ?? []).map((v) => String(v)),
     isModified: configStore.changes.has(fieldPath),
-    existsInData: exists,
+    existsInData: fieldValue !== undefined,
   }
 }
 
@@ -163,8 +166,23 @@ function buildDictEntries(
   const obj = groupValue as Record<string, unknown>
   for (const [key, value] of Object.entries(obj)) {
     const fieldPath = `${groupPath}.${key}`
-    const inner = buildFieldEntries(fieldPath, innerSchemaFields, value)
+    const inner = buildFieldEntriesRecursive(fieldPath, innerSchemaFields, value)
     out.push({ key, fieldPath, isModified: configStore.changes.has(fieldPath), inner })
+  }
+  return out
+}
+
+/** Apply search query, recursing through children. */
+function filterFields(fields: FieldEntry[], q: string): FieldEntry[] {
+  if (!q) return fields
+  const out: FieldEntry[] = []
+  for (const f of fields) {
+    const self =
+      f.fieldName.toLowerCase().includes(q) || (f.description ?? '').toLowerCase().includes(q)
+    const children = f.children ? filterFields(f.children, q) : undefined
+    if (self || (children && children.length > 0)) {
+      out.push({ ...f, children })
+    }
   }
   return out
 }
@@ -173,57 +191,40 @@ const filteredGroups = computed<GroupEntry[]>(() => {
   const q = uiStore.searchQuery.trim().toLowerCase()
   if (!q) return allGroups.value
   return allGroups.value
-    .map((g) => ({
-      ...g,
-      dictEntries: g.dictEntries
-        ?.map((d) => ({
-          ...d,
-          inner: d.inner.filter((f) => matchSearch(f, q)),
-        }))
-        .filter((d) => d.inner.length > 0 || d.key.toLowerCase().includes(q)),
-      fields: g.fields.filter((f) => matchSearch(f, q) || g.groupKey.toLowerCase().includes(q)),
-    }))
+    .map((g) => {
+      const fields = filterFields(g.fields, q)
+      const dictEntries = g.dictEntries?.map((d) => ({
+        ...d,
+        inner: filterFields(d.inner, q),
+      }))
+      return { ...g, fields, dictEntries }
+    })
     .filter(
       (g) =>
         g.fields.length > 0 || (g.dictEntries && g.dictEntries.some((d) => d.inner.length > 0)),
     )
 })
 
-function matchSearch(f: FieldEntry, q: string): boolean {
-  return f.fieldName.toLowerCase().includes(q) || (f.description ?? '').toLowerCase().includes(q)
-}
-
 const totalMatched = computed(() => {
-  return filteredGroups.value.reduce(
-    (sum, g) =>
-      sum + g.fields.length + (g.dictEntries?.reduce((s, d) => s + d.inner.length, 0) ?? 0),
-    0,
-  )
+  function count(fs: FieldEntry[]): number {
+    let n = 0
+    for (const f of fs) {
+      n += 1
+      if (f.children) n += count(f.children)
+    }
+    return n
+  }
+  let n = 0
+  for (const g of filteredGroups.value) {
+    n += count(g.fields)
+    for (const d of g.dictEntries ?? []) n += count(d.inner)
+  }
+  return n
 })
 
-function onBoolChange(field: FieldEntry, e: Event) {
-  const checked = (e.target as HTMLInputElement).checked
-  configStore.current = set(configStore.current as JsonValue, field.fieldPath, checked as JsonValue)
-}
-function onTextChange(field: FieldEntry, e: Event) {
-  const v = (e.target as HTMLInputElement).value
-  configStore.current = set(configStore.current as JsonValue, field.fieldPath, v as JsonValue)
-}
-function onIntChange(field: FieldEntry, e: Event) {
-  const v = Number.parseInt((e.target as HTMLInputElement).value, 10)
-  configStore.current = set(configStore.current as JsonValue, field.fieldPath, v as JsonValue)
-}
-function onDoubleChange(field: FieldEntry, e: Event) {
-  const v = Number.parseFloat((e.target as HTMLInputElement).value)
-  configStore.current = set(configStore.current as JsonValue, field.fieldPath, v as JsonValue)
-}
-function onEnumChange(field: FieldEntry, e: Event) {
-  const v = (e.target as HTMLSelectElement).value
-  configStore.current = set(configStore.current as JsonValue, field.fieldPath, v as JsonValue)
-}
 function onAddDictEntry(g: GroupEntry) {
   if (!configStore.current) return
-  const path = g.groupPath
+  const path = g.groupKey
   const cur = (configStore.current as Record<string, unknown>)[g.groupKey]
   if (cur && typeof cur === 'object' && !Array.isArray(cur)) {
     const newKey = `New${g.groupKey}${Object.keys(cur).length}`
@@ -231,15 +232,6 @@ function onAddDictEntry(g: GroupEntry) {
     configStore.current = { ...(configStore.current as object) }
     uiStore.selectedPath = `${path}.${newKey}`
   }
-}
-
-function onSelect(field: FieldEntry) {
-  uiStore.selectedPath = field.fieldPath
-  emit('select', field.fieldPath)
-}
-
-function isSelected(field: FieldEntry): boolean {
-  return uiStore.selectedPath === field.fieldPath
 }
 </script>
 
@@ -260,149 +252,15 @@ function isSelected(field: FieldEntry): boolean {
         </span>
       </summary>
 
-      <!-- Plain object: show each field as editable row -->
-      <div
-        v-for="f in g.fields"
-        :key="f.fieldPath"
-        class="field"
-        :class="{ modified: f.isModified, selected: isSelected(f) }"
-        @click="onSelect(f)"
-      >
-        <div class="field-label">
-          <code class="name">{{ f.fieldName }}</code>
-          <small class="type">· {{ f.fieldType }}</small>
-          <span v-if="f.description" class="desc">{{ f.description }}</span>
-          <span v-if="f.isModified" class="modified-dot" title="已修改">●</span>
-        </div>
+      <FieldRow v-for="f in g.fields" :key="f.fieldPath" :field="f" :depth="0" />
 
-        <div class="field-input">
-          <template v-if="f.fieldType === 'bool'">
-            <label>
-              <input
-                type="checkbox"
-                :checked="get(configStore.current, f.fieldPath) === true"
-                :disabled="f.isReadOnly"
-                @change="(e) => onBoolChange(f, e)"
-                @click.stop
-              />
-              <span :class="{ off: get(configStore.current, f.fieldPath) !== true }">
-                {{ get(configStore.current, f.fieldPath) === true ? 'true' : 'false' }}
-              </span>
-            </label>
-          </template>
-
-          <input
-            v-else-if="f.fieldType === 'string'"
-            type="text"
-            :value="(get(configStore.current, f.fieldPath) as string) ?? ''"
-            :disabled="f.isReadOnly"
-            @input="(e) => onTextChange(f, e)"
-            @click.stop
-          />
-
-          <input
-            v-else-if="f.fieldType === 'int'"
-            type="number"
-            step="1"
-            :value="(get(configStore.current, f.fieldPath) as number) ?? 0"
-            :disabled="f.isReadOnly"
-            @input="(e) => onIntChange(f, e)"
-            @click.stop
-          />
-
-          <input
-            v-else-if="f.fieldType === 'double'"
-            type="number"
-            step="any"
-            :value="(get(configStore.current, f.fieldPath) as number) ?? 0"
-            :disabled="f.isReadOnly"
-            @input="(e) => onDoubleChange(f, e)"
-            @click.stop
-          />
-
-          <select
-            v-else-if="f.fieldType === 'enum'"
-            :value="String(get(configStore.current, f.fieldPath) ?? '')"
-            :disabled="f.isReadOnly"
-            @change="(e) => onEnumChange(f, e)"
-            @click.stop
-          >
-            <option v-for="opt in f.enumStrValues" :key="opt" :value="opt">{{ opt }}</option>
-          </select>
-
-          <code v-else class="unknown">类型 {{ f.fieldType }} 不支持就地编辑</code>
-        </div>
-      </div>
-
-      <!-- Dict-like group: each existing key is its own sub-section -->
       <template v-if="g.isDict && g.dictEntries">
         <div v-for="de in g.dictEntries" :key="de.key" class="dict-entry">
           <div class="dict-header" @click="uiStore.selectedPath = de.fieldPath">
             <code class="dict-key">{{ de.key }}</code>
             <span class="count">{{ de.inner.length }} 字段</span>
           </div>
-          <div
-            v-for="f in de.inner"
-            :key="f.fieldPath"
-            class="field dict-field"
-            :class="{ modified: f.isModified, selected: isSelected(f), missing: !f.existsInData }"
-            @click="onSelect(f)"
-          >
-            <div class="field-label">
-              <code class="name">{{ f.fieldName }}</code>
-              <small class="type">· {{ f.fieldType }}</small>
-              <span v-if="f.description" class="desc">{{ f.description }}</span>
-              <span v-if="!f.existsInData" class="missing-dot">⚠ 未设置</span>
-              <span v-if="f.isModified" class="modified-dot">●</span>
-            </div>
-            <div class="field-input">
-              <span v-if="!f.existsInData" class="not-set">未设置</span>
-              <input
-                v-else-if="f.fieldType === 'string'"
-                type="text"
-                :value="(get(configStore.current, f.fieldPath) as string) ?? ''"
-                :disabled="f.isReadOnly"
-                @input="(e) => onTextChange(f, e)"
-                @click.stop
-              />
-              <input
-                v-else-if="f.fieldType === 'bool'"
-                type="checkbox"
-                :checked="get(configStore.current, f.fieldPath) === true"
-                :disabled="f.isReadOnly"
-                @change="(e) => onBoolChange(f, e)"
-                @click.stop
-              />
-              <input
-                v-else-if="f.fieldType === 'int'"
-                type="number"
-                step="1"
-                :value="(get(configStore.current, f.fieldPath) as number) ?? 0"
-                :disabled="f.isReadOnly"
-                @input="(e) => onIntChange(f, e)"
-                @click.stop
-              />
-              <input
-                v-else-if="f.fieldType === 'double'"
-                type="number"
-                step="any"
-                :value="(get(configStore.current, f.fieldPath) as number) ?? 0"
-                :disabled="f.isReadOnly"
-                @input="(e) => onDoubleChange(f, e)"
-                @click.stop
-              />
-              <select
-                v-else-if="f.fieldType === 'enum'"
-                :value="String(get(configStore.current, f.fieldPath) ?? '')"
-                :disabled="f.isReadOnly"
-                @change="(e) => onEnumChange(f, e)"
-                @click.stop
-              >
-                <option v-for="opt in f.enumStrValues" :key="opt" :value="opt">{{ opt }}</option>
-              </select>
-              <code v-else class="unknown">{{ f.fieldType }}</code>
-            </div>
-          </div>
+          <FieldRow v-for="f in de.inner" :key="f.fieldPath" :field="f" :depth="0" />
         </div>
         <button class="add-dict-btn" @click="onAddDictEntry(g)">+ 新增条目</button>
       </template>
@@ -459,119 +317,6 @@ function isSelected(field: FieldEntry): boolean {
   font-size: 11px;
   color: #999;
 }
-.field {
-  display: grid;
-  grid-template-columns: minmax(220px, 320px) 1fr;
-  gap: 16px;
-  padding: 8px 14px;
-  border-bottom: 1px solid #f5f5f5;
-  align-items: center;
-  cursor: pointer;
-}
-.field:last-child {
-  border-bottom: none;
-}
-.field:hover {
-  background: #fafbfc;
-}
-.field.selected {
-  background: #e6f7ff;
-}
-.field.modified {
-  background: #fff7e6;
-}
-.field.modified.selected {
-  background: #ffd591;
-}
-.field.missing {
-  background: #fafafa;
-  opacity: 0.7;
-}
-.field-label {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.field-label .name {
-  font-weight: 600;
-  font-family: 'Consolas', monospace;
-  font-size: 12px;
-  color: #003eb3;
-}
-.field-label .type {
-  font-weight: normal;
-  color: #999;
-  font-size: 10px;
-  margin-left: 4px;
-}
-.field-label .desc {
-  font-size: 11px;
-  color: #555;
-  line-height: 1.4;
-}
-.field.modified .field-label .name {
-  color: #d46b08;
-}
-.modified-dot {
-  color: #fa8c16;
-  font-size: 14px;
-}
-.missing-dot {
-  color: #d4380d;
-  font-size: 11px;
-  font-weight: 600;
-}
-.field-input {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-family: 'Consolas', monospace;
-  font-size: 12px;
-}
-.field-input input[type='text'],
-.field-input input[type='number'],
-.field-input select {
-  width: 100%;
-  padding: 4px 8px;
-  border: 1px solid #d9d9d9;
-  border-radius: 3px;
-  font-family: 'Consolas', monospace;
-  font-size: 12px;
-  box-sizing: border-box;
-}
-.field-input input:focus,
-.field-input select:focus {
-  border-color: #1890ff;
-  outline: none;
-}
-.field-input input:disabled,
-.field-input select:disabled {
-  background: #f5f5f5;
-  color: #999;
-  cursor: not-allowed;
-}
-.field-input input[type='checkbox'] {
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-}
-.field-input label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.field-input .off {
-  color: #aaa;
-}
-.field-input .not-set {
-  color: #d4380d;
-  font-size: 11px;
-}
-.field-input .unknown {
-  color: #999;
-  font-style: italic;
-  font-size: 11px;
-}
 .dict-entry {
   border-top: 1px solid #f0f0f0;
   background: #fcfcfc;
@@ -584,6 +329,7 @@ function isSelected(field: FieldEntry): boolean {
   gap: 8px;
   font-family: 'Consolas', monospace;
   font-size: 11px;
+  cursor: pointer;
 }
 .dict-entry .dict-key {
   font-weight: 600;
@@ -592,10 +338,6 @@ function isSelected(field: FieldEntry): boolean {
 .dict-entry .count {
   color: #999;
   font-size: 10px;
-}
-.dict-field {
-  padding-left: 28px;
-  background: #fafafa;
 }
 .add-dict-btn {
   display: block;
