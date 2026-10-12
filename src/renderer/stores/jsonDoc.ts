@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
-import { computed, ref, toRaw } from 'vue'
+import { computed, ref, toRaw, watch } from 'vue'
 import { diff, type ChangeMap } from '@shared/utils/diff'
+import { fastSearchTree } from '@shared/utils/tree-search'
 import {
   get,
   set,
@@ -227,16 +228,25 @@ export const useJsonDocStore = defineStore('jsonDoc', () => {
     return `${total} 处改动`
   })
 
-  function ensurePathExpanded(path: string) {
-    if (!path) return
+  function ensurePathExpanded(path: string): boolean {
+    if (!path) return false
     const segments = path.split('.')
+    if (segments.length <= 1) return false
     const exp = new Set(expandedPaths.value)
     let cur = ''
+    let hasAdded = false
     for (let i = 0; i < segments.length - 1; i++) {
       cur = cur ? `${cur}.${segments[i]}` : segments[i]
-      exp.add(cur)
+      if (!exp.has(cur)) {
+        exp.add(cur)
+        hasAdded = true
+      }
     }
-    expandedPaths.value = exp
+    if (hasAdded) {
+      expandedPaths.value = exp
+      return true
+    }
+    return false
   }
 
   function jumpToNextChange(): string | null {
@@ -267,16 +277,44 @@ export const useJsonDocStore = defineStore('jsonDoc', () => {
   }
 
   // ─── 搜索与高亮导航系统 ───
-  const searchScope = ref<'all' | 'key' | 'desc' | 'val'>('all')
+  const searchScope = ref<'all' | 'key' | 'desc' | 'val'>('desc') // 默认为按描述搜索
   const searchMode = ref<'filter' | 'tree'>('tree') // 默认为全量树定位
   const searchMatchIndex = ref(0)
-  const searchMatchCount = ref(0)
-  const searchMatchPaths = ref<string[]>([])
   const searchTargetTrigger = ref<{ path: string; timestamp: number } | null>(null)
 
+  // 全量搜索匹配路径列表 (内存轻量快速计算，毫秒级响应万级节点)
+  const searchMatchPaths = computed<string[]>(() => {
+    const q = searchQuery.value.trim()
+    if (!q || current.value === null) return []
+    return fastSearchTree(toRaw(current.value), descriptions.value, q, searchScope.value)
+  })
+
+  const searchMatchCount = computed(() => searchMatchPaths.value.length)
+
+  // 监听匹配路径列表变化，仅展开并高亮当前首个焦点匹配项，避免一次性展开数十个大分支导致卡顿
+  watch(
+    searchMatchPaths,
+    (paths) => {
+      if (paths.length === 0) {
+        searchMatchIndex.value = 0
+        searchTargetTrigger.value = null
+      } else {
+        if (searchMatchIndex.value >= paths.length) {
+          searchMatchIndex.value = 0
+        }
+        const targetPath = paths[searchMatchIndex.value]
+        if (targetPath) {
+          ensurePathExpanded(targetPath)
+          selectedPath.value = targetPath
+          searchTargetTrigger.value = { path: targetPath, timestamp: Date.now() }
+        }
+      }
+    },
+    { immediate: true },
+  )
+
   function updateSearchMatches(paths: string[]) {
-    searchMatchPaths.value = paths
-    searchMatchCount.value = paths.length
+    // 兼容保留接口 (若外部调用)
     if (paths.length === 0) {
       searchMatchIndex.value = 0
       searchTargetTrigger.value = null
@@ -285,24 +323,11 @@ export const useJsonDocStore = defineStore('jsonDoc', () => {
         searchMatchIndex.value = 0
       }
       const targetPath = paths[searchMatchIndex.value]
-      if (searchMode.value === 'tree') {
-        // 全量树定位模式下：自动展开匹配项的祖先容器，确保节点在树中完整可见
-        const exp = new Set(expandedPaths.value)
-        const limit = Math.min(paths.length, 50)
-        for (let j = 0; j < limit; j++) {
-          const segments = paths[j].split('.')
-          let cur = ''
-          for (let i = 0; i < segments.length - 1; i++) {
-            cur = cur ? `${cur}.${segments[i]}` : segments[i]
-            exp.add(cur)
-          }
-        }
-        expandedPaths.value = exp
-      } else {
+      if (targetPath) {
         ensurePathExpanded(targetPath)
+        selectedPath.value = targetPath
+        searchTargetTrigger.value = { path: targetPath, timestamp: Date.now() }
       }
-      selectedPath.value = targetPath
-      searchTargetTrigger.value = { path: targetPath, timestamp: Date.now() }
     }
   }
 
@@ -336,20 +361,10 @@ export const useJsonDocStore = defineStore('jsonDoc', () => {
 
   function toggleSearchMode() {
     searchMode.value = searchMode.value === 'filter' ? 'tree' : 'filter'
-    if (searchMode.value === 'tree' && searchMatchPaths.value.length > 0) {
-      const exp = new Set(expandedPaths.value)
-      const limit = Math.min(searchMatchPaths.value.length, 50)
-      for (let j = 0; j < limit; j++) {
-        const segments = searchMatchPaths.value[j].split('.')
-        let cur = ''
-        for (let i = 0; i < segments.length - 1; i++) {
-          cur = cur ? `${cur}.${segments[i]}` : segments[i]
-          exp.add(cur)
-        }
-      }
-      expandedPaths.value = exp
+    if (searchMatchPaths.value.length > 0) {
       const targetPath = searchMatchPaths.value[searchMatchIndex.value]
       if (targetPath) {
+        ensurePathExpanded(targetPath)
         selectedPath.value = targetPath
         searchTargetTrigger.value = { path: targetPath, timestamp: Date.now() }
       }
@@ -359,8 +374,6 @@ export const useJsonDocStore = defineStore('jsonDoc', () => {
   function clearSearch() {
     searchQuery.value = ''
     searchMatchIndex.value = 0
-    searchMatchCount.value = 0
-    searchMatchPaths.value = []
     searchTargetTrigger.value = null
   }
 

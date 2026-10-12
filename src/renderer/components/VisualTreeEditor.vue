@@ -119,21 +119,6 @@ function buildRows(
   }
 }
 
-function checkRowMatch(r: TreeRowItem, q: string, scope: 'all' | 'key' | 'desc' | 'val'): boolean {
-  if (!q) return false
-  const matchKey = () =>
-    matchTextOrPinyin(r.keyName, q).matched || matchTextOrPinyin(r.path, q).matched
-  const matchDesc = () => Boolean(r.description && matchTextOrPinyin(r.description, q).matched)
-  const matchVal = () =>
-    r.value !== null && typeof r.value !== 'object' && matchTextOrPinyin(String(r.value), q).matched
-
-  if (scope === 'key') return matchKey()
-  if (scope === 'desc') return matchDesc()
-  if (scope === 'val') return matchVal()
-  // 'all'
-  return matchKey() || matchDesc() || matchVal()
-}
-
 const allRows = computed<TreeRowItem[]>(() => {
   if (doc.current === null) return []
   const list: TreeRowItem[] = []
@@ -141,35 +126,15 @@ const allRows = computed<TreeRowItem[]>(() => {
   return list
 })
 
-// 缓存全量搜索结果匹配路径
-const matchedPaths = computed<string[]>(() => {
-  const q = doc.searchQuery.trim()
-  if (!q || doc.current === null) return []
-  const allDocList: TreeRowItem[] = []
-  buildRows(toRaw(doc.current), '', 0, Array.isArray(doc.current), allDocList, true)
-  return allDocList.filter((r) => checkRowMatch(r, q, doc.searchScope)).map((r) => r.path)
-})
-
-const matchedPathSet = computed(() => new Set(matchedPaths.value))
-
-// 及时同步匹配结果列表至 store 供顶栏计数器与步进定位消费
-watch(
-  matchedPaths,
-  (paths) => {
-    doc.updateSearchMatches(paths)
-  },
-  { immediate: true },
-)
+// 命中路径快速索引 Set (用于 O(1) 样式高亮判定)
+const matchedPathSet = computed(() => new Set(doc.searchMatchPaths))
 
 // 视图展示行：
-// - 无搜索词：展示当前展开状态树 (allRows)
-// - 搜索模式为 'tree' (全量树定位)：依然展示当前树形结构，配合高亮
+// - 无搜索词或搜索模式为 'tree' (全量树定位)：展示当前树形结构，配合高亮
 // - 搜索模式为 'filter' (过滤列表)：全量穿透展开展示所有匹配项
 const displayRows = computed<TreeRowItem[]>(() => {
   const q = doc.searchQuery.trim()
-  if (!q) return allRows.value
-
-  if (doc.searchMode === 'tree') {
+  if (!q || doc.searchMode === 'tree') {
     return allRows.value
   }
 
@@ -177,7 +142,8 @@ const displayRows = computed<TreeRowItem[]>(() => {
   if (doc.current === null) return []
   const allDocList: TreeRowItem[] = []
   buildRows(toRaw(doc.current), '', 0, Array.isArray(doc.current), allDocList, true)
-  return allDocList.filter((r) => checkRowMatch(r, q, doc.searchScope))
+  const set = matchedPathSet.value
+  return allDocList.filter((r) => set.has(r.path))
 })
 
 const activeSearchPath = computed(() => {
@@ -327,7 +293,7 @@ watch(
       const targetTop = Math.max(0, idx * ROW_HEIGHT - viewportHeight.value / 2 + ROW_HEIGHT / 2)
       treeListRef.value.scrollTo({
         top: targetTop,
-        behavior: 'smooth',
+        behavior: 'auto',
       })
       flashNavPath.value = trigger.path
       if (flashTimer) clearTimeout(flashTimer)
@@ -352,7 +318,7 @@ watch(
       const targetTop = Math.max(0, idx * ROW_HEIGHT - viewportHeight.value / 2 + ROW_HEIGHT / 2)
       treeListRef.value.scrollTo({
         top: targetTop,
-        behavior: 'smooth',
+        behavior: 'auto',
       })
       flashSearchPath.value = trigger.path
       if (flashSearchTimer) clearTimeout(flashSearchTimer)
