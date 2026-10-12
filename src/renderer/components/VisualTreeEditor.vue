@@ -499,45 +499,6 @@ watch(
               </select>
             </div>
 
-            <!-- 中文描述胶囊 -->
-            <div class="desc-section">
-              <!-- 编辑描述状态 -->
-              <div v-if="editingDescPath === row.path" class="desc-editor-inline" @click.stop>
-                <input
-                  v-model="descDraft"
-                  class="desc-input"
-                  placeholder="输入中文描述/备注..."
-                  autofocus
-                  @keydown.enter="commitEditDesc(row)"
-                  @keydown.esc="editingDescPath = null"
-                  @blur="commitEditDesc(row)"
-                />
-              </div>
-              <span
-                v-else-if="row.description"
-                class="desc-pill"
-                :title="`中文描述: ${row.description} (点击修改)`"
-                @click="startEditDesc(row, $event)"
-              >
-                📝
-                <span
-                  v-html="
-                    doc.searchQuery && (doc.searchScope === 'all' || doc.searchScope === 'desc')
-                      ? highlightMatch(row.description, doc.searchQuery)
-                      : escapeHtml(row.description)
-                  "
-                />
-              </span>
-              <button
-                v-else
-                class="add-desc-hover"
-                title="为此字段添加中文说明"
-                @click="startEditDesc(row, $event)"
-              >
-                + 描述
-              </button>
-            </div>
-
             <!-- 值编辑控件 -->
             <div class="val-section" @click.stop>
               <!-- 布尔值切换 -->
@@ -580,6 +541,46 @@ watch(
               <span v-else-if="row.type === 'object'" class="container-summary">
                 { {{ row.childCount }} 个属性 }
               </span>
+            </div>
+
+            <!-- 中文描述胶囊 (显示在值/属性计数之后，充分利用横向空间) -->
+            <div class="desc-section">
+              <!-- 编辑描述状态 -->
+              <div v-if="editingDescPath === row.path" class="desc-editor-inline" @click.stop>
+                <input
+                  v-model="descDraft"
+                  class="desc-input"
+                  placeholder="输入中文描述/备注..."
+                  autofocus
+                  @keydown.enter="commitEditDesc(row)"
+                  @keydown.esc="editingDescPath = null"
+                  @blur="commitEditDesc(row)"
+                />
+              </div>
+              <span
+                v-else-if="row.description"
+                class="desc-pill"
+                :title="`中文描述: ${row.description} (点击修改)`"
+                @click="startEditDesc(row, $event)"
+              >
+                📝
+                <span
+                  class="desc-text"
+                  v-html="
+                    doc.searchQuery && (doc.searchScope === 'all' || doc.searchScope === 'desc')
+                      ? highlightMatch(row.description, doc.searchQuery)
+                      : escapeHtml(row.description)
+                  "
+                />
+              </span>
+              <button
+                v-else
+                class="add-desc-hover"
+                title="为此字段添加中文说明"
+                @click="startEditDesc(row, $event)"
+              >
+                + 描述
+              </button>
             </div>
 
             <!-- 改动小圆点标记 -->
@@ -1023,9 +1024,13 @@ watch(
 .desc-section {
   display: flex;
   align-items: center;
-  flex-shrink: 0;
+  flex: 1;
+  min-width: 0;
 }
 .desc-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   background: #2e2612;
   color: #fde047;
   padding: 2px 8px;
@@ -1033,14 +1038,18 @@ watch(
   font-size: 11px;
   cursor: pointer;
   border: 1px solid #5a4515;
-  max-width: 220px;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  max-width: 100%;
+  min-width: 0;
   white-space: nowrap;
 }
 .desc-pill:hover {
   background: #423617;
   border-color: #85631b;
+}
+.desc-pill .desc-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .add-desc-hover {
   background: transparent;
@@ -1052,6 +1061,8 @@ watch(
   cursor: pointer;
   opacity: 0;
   transition: opacity 0.1s;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 .tree-row:hover .add-desc-hover {
   opacity: 1;
@@ -1061,23 +1072,30 @@ watch(
   color: #60a5fa;
   background: #172554;
 }
+.desc-editor-inline {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  max-width: 480px;
+}
 .desc-input {
   font-size: 12px;
-  padding: 2px 6px;
+  padding: 2px 8px;
   background: #1e1e26;
   color: #f1f5f9;
   border: 1px solid #3b82f6;
   border-radius: 4px;
   outline: none;
-  width: 160px;
+  width: 100%;
+  min-width: 200px;
+  max-width: 480px;
 }
 
 /* 值输入区域 */
 .val-section {
-  flex: 1;
   display: flex;
   align-items: center;
-  min-width: 120px;
+  flex-shrink: 0;
 }
 .val-input {
   padding: 3px 8px;
@@ -1095,8 +1113,7 @@ watch(
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 .str-input {
-  width: 100%;
-  max-width: 320px;
+  width: 220px;
   color: #86efac;
 }
 .num-input {
@@ -1173,6 +1190,7 @@ watch(
   opacity: 0;
   transition: opacity 0.1s;
   margin-left: auto;
+  flex-shrink: 0;
 }
 .tree-row:hover .row-actions {
   opacity: 1;

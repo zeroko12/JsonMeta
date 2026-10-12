@@ -2,8 +2,8 @@
   "_meta": {
     "version": 1,
     "rootClass": "SystemConfigModel",
-    "generatedAt": "2026-09-21T02:54:15.794Z",
-    "generatorVersion": "1.0.0",
+    "generatedAt": "2026-10-12T03:09:57.943Z",
+    "generatorVersion": "0.1.6-human-desc",
     "sourceFiles": [
       "BuildInfo.cs",
       "Core.AlarmEngine\\AlarmEngine.cs",
@@ -1712,78 +1712,86 @@
       "_fields": {
         "ControlDisplayUnit": {
           "_type": "string",
-          "_desc": "Control值显示的单位"
+          "_desc": "Control 值显示的单位"
         },
         "ControlConvertCoefficient": {
           "_type": "double",
-          "_desc": "Control值显示与接收的转换系数"
+          "_desc": "Control 值显示与接收的转换系数"
         },
         "ControlDigits": {
           "_type": "int",
-          "_desc": "Control值保留小数点后几位"
+          "_desc": "Control 值保留小数点后几位"
         },
         "IsControlScientificNotation": {
           "_type": "bool",
-          "_desc": "是否用科学计数法显示Control值"
+          "_desc": "是否用科学计数法显示 Control 值"
         },
         "ControlMinValue": {
           "_type": "double",
-          "_desc": "Control值最小值",
+          "_desc": "Control 值最小值(init-only)",
           "_readOnly": true
         },
         "ControlMaxValue": {
           "_type": "double",
-          "_desc": "Control值最大值",
+          "_desc": "Control 值最大值(init-only)",
           "_readOnly": true
         },
         "LoadDisplayUnit": {
           "_type": "string",
-          "_desc": "Load值显示的单位"
+          "_desc": "Load 值显示的单位"
         },
         "LoadConvertCoefficient": {
           "_type": "double",
-          "_desc": "Load值显示与接收的转换系数"
+          "_desc": "Load 值显示与接收的转换系数"
         },
         "LoadDigits": {
           "_type": "int",
-          "_desc": "Load值保留小数点后几位"
+          "_desc": "Load 值保留小数点后几位"
         },
         "IsLoadScientificNotation": {
           "_type": "bool",
-          "_desc": "是否用科学计数法显示Control值"
+          "_desc": "是否用科学计数法显示 Load 值"
         },
         "LoadMinValue": {
           "_type": "double",
-          "_desc": "Load值最小值",
+          "_desc": "Load 值最小值(init-only)",
           "_readOnly": true
         },
         "LoadMaxValue": {
           "_type": "double",
-          "_desc": "Load值最大值",
+          "_desc": "Load 值最大值(init-only)",
           "_readOnly": true
         },
         "IsOpenSetInvert": {
-          "_type": "bool"
+          "_type": "bool",
+          "_desc": "开设定取反"
         },
         "IsOpenFeedbackInvert": {
-          "_type": "bool"
+          "_type": "bool",
+          "_desc": "开反馈取反"
         },
         "IsCloseSetInvert": {
-          "_type": "bool"
+          "_type": "bool",
+          "_desc": "关设定取反"
         },
         "IsCloseFeedbackInvert": {
-          "_type": "bool"
+          "_type": "bool",
+          "_desc": "关反馈取反"
         },
         "IsEnableSetInvert": {
-          "_type": "bool"
+          "_type": "bool",
+          "_desc": "使能设定取反"
         },
         "IsEnableFeedbackInvert": {
-          "_type": "bool"
+          "_type": "bool",
+          "_desc": "使能反馈取反"
         },
         "IsAlarmFeedbackInvert": {
-          "_type": "bool"
+          "_type": "bool",
+          "_desc": "报警反馈取反"
         }
-      }
+      },
+      "_desc": "电源(Control 设定值 + Load 反馈值 + 6 个状态位取反)"
     },
     "ControllerTypeConfig": {
       "_type": "object",
@@ -1806,15 +1814,16 @@
         },
         "MinValue": {
           "_type": "double",
-          "_desc": "器件最小值",
+          "_desc": "器件最小值(init-only)",
           "_readOnly": true
         },
         "MaxValue": {
           "_type": "double",
-          "_desc": "器件最大值",
+          "_desc": "器件最大值(init-only)",
           "_readOnly": true
         }
-      }
+      },
+      "_desc": "控制器(单值设定 + 显示参数 + 量程)"
     },
     "ControlJobData": {
       "_type": "object",
@@ -1882,18 +1891,23 @@
       "_type": "object",
       "_fields": {
         "IsFirstCtrlInvert": {
-          "_type": "bool"
+          "_type": "bool",
+          "_desc": "一控取反"
         },
         "IsSecondCtrlInvert": {
-          "_type": "bool"
+          "_type": "bool",
+          "_desc": "二控取反"
         },
         "IsFirstFeedbackInvert": {
-          "_type": "bool"
+          "_type": "bool",
+          "_desc": "一反馈取反"
         },
         "IsSecondFeedbackInvert": {
-          "_type": "bool"
+          "_type": "bool",
+          "_desc": "二反馈取反"
         }
-      }
+      },
+      "_desc": "开关量点位(双控双反馈)"
     },
     "AnalogTypeConfig": {
       "_type": "object",
@@ -1916,52 +1930,59 @@
         },
         "LowLimit": {
           "_type": "double",
-          "_desc": "下限值Alarm"
+          "_desc": "下限值 Alarm"
         },
         "LowWarning": {
           "_type": "double",
-          "_desc": "下限值Warning"
+          "_desc": "下限值 Warning"
         },
         "HighWarning": {
           "_type": "double",
-          "_desc": "上限值Warning"
+          "_desc": "上限值 Warning"
         },
         "HighLimit": {
           "_type": "double",
-          "_desc": "上限值Alarm"
+          "_desc": "上限值 Alarm"
         },
         "MinValue": {
           "_type": "double",
-          "_desc": "器件最小值",
+          "_desc": "器件最小值(init-only)",
           "_readOnly": true
         },
         "MaxValue": {
           "_type": "double",
-          "_desc": "器件最大值"
+          "_desc": "器件最大值(init-only)"
         }
-      }
+      },
+      "_desc": "模拟量点位(显示 + 报警阈值 + 量程)"
     },
     "DigitalTypeConfig": {
       "_type": "object",
       "_fields": {
         "IsInvert": {
-          "_type": "bool"
+          "_type": "bool",
+          "_desc": "取反"
         }
-      }
+      },
+      "_desc": "单点开关量点位(支持取反)"
     },
     "TurboPumpTypeConfig": {
       "_type": "object",
       "_fields": {
         "IsOpenSetInvert": {
-          "_type": "bool"
+          "_type": "bool",
+          "_desc": "开设定取反"
         },
         "IsNormalInvert": {
-          "_type": "bool"
+          "_type": "bool",
+          "_desc": "正常反馈取反"
         },
         "IsAlarmInvert": {
-          "_type": "bool"
+          "_type": "bool",
+          "_desc": "报警反馈取反"
         }
-      }
+      },
+      "_desc": "分子泵(开 / 正常 / 报警 三态)"
     }
   },
   "SoftwareConfig": {
@@ -1969,855 +1990,1067 @@
     "_fields": {
       "EnableTermPower": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "头部供电使能"
       },
       "TerminalPower": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "头部供电"
       },
       "V51": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ V51 待人工核实(推断 51 号阀门控制点位)"
       },
       "Setup": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ Setup 待人工核实(推断 Setup 杯 / 调试状态切换)"
       },
       "V48": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ V48 待人工核实"
       },
       "DoorLock1": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "1#门禁联锁"
       },
       "DoorLock2": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "2#门禁联锁"
       },
       "DoorLock3": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "3#门禁联锁"
       },
       "DoorLock4": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "4#门禁联锁"
       },
       "DoorLock5": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "5#门禁联锁"
       },
       "DoorLock6": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "6#门禁联锁"
       },
       "DoorLock7": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "7#门禁联锁"
       },
       "DoorLock8": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "8#门禁联锁"
       },
       "DoorLock9": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "9#门禁联锁"
       },
       "DoorLock10": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "10#门禁联锁"
       },
       "DoorLock11": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "11#门禁联锁"
       },
       "LampRed": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "红灯"
       },
       "LampGreen": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "绿灯"
       },
       "LampYellow": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "黄灯"
       },
       "LampAlarm": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "报警灯"
       },
       "WaterPumpEnable": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "水泵使能"
       },
       "Rp2Enable": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "Rp2 使能"
       },
       "Rp3Enable": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "Rp3 使能"
       },
       "AccelPowerEnable": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "加速电源使能"
       },
       "DoorLock": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "总门禁(联锁词典\"全部解锁\"主开关)"
       },
       "TargetPanelWarm": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "靶台加热"
       },
       "V59": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ V59 待人工核实"
       },
       "V19": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ V19 待人工核实"
       },
       "V72A": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ V72A 待人工核实(联锁词典 V72A 上升作为 V72B 关闭条件)"
       },
       "V72B": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ V72B 待人工核实(联锁词典 V72B 打开作为 V72A 关闭条件,VS9 大气状态才允许开)"
       },
       "V69B": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ V69B 待人工核实"
       },
       "V69A": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ V69A 待人工核实"
       },
       "V22A": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ V22A 待人工核实"
       },
       "V49": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ V49 待人工核实"
       },
       "V58": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ V58 待人工核实"
       },
       "V18": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ V18 待人工核实"
       },
       "V71A": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ V71A 待人工核实"
       },
       "V71B": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ V71B 待人工核实(联锁词典 V71B 打开作为 V71A 关闭条件,VS8 大气状态才允许开)"
       },
       "V68B": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ V68B 待人工核实"
       },
       "V68A": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ V68A 待人工核实"
       },
       "V21A": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ V21A 待人工核实"
       },
       "FocusFarad": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "聚焦杯插入(联锁词典 SetupUniformity/MeasureUniformity 用)"
       },
       "V53": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ V53 待人工核实"
       },
       "V55": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ V55 待人工核实"
       },
       "V15": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ V15 待人工核实"
       },
       "V13": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ V13 待人工核实"
       },
       "V43": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ V43 待人工核实"
       },
       "V62": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ V62 待人工核实"
       },
       "ScanBackSuppSwitch": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "扫描后抑制开关"
       },
       "AcceSuppSwitch": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "加速抑制开关"
       },
       "PL1": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ PL1 待人工核实(联锁词典与 SI1 配合,推断气路1气瓶阀)"
       },
       "SI1": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ SI1 待人工核实(联锁词典与 PL1 配合,推断气路1安全阀)"
       },
       "VL1": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ VL1 待人工核实"
       },
       "PG1": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ PG1 待人工核实"
       },
       "PL2": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ PL2 待人工核实(气路2气瓶阀)"
       },
       "SI2": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ SI2 待人工核实(气路2安全阀)"
       },
       "VL2": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ VL2 待人工核实"
       },
       "PG2": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ PG2 待人工核实"
       },
       "PL3": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ PL3 待人工核实(气路3气瓶阀)"
       },
       "SI3": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ SI3 待人工核实(气路3安全阀)"
       },
       "VL3": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ VL3 待人工核实"
       },
       "PG3": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ PG3 待人工核实"
       },
       "PL4": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ PL4 待人工核实(气路4气瓶阀)"
       },
       "SI4": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ SI4 待人工核实(气路4安全阀)"
       },
       "VL4": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ VL4 待人工核实"
       },
       "PG4": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ PG4 待人工核实"
       },
       "PG5": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ PG5 待人工核实"
       },
       "ExtractPowerSwtich": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ ExtractPowerSwitch 待人工核实(源码拼写 Swtich 缺 t,推断引出电源开关)"
       },
       "ExtractSuppPowerSwitch": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ ExtractSuppPowerSwitch 待人工核实(推断引出抑制电源开关)"
       },
       "IonSourceEnable": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "离子源供电使能"
       },
       "TLValveIsland": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ TLValveIsland 待人工核实(推断高压仓阀岛)"
       },
       "ExtractPowerEnable": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "引出电源使能"
       },
       "Rp1Power": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "Rp1 电源(机械泵1)"
       },
       "AnalyzeBar": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "分析杆"
       },
       "V61": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ V61 待人工核实"
       },
       "SetUp": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "Setup 杯插入(联锁词典 SetupUniformity/MeasureUniformity 用)"
       },
       "V42": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ V42 待人工核实"
       },
       "V41": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ V41 待人工核实"
       },
       "Rp1Open": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "Rp1 打开(联锁词典独立条目)"
       },
       "P1": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ P1 待人工核实(PLC 真空计通道 1?)"
       },
       "P2": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ P2 待人工核实"
       },
       "P3": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ P3 待人工核实"
       },
       "P4": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ P4 待人工核实"
       },
       "V44": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ V44 待人工核实"
       },
       "CoolingWater": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "冷却水"
       },
       "VTP1": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ VTP1 待人工核实(推断 Tp1 前级阀 / 真空阀)"
       },
       "VTP2": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ VTP2 待人工核实"
       },
       "VTP3": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ VTP3 待人工核实"
       },
       "VTP4": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ VTP4 待人工核实"
       },
       "VTP8": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ VTP8 待人工核实"
       },
       "VTP9": {
         "_type": "object",
-        "_useTemplate": "SwitchTypeConfig"
+        "_useTemplate": "SwitchTypeConfig",
+        "_desc": "⚠ VTP9 待人工核实"
       },
       "G19": {
         "_type": "object",
-        "_useTemplate": "AnalogTypeConfig"
+        "_useTemplate": "AnalogTypeConfig",
+        "_desc": "19# 真空计(默认 0~760 Torr)"
       },
       "G18": {
         "_type": "object",
-        "_useTemplate": "AnalogTypeConfig"
+        "_useTemplate": "AnalogTypeConfig",
+        "_desc": "18# 真空计(默认 0~760 Torr)"
       },
       "G13": {
         "_type": "object",
-        "_useTemplate": "AnalogTypeConfig"
+        "_useTemplate": "AnalogTypeConfig",
+        "_desc": "12# 真空计(默认 0~760 Torr)"
       },
       "IG3": {
         "_type": "object",
-        "_useTemplate": "AnalogTypeConfig"
+        "_useTemplate": "AnalogTypeConfig",
+        "_desc": "IG3 电离真空计(默认 0~750 Torr)"
       },
       "IG2": {
         "_type": "object",
-        "_useTemplate": "AnalogTypeConfig"
+        "_useTemplate": "AnalogTypeConfig",
+        "_desc": "IG2 电离真空计"
       },
       "G12": {
         "_type": "object",
-        "_useTemplate": "AnalogTypeConfig"
+        "_useTemplate": "AnalogTypeConfig",
+        "_desc": "12# 真空计(默认 0~760 Torr)"
       },
       "G11": {
         "_type": "object",
-        "_useTemplate": "AnalogTypeConfig"
+        "_useTemplate": "AnalogTypeConfig",
+        "_desc": "11# 真空计(默认 0~760 Torr)"
       },
       "IG1": {
         "_type": "object",
-        "_useTemplate": "AnalogTypeConfig"
+        "_useTemplate": "AnalogTypeConfig",
+        "_desc": "IG1 电离真空计"
       },
       "IG4": {
         "_type": "object",
-        "_useTemplate": "AnalogTypeConfig"
+        "_useTemplate": "AnalogTypeConfig",
+        "_desc": "IG4 电离真空计"
       },
       "VS8": {
         "_type": "object",
-        "_useTemplate": "AnalogTypeConfig"
+        "_useTemplate": "AnalogTypeConfig",
+        "_desc": "VS8 差压(默认 -100~100 kPa)"
       },
       "VS9": {
         "_type": "object",
-        "_useTemplate": "AnalogTypeConfig"
+        "_useTemplate": "AnalogTypeConfig",
+        "_desc": "VS9 差压"
       },
       "VS4": {
         "_type": "object",
-        "_useTemplate": "AnalogTypeConfig"
+        "_useTemplate": "AnalogTypeConfig",
+        "_desc": "VS4 差压"
       },
       "VS2": {
         "_type": "object",
-        "_useTemplate": "AnalogTypeConfig"
+        "_useTemplate": "AnalogTypeConfig",
+        "_desc": "VS2 差压"
       },
       "VS1": {
         "_type": "object",
-        "_useTemplate": "AnalogTypeConfig"
+        "_useTemplate": "AnalogTypeConfig",
+        "_desc": "VS1 差压"
       },
       "DIWaterResistance": {
         "_type": "object",
-        "_useTemplate": "AnalogTypeConfig"
+        "_useTemplate": "AnalogTypeConfig",
+        "_desc": "去离子水电阻率(默认 0~20 us/cm)"
       },
       "DIWaterTemp": {
         "_type": "object",
-        "_useTemplate": "AnalogTypeConfig"
+        "_useTemplate": "AnalogTypeConfig",
+        "_desc": "去离子水温度(默认 0~100 ℃)"
       },
       "PTE1": {
         "_type": "object",
-        "_useTemplate": "AnalogTypeConfig"
+        "_useTemplate": "AnalogTypeConfig",
+        "_desc": "PTE1 压力变送器(默认 0~100 Pa)"
       },
       "PTE2": {
         "_type": "object",
-        "_useTemplate": "AnalogTypeConfig"
+        "_useTemplate": "AnalogTypeConfig",
+        "_desc": "PTE2 压力变送器"
       },
       "PTE3": {
         "_type": "object",
-        "_useTemplate": "AnalogTypeConfig"
+        "_useTemplate": "AnalogTypeConfig",
+        "_desc": "PTE3 压力变送器"
       },
       "PTE4": {
         "_type": "object",
-        "_useTemplate": "AnalogTypeConfig"
+        "_useTemplate": "AnalogTypeConfig",
+        "_desc": "PTE4 压力变送器"
       },
       "PteResetStabilizationTimeMs": {
-        "_type": "int"
+        "_type": "int",
+        "_desc": "PTE 复位稳定等待时间(毫秒,默认 5000)"
       },
       "PteResetStabilizationThreshold": {
-        "_type": "double"
+        "_type": "double",
+        "_desc": "PTE 复位稳定阈值(默认 0.01)"
       },
       "PteResetMinPressure": {
-        "_type": "double"
+        "_type": "double",
+        "_desc": "PTE 复位最小压力(默认 0)"
       },
       "LeftDoor": {
         "_type": "object",
-        "_desc": "靶台左窗口",
+        "_desc": "靶台左窗口(源码标注,但联锁词典实际用作左片库防护门状态)",
         "_useTemplate": "DigitalTypeConfig",
         "_instanceDesc": "靶台左窗口"
       },
       "RightDoor": {
         "_type": "object",
-        "_desc": "靶台右窗口",
+        "_desc": "靶台右窗口(联锁词典实际用作右片库防护门状态)",
         "_useTemplate": "DigitalTypeConfig",
         "_instanceDesc": "靶台右窗口"
       },
       "N2Press": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "N2 压力"
       },
       "SmokeSignal": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "烟雾信号"
       },
       "PiosonGas": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "⚠ PiosonGas 待人工核实(拼写异常,推断毒气 / poison gas 报警)"
       },
       "CompressAir": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "压缩空气"
       },
       "ParallBeamTemp": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "⚠ ParallBeamTemp 待人工核实(拼写异常,推断平行束温度)"
       },
       "DischargeRodUp": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "放电极杆上"
       },
       "DischargeRodDown": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "放电极杆下"
       },
       "EmoSignal": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "急停信号"
       },
       "MoterOpen": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "⚠ MoterOpen 待人工核实(拼写,推断电机打开 / 机械手开启)"
       },
       "HighVoltOpen": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "高压打开"
       },
       "Phase": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "⚠ Phase 待人工核实(三相电 / 相位?)"
       },
       "GasboxDischageRodDown": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "气源柜放电极杆下(源码拼写 Dischage 缺 e)"
       },
       "ProfileFaradWater": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "形貌法拉第水"
       },
       "AngleFaradWater": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "角度法拉第水"
       },
       "CloseFaradWater": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "抑制法拉第水"
       },
       "TargetPanelWater": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "靶台冷却水"
       },
       "LoadLockTurboWater": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "片库分子泵水"
       },
       "FocusFaradWater": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "聚焦法拉第水"
       },
       "ParallelLensWater": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "平行透镜水"
       },
       "BeamTuborWater": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "束线分子泵水(源码拼写 Tubor 缺 o)"
       },
       "WaterLeak": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "水浸报警"
       },
       "FloorWaterLeak": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "地面水浸"
       },
       "WaterDrainLeak": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "排水水浸"
       },
       "WaterFittingLeak": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "水管接头水浸"
       },
       "WaterMid": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "水位中"
       },
       "WaterLow": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "水位低"
       },
       "ResinSandWater": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "树脂砂水"
       },
       "CompressorWater": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "压缩机水"
       },
       "IonSourDischargeup": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "离子源放电极杆上(源码拼写 Discharge 缺 e)"
       },
       "IonSourDischargedown": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "离子源放电极杆下"
       },
       "ChangeBarWater": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "换杆水"
       },
       "MagFourPoleLensWater": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "磁四极透镜水"
       },
       "SourceMagCoilWater": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "源磁铁线圈水"
       },
       "Rp1Water": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "Rp1 水流"
       },
       "Tp1Water": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "头部分子分子泵水流"
       },
       "ExtractAndSetupWater": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "引出与 Setup 水流"
       },
       "IonSourceWater": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "离子源水"
       },
       "IonSourceRoomWater": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "离子源腔体水"
       },
       "IonSourceFlangeWater": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "离子源法兰水"
       },
       "AnalyzeMagCoilWater": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "分析磁铁线圈水"
       },
       "GroundHighPowerOpen": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "接地高功率打开"
       },
       "GasboxDoorClose": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "气源柜门关闭"
       },
       "HighVoltAreaDoorClose": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "高压区门关闭"
       },
       "SourceMagTemp": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "源磁铁温度"
       },
       "AnalyzeTemp": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "分析器温度"
       },
       "FocusLensTemp": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "聚焦透镜温度"
       },
       "TLLeftDoorClose": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "高压仓左门关闭"
       },
       "TLBackDoorClose": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "高压仓后门关闭"
       },
       "TLRightDoorClose": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "高压仓右门关闭"
       },
       "TLFrontDoorClose": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "高压仓前门关闭"
       },
       "Rp1Warn": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "Rp1 警告"
       },
       "Rp1Alarm": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "Rp1 报警"
       },
       "DFPumpEnable": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "干泵使能"
       },
       "Rp2Alarm": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "Rp2 报警"
       },
       "Rp3Alarm": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "Rp3 报警"
       },
       "PreheatPanelWater": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "预热板水"
       },
       "WaterHigh": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "水位高"
       },
       "Scrubber": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "洗涤器 / 尾气处理器"
       },
       "DifferentialPressure": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "差压(气体管路)"
       },
       "H2Detector": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "氢气探测器"
       },
       "DryPumpAlarm": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "干泵报警"
       },
       "BeamLineLeak": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "束线泄漏"
       },
       "SetUpCupLeak": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "Setup 杯泄漏"
       },
       "TargetDrainLeak": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "靶台排水泄漏"
       },
       "TargetFloorLeak": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "靶台地面泄漏"
       },
       "FocusCupLeak": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "聚焦杯泄漏"
       },
       "HeliumCompressorLeak": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "氦压缩机泄漏"
       },
       "HightPowerAreaLeak": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "高功率区泄漏(源码拼写 Hight)"
       },
       "MainCoolingWaterInOutLeak": {
         "_type": "object",
-        "_useTemplate": "DigitalTypeConfig"
+        "_useTemplate": "DigitalTypeConfig",
+        "_desc": "主冷却水进出水泄漏"
       },
       "Gas1Name": {
-        "_type": "string"
+        "_type": "string",
+        "_desc": "气源 1 名称(默认 Ar)"
       },
       "Gas2Name": {
-        "_type": "string"
+        "_type": "string",
+        "_desc": "气源 2 名称(默认 N2)"
       },
       "Gas3Name": {
-        "_type": "string"
+        "_type": "string",
+        "_desc": "气源 3 名称(默认 BF3)"
       },
       "Gas4Name": {
-        "_type": "string"
+        "_type": "string",
+        "_desc": "气源 4 名称(默认 PF3)"
       },
       "IsPLCDataBooleanInvert": {
-        "_type": "bool"
+        "_type": "bool",
+        "_desc": "PLC 布尔数据是否取反(默认 false)"
       },
       "ScanBackSuppPower": {
         "_type": "object",
-        "_useTemplate": "PowerTypeConfig"
+        "_useTemplate": "PowerTypeConfig",
+        "_desc": "扫描后抑制电源(Control 0~10 kV,Load 0~12 mA)"
       },
       "ParallelLens": {
         "_type": "object",
-        "_useTemplate": "PowerTypeConfig"
+        "_useTemplate": "PowerTypeConfig",
+        "_desc": "平行透镜电源(Control 0~240 A,Load 0~35 V)"
       },
       "AccePower": {
         "_type": "object",
-        "_useTemplate": "PowerTypeConfig"
+        "_useTemplate": "PowerTypeConfig",
+        "_desc": "加速电源(Control 0~350 kV,Load 0~9 mA)"
       },
       "AcceSuppPower": {
         "_type": "object",
-        "_useTemplate": "PowerTypeConfig"
+        "_useTemplate": "PowerTypeConfig",
+        "_desc": "加速抑制电源(Control 0~10 kV,Load 0~10 mA)"
       },
       "FilamentPower": {
         "_type": "object",
-        "_useTemplate": "PowerTypeConfig"
+        "_useTemplate": "PowerTypeConfig",
+        "_desc": "灯丝电源(Control 0~200 A,Load 0~6 V)"
       },
       "AnodePower": {
         "_type": "object",
-        "_useTemplate": "PowerTypeConfig"
+        "_useTemplate": "PowerTypeConfig",
+        "_desc": "阳极电源(Control 0~150 V,Load 0~10 A)"
       },
       "BiasPower": {
         "_type": "object",
-        "_useTemplate": "PowerTypeConfig"
+        "_useTemplate": "PowerTypeConfig",
+        "_desc": "偏置电源(Control 0~600 V,Load 0~5.5 A)"
       },
       "AnodeIHC": {
         "_type": "object",
-        "_useTemplate": "PowerTypeConfig"
+        "_useTemplate": "PowerTypeConfig",
+        "_desc": "IHC 阳极电源(Control 0~150 V,Load 0~10 A,同 AnodePower 参数)"
       },
       "BiasIHC": {
         "_type": "object",
-        "_useTemplate": "PowerTypeConfig"
+        "_useTemplate": "PowerTypeConfig",
+        "_desc": "IHC 偏置电源(Control 0~600 V,Load 0~5.5 A)"
       },
       "FilaIHC": {
         "_type": "object",
-        "_useTemplate": "PowerTypeConfig"
+        "_useTemplate": "PowerTypeConfig",
+        "_desc": "IHC 灯丝电源(Control 0~200 A,Load 0~6 V)"
       },
       "XFocusPower": {
         "_type": "object",
-        "_useTemplate": "PowerTypeConfig"
+        "_useTemplate": "PowerTypeConfig",
+        "_desc": "X 聚焦电源(Control 0~100 A,Load 0~6 V)"
       },
       "YFocusPower": {
         "_type": "object",
-        "_useTemplate": "PowerTypeConfig"
+        "_useTemplate": "PowerTypeConfig",
+        "_desc": "Y 聚焦电源(Control 0~100 A,Load 0~6 V)"
       },
       "SourceMagPower": {
         "_type": "object",
-        "_useTemplate": "PowerTypeConfig"
+        "_useTemplate": "PowerTypeConfig",
+        "_desc": "源磁铁电源(Control 0~100 A,Load 0~6 V)"
       },
       "XPole": {
         "_type": "object",
-        "_useTemplate": "PowerTypeConfig"
+        "_useTemplate": "PowerTypeConfig",
+        "_desc": "X 极(Control 0~7 mm,Load 0~7 mm)"
       },
       "YPole": {
         "_type": "object",
-        "_useTemplate": "PowerTypeConfig"
+        "_useTemplate": "PowerTypeConfig",
+        "_desc": "Y 极(Control 0~2.12 °,Load 0~2.12 °)"
       },
       "ZPole": {
         "_type": "object",
-        "_useTemplate": "PowerTypeConfig"
+        "_useTemplate": "PowerTypeConfig",
+        "_desc": "Z 极(Control 0~30 mm,Load 0~30 mm)"
       },
       "ExtractPower": {
         "_type": "object",
-        "_useTemplate": "PowerTypeConfig"
+        "_useTemplate": "PowerTypeConfig",
+        "_desc": "引出电源(Control 0~100 kV,Load 0~20 mA)"
       },
       "ExtractSuppPower": {
         "_type": "object",
-        "_useTemplate": "PowerTypeConfig"
+        "_useTemplate": "PowerTypeConfig",
+        "_desc": "引出抑制电源(Control 0~20 kV,Load 0~10 mA)"
       },
       "AnalyzePower": {
         "_type": "object",
-        "_useTemplate": "PowerTypeConfig"
+        "_useTemplate": "PowerTypeConfig",
+        "_desc": "分析器电源(Control 0~240 A,Load 0~35 V)"
       },
       "Mfc1": {
         "_type": "object",
-        "_useTemplate": "ControllerTypeConfig"
+        "_useTemplate": "ControllerTypeConfig",
+        "_desc": "1# 质量流量控制器(默认 0~5 sccm)"
       },
       "Mfc2": {
         "_type": "object",
-        "_useTemplate": "ControllerTypeConfig"
+        "_useTemplate": "ControllerTypeConfig",
+        "_desc": "2# 质量流量控制器(0~5 sccm)"
       },
       "Mfc3": {
         "_type": "object",
-        "_useTemplate": "ControllerTypeConfig"
+        "_useTemplate": "ControllerTypeConfig",
+        "_desc": "3# 质量流量控制器(0~5 sccm)"
       },
       "Mfc4": {
         "_type": "object",
-        "_useTemplate": "ControllerTypeConfig"
+        "_useTemplate": "ControllerTypeConfig",
+        "_desc": "4# 质量流量控制器(0~5 sccm)"
       },
       "TargetHeater": {
         "_type": "object",
-        "_useTemplate": "ControllerTypeConfig"
+        "_useTemplate": "ControllerTypeConfig",
+        "_desc": "靶台加热器(默认 0~800 ℃)"
       },
       "FocusFaradayCup": {
         "_type": "object",
@@ -2847,35 +3080,43 @@
             "_type": "bool",
             "_desc": "是否用科学计数法显示"
           }
-        }
+        },
+        "_desc": "聚焦法拉第杯(默认 mA,3 位小数)"
       },
       "SetUpCup": {
         "_type": "object",
-        "_fields": {}
+        "_fields": {},
+        "_desc": "Setup 杯(默认 mA,3 位小数)"
       },
       "Tp8": {
         "_type": "object",
-        "_useTemplate": "TurboPumpTypeConfig"
+        "_useTemplate": "TurboPumpTypeConfig",
+        "_desc": "Tp8 分子泵"
       },
       "Tp9": {
         "_type": "object",
-        "_useTemplate": "TurboPumpTypeConfig"
+        "_useTemplate": "TurboPumpTypeConfig",
+        "_desc": "Tp9 分子泵"
       },
       "Tp3": {
         "_type": "object",
-        "_useTemplate": "TurboPumpTypeConfig"
+        "_useTemplate": "TurboPumpTypeConfig",
+        "_desc": "Tp3 分子泵"
       },
       "Tp1": {
         "_type": "object",
-        "_useTemplate": "TurboPumpTypeConfig"
+        "_useTemplate": "TurboPumpTypeConfig",
+        "_desc": "Tp1 分子泵"
       },
       "Tp2": {
         "_type": "object",
-        "_useTemplate": "TurboPumpTypeConfig"
+        "_useTemplate": "TurboPumpTypeConfig",
+        "_desc": "Tp2 分子泵"
       },
       "Tp4": {
         "_type": "object",
-        "_useTemplate": "TurboPumpTypeConfig"
+        "_useTemplate": "TurboPumpTypeConfig",
+        "_desc": "Tp4 分子泵"
       },
       "ImplantElementConfigs": {
         "_type": "array",
@@ -2895,23 +3136,24 @@
               "_desc": "元素电荷数"
             }
           }
-        }
+        },
+        "_desc": "注入元素清单(默认 Al+、Al++、Al+++、N+、B+、B++、P+、P++、P+++、Ar+)"
       },
       "AnalyzePowerWaitInterval": {
         "_type": "int",
-        "_desc": "分析器反馈循环等待时间(ms)"
+        "_desc": "分析器反馈循环等待时间(ms,默认 200)"
       },
       "AnalyzePowerWaitTimeout": {
         "_type": "int",
-        "_desc": "分析器反馈等待超时时间(ms)"
+        "_desc": "分析器反馈等待超时(ms,默认 500)"
       },
       "AnalyzePowerSteadyDelay": {
         "_type": "int",
-        "_desc": "分析器反馈到位后稳态延时(ms)"
+        "_desc": "分析器反馈到位后稳态延时(ms,默认 0)"
       },
       "AnalyzePowerFeedbackPrecision": {
         "_type": "double",
-        "_desc": "分析器反馈到位精度"
+        "_desc": "分析器反馈到位精度(默认 0.01)"
       },
       "WaferSizeRefLineMap": {
         "_type": "object",
@@ -2919,43 +3161,44 @@
           "_dictValue": {
             "_type": "double"
           }
-        }
+        },
+        "_desc": "晶圆尺寸参考线字典(默认 {\"6\":180, \"8\":360})"
       },
       "EnableBiDirectionalScan": {
         "_type": "bool",
-        "_desc": "是否启用正反扫循环补偿机制（消除磁滞效应）"
+        "_desc": "是否启用正反扫循环补偿机制(消除磁滞效应)"
       },
       "EnableGaussianFitting": {
         "_type": "bool",
-        "_desc": "波峰识别：是否启用高斯拟合寻找真实物理中心（解决峰形不对称问题）"
+        "_desc": "波峰识别:是否启用高斯拟合寻找真实物理中心(解决峰形不对称)"
       },
       "GaussianFitPoints": {
         "_type": "int",
-        "_desc": "波峰识别：高斯拟合采样点数（波峰及左右的采样点总数，推荐奇数，如5或7）"
+        "_desc": "高斯拟合采样点数(波峰及左右,推荐 5 或 7)"
       },
       "PeakDetectionSmoothingWindow": {
         "_type": "int",
-        "_desc": "波峰识别：平滑滤波窗口大小，0或1代表不平滑"
+        "_desc": "平滑滤波窗口大小(0 或 1 代表不平滑)"
       },
       "PeakDetectionProminenceThreshold": {
         "_type": "double",
-        "_desc": "波峰识别：绝对显著度阈值百分比 (0-1)。如 0.05 代表波峰必须大于全局最高峰的 5%"
+        "_desc": "绝对显著度阈值(0-1);0.05 = 波峰 > 全局最高峰 5%"
       },
       "PeakNmsMinSeparationSteps": {
         "_type": "int",
-        "_desc": "波峰识别 NMS：最小峰间距，单位为\"采样步长的倍数\"。 两个候选峰的 X 距离若小于（步长 × 此值），则认为是同一个峰，仅保留最高点。 推荐设为 3~6；步长越大（粗扫）可适当减小，步长越小（细扫）可适当增大。"
+        "_desc": "NMS 最小峰间距(采样步长倍数,推荐 3~6)"
       },
       "SpectrumPeakDriftPercent": {
         "_type": "double",
-        "_desc": "波峰偏移限制百分比 (%)，默认 100.0"
+        "_desc": "波峰偏移限制百分比(%)"
       },
       "SpectrumPeakAmplitudeMultiplier": {
         "_type": "double",
-        "_desc": "波峰拟合振幅合理倍数限制，默认 1.5"
+        "_desc": "波峰拟合振幅合理倍数限制"
       },
       "IsShowPeakLabels": {
         "_type": "bool",
-        "_desc": "是否在图表上显示波峰标注文字，默认关闭"
+        "_desc": "是否在图表上显示波峰标注文字"
       },
       "IsShowPeakResolution": {
         "_type": "bool",
@@ -2963,15 +3206,15 @@
       },
       "UnknownPeakLabel": {
         "_type": "string",
-        "_desc": "未知波峰的显示文本，默认为空字符串"
+        "_desc": "未知波峰的显示文本"
       },
       "IsShowSpectrumElementsList": {
         "_type": "bool",
-        "_desc": "是否显示扫描成分列表，默认隐藏"
+        "_desc": "是否显示扫描成分列表"
       },
       "SpectrumAnalyzeElements": {
         "_type": "array",
-        "_desc": "质谱分析元素配置列表（多组，每组含：相对原子质量、描述、半径大小、采样步长）",
+        "_desc": "质谱分析元素配置列表(每组含原子质量、描述、半径、步长)",
         "_elementTemplate": {
           "_type": "object",
           "_fields": {
@@ -3025,7 +3268,7 @@
       },
       "IsShowGaussianCurve": {
         "_type": "bool",
-        "_desc": "是否显示高斯拟合曲线（默认开启）。关闭时显示原始采样曲线。"
+        "_desc": "是否显示高斯拟合曲线(关闭则显示原始采样曲线)"
       },
       "IsShowForwardCurve": {
         "_type": "bool",
@@ -3045,11 +3288,11 @@
       },
       "EnableBeamSettlingDetection": {
         "_type": "bool",
-        "_desc": "是否启用智能束流稳定检测（关闭则退回固定延时模式 AnalyzePowerSteadyDelay）"
+        "_desc": "是否启用智能束流稳定检测(关闭退回 AnalyzePowerSteadyDelay)"
       },
       "BeamSettlingWindowSize": {
         "_type": "int",
-        "_desc": "滑动窗口大小（采样点数），用于计算CV变异系数"
+        "_desc": "滑动窗口大小(采样点数),用于 CV 变异系数"
       },
       "BeamSettlingSamplingInterval": {
         "_type": "int",
@@ -3057,27 +3300,27 @@
       },
       "BeamSettlingCvThreshold": {
         "_type": "double",
-        "_desc": "CV（变异系数）阈值，低于此值认为波动足够小（如 0.02 = 2%）"
+        "_desc": "CV(变异系数)阈值(0.02 = 2%)"
       },
       "BeamSettlingTrendThreshold": {
         "_type": "double",
-        "_desc": "EMA 趋势阈值，低于此值认为信号无漂移"
+        "_desc": "EMA 趋势阈值(默认 1e-6)"
       },
       "BeamSettlingEmaAlpha": {
         "_type": "double",
-        "_desc": "EMA 平滑系数（0~1，越大越灵敏）"
+        "_desc": "EMA 平滑系数(0~1,越大越灵敏)"
       },
       "BeamSettlingTimeout": {
         "_type": "int",
-        "_desc": "稳定检测总超时(ms)，超时后降级采集"
+        "_desc": "稳定检测总超时(ms)"
       },
       "BeamSettlingPostDelay": {
         "_type": "int",
-        "_desc": "判定稳定后的额外等待(ms)，确保磁场完全建立"
+        "_desc": "判定稳定后的额外等待(ms)"
       },
       "BeamSettlingZeroThreshold": {
         "_type": "double",
-        "_desc": "均值接近零的判定阈值（避免 CV 除零问题）"
+        "_desc": "均值接近零的判定阈值(避免 CV 除零)"
       },
       "BeamSettlingAbsStdThreshold": {
         "_type": "double",
@@ -3090,161 +3333,207 @@
             "_type": "object",
             "_fields": {}
           }
-        }
+        },
+        "_desc": "联锁条件词典(设备名 → 动作 → 条件描述 + 表达式)"
       }
-    }
+    },
+    "_desc": "上位机全局点位 / 量程 / 工艺参数配置"
   },
   "LoopMasterConfig": {
     "_type": "object",
-    "_useTemplate": "LoopMasterConfig"
+    "_useTemplate": "LoopMasterConfig",
+    "_desc": "LoopMaster 端口映射配置(端口名 → DeviceConfig 设备)"
   },
   "DoseControlConfig": {
     "_type": "object",
     "_fields": {
       "RemoteIPAddress": {
-        "_type": "string"
+        "_type": "string",
+        "_desc": "剂量控制上位机 IP 地址(默认 192.168.1.16)"
       },
       "RemotePort": {
-        "_type": "int"
+        "_type": "int",
+        "_desc": "端口(默认 12345)"
       },
       "MainCupUnit": {
-        "_type": "string"
+        "_type": "string",
+        "_desc": "主杯单位字符串(默认 mA,可填 uA 等,合法取值待人工核实)"
       }
-    }
+    },
+    "_desc": "剂量控制上位机通信配置(网络收发)"
   },
   "IonSourceControlConfig": {
     "_type": "object",
-    "_fields": {}
+    "_fields": {},
+    "_desc": "离子源控制器配置(当前为空类,字段待人工设计)"
   },
   "PLCControlConfig": {
     "_type": "object",
     "_fields": {
       "RemoteAdsAddress": {
-        "_type": "string"
+        "_type": "string",
+        "_desc": "远程 ADS 地址(默认 169.254.61.78.1.1)"
       },
       "RemotePort": {
-        "_type": "int"
+        "_type": "int",
+        "_desc": "ADS 端口(默认 851)"
       },
       "TransferTimeMultiplier": {
-        "_type": "double"
+        "_type": "double",
+        "_desc": "时间倍率(用途待人工核实)"
       }
-    }
+    },
+    "_desc": "Beckhoff PLC 控制配置(TwinCAT ADS 协议)"
   },
   "BokePumpSerialPortConfig": {
     "_type": "object",
     "_fields": {
       "Pump1Addr": {
-        "_type": "string"
+        "_type": "string",
+        "_desc": "1 号冷泵从站地址(默认 01)"
       },
       "Pump2Addr": {
-        "_type": "string"
+        "_type": "string",
+        "_desc": "2 号冷泵从站地址(默认 02)"
       },
       "PortName": {
-        "_type": "string"
+        "_type": "string",
+        "_desc": "串口名(默认 COM1)"
       },
       "BaudRate": {
-        "_type": "int"
+        "_type": "int",
+        "_desc": "波特率(默认 9600)"
       },
       "ParityStopBitsDataBis": {
-        "_type": "string"
+        "_type": "string",
+        "_desc": "校验 / 停止位 / 数据位串描述(默认 7E1 = 7 数据位 + Even 偶校验 + 1 停止位;源码拼写 ParityStopBitsDataBis 缺 t)"
       }
-    }
+    },
+    "_desc": "Boke 冷泵串口配置"
   },
   "TemperatureControllerConfig": {
     "_type": "object",
     "_fields": {
       "IsEnable": {
-        "_type": "bool"
+        "_type": "bool",
+        "_desc": "是否启用(默认 true)"
       },
       "ControllerType": {
-        "_type": "string"
+        "_type": "string",
+        "_desc": "控制器类型(默认 ZTIO)"
       },
       "PortName": {
-        "_type": "string"
+        "_type": "string",
+        "_desc": "串口名(默认 COM3)"
       },
       "BaudRate": {
-        "_type": "int"
+        "_type": "int",
+        "_desc": "波特率(默认 19200)"
       },
       "ParityStopBitsDataBis": {
-        "_type": "string"
+        "_type": "string",
+        "_desc": "校验 / 停止位 / 数据位串描述(默认 8N1;源码拼写缺 t)"
       },
       "SlaveNumber": {
-        "_type": "int"
+        "_type": "int",
+        "_desc": "从站号(默认 1)"
       }
-    }
+    },
+    "_desc": "温度控制器串口配置"
   },
   "ChillerConfig": {
     "_type": "object",
     "_fields": {
       "IsEnable": {
-        "_type": "bool"
+        "_type": "bool",
+        "_desc": "是否启用(默认 true)"
       },
       "ChillerType": {
-        "_type": "string"
+        "_type": "string",
+        "_desc": "冷水机类型(默认 SMC)"
       },
       "PortName": {
-        "_type": "string"
+        "_type": "string",
+        "_desc": "串口名(默认 COM4)"
       },
       "BaudRate": {
-        "_type": "int"
+        "_type": "int",
+        "_desc": "波特率(默认 9600)"
       },
       "ParityStopBitsDataBits": {
-        "_type": "string"
+        "_type": "string",
+        "_desc": "校验 / 停止位 / 数据位串描述(默认 7E1)"
       },
       "SlaveNumber": {
-        "_type": "int"
+        "_type": "int",
+        "_desc": "从站号(默认 1)"
       },
       "PollIntervalMs": {
-        "_type": "int"
+        "_type": "int",
+        "_desc": "轮询间隔(毫秒,默认 1000)"
       },
       "TimeoutMs": {
-        "_type": "int"
+        "_type": "int",
+        "_desc": "通信超时(毫秒,默认 2000)"
       }
-    }
+    },
+    "_desc": "冷水机串口配置"
   },
   "IHCConfig": {
     "_type": "object",
     "_fields": {
       "DeviceName": {
-        "_type": "string"
+        "_type": "string",
+        "_desc": "MMIPAR 并行端口设备名(默认 @\\\\.\\MMIPAR0)"
       },
       "DriverType": {
         "_type": "string",
-        "_desc": "IHC 驱动模式: \"LoopMaster\" (新 LoopMaster 适配器) 或 \"Lightlink\" (原IHC)"
+        "_desc": "IHC 驱动模式:LoopMaster(新)或 Lightlink(原)"
       },
       "IsEnable": {
-        "_type": "bool"
+        "_type": "bool",
+        "_desc": "是否启用 IHC"
       },
       "Kp": {
-        "_type": "double"
+        "_type": "double",
+        "_desc": "PID 比例系数"
       },
       "Ki": {
-        "_type": "double"
+        "_type": "double",
+        "_desc": "PID 积分系数"
       },
       "Kd": {
-        "_type": "double"
+        "_type": "double",
+        "_desc": "PID 微分系数"
       },
       "ControlInterval": {
-        "_type": "int"
+        "_type": "int",
+        "_desc": "控制间隔时间(单位待人工核实)"
       },
       "IntegralLimit": {
-        "_type": "double"
+        "_type": "double",
+        "_desc": "积分限幅"
       },
       "DefaultFilaCurrentAdjustAmp": {
-        "_type": "double"
+        "_type": "double",
+        "_desc": "默认灯丝电流调节幅度"
       },
       "DefaultFilaCurrentIntegralTime": {
-        "_type": "double"
+        "_type": "double",
+        "_desc": "默认灯丝电流积分时间"
       },
       "DefaultCathodeVolAdjustAmp": {
-        "_type": "double"
+        "_type": "double",
+        "_desc": "默认阴极电压调节幅度"
       },
       "DefaultCathodeVolIntegralTime": {
-        "_type": "double"
+        "_type": "double",
+        "_desc": "默认阴极电压积分时间"
       },
       "MappingConfigs": {
         "_type": "object",
-        "_fields": {}
+        "_fields": {},
+        "_desc": "LoopMaster 模式下按属性名动态生成的 IHC 映射参数集合"
       },
       "this": {
         "_type": "object",
@@ -3278,7 +3567,8 @@
           }
         }
       }
-    }
+    },
+    "_desc": "IHC(灯丝 / 阴极加热控制)配置;LoopMaster 模式下动态同步 FilaIHC / AnodeIHC / BiasIHC 量程"
   },
   "WarningSettingsConfig": {
     "_type": "object",
@@ -3290,7 +3580,7 @@
       },
       "ColumnDefinitions": {
         "_type": "array",
-        "_desc": "列配置定义列表",
+        "_desc": "警告动作列定义列表(每条警告 UI 上展示哪些动作列)",
         "_elementTemplate": {
           "_type": "object",
           "_fields": {
@@ -3388,7 +3678,8 @@
             },
             "_desc": "单个警告项的配置：动作项数据字典"
           }
-        }
+        },
+        "_desc": "警告描述 → 配置项的映射"
       },
       "EnsureAllWarningsPresent": {
         "_type": "object",
@@ -3417,6 +3708,6 @@
         "_desc": "删除已有的报警项"
       }
     },
-    "_desc": "警告设置配置，存储每个警告/报警的声光报警和自动流程中断开关"
+    "_desc": "警告动作配置矩阵(声光报警 / 关阀 / 流程中断等开关)"
   }
 }
