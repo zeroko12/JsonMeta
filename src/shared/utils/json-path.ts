@@ -194,3 +194,93 @@ export function walk(root: JsonValue | unknown, visitor: WalkVisitor): void {
     return true
   }
 }
+
+/**
+ * Rename a key in an object at parentPath while preserving the key order.
+ */
+export function renameKey<T>(root: T, parentPath: string, oldKey: string, newKey: string): T {
+  if (!oldKey || !newKey || oldKey === newKey) return root
+  const parent = get(root, parentPath)
+  if (!isObject(parent) || !(oldKey in parent)) return root
+
+  const newObj: JsonObject = {}
+  for (const k of Object.keys(parent)) {
+    if (k === oldKey) {
+      newObj[newKey] = parent[oldKey] as JsonValue
+    } else {
+      newObj[k] = parent[k] as JsonValue
+    }
+  }
+  return set(root, parentPath, newObj as JsonValue)
+}
+
+/**
+ * Reorder a key up or down within an object at parentPath while preserving other keys.
+ */
+export function moveKey<T>(root: T, parentPath: string, key: string, direction: 'up' | 'down'): T {
+  const parent = get(root, parentPath)
+  if (!isObject(parent) || !(key in parent)) return root
+
+  const keys = Object.keys(parent)
+  const idx = keys.indexOf(key)
+  if (idx === -1) return root
+  if (direction === 'up' && idx === 0) return root
+  if (direction === 'down' && idx === keys.length - 1) return root
+
+  const targetIdx = direction === 'up' ? idx - 1 : idx + 1
+  const swapped = [...keys]
+  const temp = swapped[idx]!
+  swapped[idx] = swapped[targetIdx]!
+  swapped[targetIdx] = temp
+
+  const newObj: JsonObject = {}
+  for (const k of swapped) {
+    newObj[k] = parent[k] as JsonValue
+  }
+  return set(root, parentPath, newObj as JsonValue)
+}
+
+/**
+ * Move an array element up or down by index.
+ */
+export function moveArrayItem<T>(
+  root: T,
+  arrayPath: string,
+  index: number,
+  direction: 'up' | 'down',
+): T {
+  const target = get(root, arrayPath)
+  if (!isArray(target)) return root
+  if (direction === 'up' && index <= 0) return root
+  if (direction === 'down' && index >= target.length - 1) return root
+
+  const nextIdx = direction === 'up' ? index - 1 : index + 1
+  const nextArr = [...target]
+  const temp = nextArr[index]!
+  nextArr[index] = nextArr[nextIdx]!
+  nextArr[nextIdx] = temp
+
+  return set(root, arrayPath, nextArr as JsonValue)
+}
+
+/**
+ * Insert an item into an array at the given index.
+ */
+export function insertArrayItem<T>(root: T, arrayPath: string, index: number, item: JsonValue): T {
+  const target = get(root, arrayPath)
+  const arr = isArray(target) ? [...target] : []
+  const safeIdx = Math.max(0, Math.min(index, arr.length))
+  arr.splice(safeIdx, 0, item)
+  return set(root, arrayPath, arr as JsonValue)
+}
+
+/**
+ * Add or overwrite a property in an object at objectPath.
+ */
+export function addProperty<T>(root: T, objectPath: string, key: string, value: JsonValue): T {
+  if (!key) return root
+  const parent = get(root, objectPath)
+  const obj = isObject(parent) ? { ...parent } : {}
+  obj[key] = value
+  return set(root, objectPath, obj as JsonValue)
+}

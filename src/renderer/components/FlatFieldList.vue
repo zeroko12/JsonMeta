@@ -8,8 +8,6 @@
  * - 用单一 computed 重建,FieldRow 组件无递归调用
  */
 import { computed } from 'vue'
-import { RecycleScroller } from 'vue-virtual-scroller'
-import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
 import { useConfigStore } from '../stores/config'
 import { useSchemaStore } from '../stores/schema'
 import { useUiStore } from '../stores/ui'
@@ -127,26 +125,21 @@ const totalCount = computed(() => filteredRows.value.length)
       <p v-if="uiStore.searchQuery">未找到匹配 "{{ uiStore.searchQuery }}" 的字段</p>
       <p v-else>没有字段可显示</p>
     </div>
-    <div v-else class="rows-scroller">
-      <RecycleScroller
-        v-slot="{ item }"
-        :items="filteredRows"
-        :item-size="62"
-        key-field="fieldPath"
-      >
-        <FieldRow
-          :field-name="item.fieldName"
-          :field-path="item.fieldPath"
-          :field-type="item.fieldType"
-          :description="item.description"
-          :enum-values="item.enumValues"
-          :enum-str-values="item.enumStrValues"
-          :is-read-only="item.isReadOnly"
-          :is-modified="item.isModified"
-          :depth="item.depth"
-          :has-children="item.hasChildren"
-        />
-      </RecycleScroller>
+    <div v-else class="rows">
+      <FieldRow
+        v-for="row in filteredRows"
+        :key="row.fieldPath"
+        :field-name="row.fieldName"
+        :field-path="row.fieldPath"
+        :field-type="row.fieldType"
+        :description="row.description"
+        :enum-values="row.enumValues"
+        :enum-str-values="row.enumStrValues"
+        :is-read-only="row.isReadOnly"
+        :is-modified="row.isModified"
+        :depth="row.depth"
+        :has-children="row.hasChildren"
+      />
     </div>
   </div>
 </template>
@@ -154,18 +147,15 @@ const totalCount = computed(() => filteredRows.value.length)
 <style scoped>
 .flat-list {
   flex: 1;
-  display: flex;
-  flex-direction: column;
+  overflow: auto;
   background: white;
-  min-height: 0;
 }
 .empty {
   padding: 80px 40px;
   text-align: center;
   color: #999;
 }
-.rows-scroller {
-  flex: 1;
-  min-height: 0;
+.rows {
+  padding: 8px 0;
 }
 </style>

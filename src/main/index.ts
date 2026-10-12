@@ -19,7 +19,82 @@ ipcMain.handle('auth:check', async (_event, password: string) => {
   return checkPassword(password)
 })
 
+function getMetaPath(jsonPath: string): string {
+  if (jsonPath.toLowerCase().endsWith('.json')) {
+    return jsonPath.slice(0, -5) + '.meta.json'
+  }
+  return jsonPath + '.meta.json'
+}
+
 // ----- FILE -----
+ipcMain.handle('file:pickJsonFile', async (event) => {
+  const win = BrowserWindow.fromWebContents(event.sender)
+  if (!win) return null
+  const result = await dialog.showOpenDialog(win, {
+    title: '打开 JSON 文件',
+    filters: [
+      { name: 'JSON Files', extensions: ['json'] },
+      { name: 'All Files', extensions: ['*'] },
+    ],
+    properties: ['openFile'],
+  })
+  if (result.canceled || result.filePaths.length === 0) return null
+  return result.filePaths[0]
+})
+
+ipcMain.handle('file:saveAsJsonFile', async (event, defaultName?: string) => {
+  const win = BrowserWindow.fromWebContents(event.sender)
+  if (!win) return null
+  const result = await dialog.showSaveDialog(win, {
+    title: '另存为 JSON 文件',
+    defaultPath: defaultName || 'Untitled.json',
+    filters: [
+      { name: 'JSON Files', extensions: ['json'] },
+      { name: 'All Files', extensions: ['*'] },
+    ],
+  })
+  if (result.canceled || !result.filePath) return null
+  return result.filePath
+})
+
+ipcMain.handle('file:loadMeta', async (_event, jsonPath: string) => {
+  const { readFile } = await import('node:fs/promises')
+  const { dirname, join } = await import('node:path')
+  const metaPath = getMetaPath(jsonPath)
+  try {
+    const text = await readFile(metaPath, 'utf8')
+    return JSON.parse(text)
+  } catch {
+    // 尝试迁移旧的同级 annotations.json
+    try {
+      const legacyPath = join(dirname(jsonPath), 'annotations.json')
+      const legacyText = await readFile(legacyPath, 'utf8')
+      const legacy = JSON.parse(legacyText) as { descriptions?: Record<string, unknown> }
+      const descs: Record<string, string> = {}
+      if (legacy.descriptions) {
+        for (const [k, v] of Object.entries(legacy.descriptions)) {
+          if (typeof v === 'string') descs[k] = v
+          else if (v && typeof v === 'object' && 'description' in v) {
+            descs[k] = (v as { description: string }).description
+          }
+        }
+      }
+      return { descriptions: descs }
+    } catch {
+      return { descriptions: {} }
+    }
+  }
+})
+
+ipcMain.handle('file:saveMeta', async (_event, jsonPath: string, meta: unknown) => {
+  const { writeFile, mkdir } = await import('node:fs/promises')
+  const { dirname } = await import('node:path')
+  const metaPath = getMetaPath(jsonPath)
+  await mkdir(dirname(metaPath), { recursive: true })
+  await writeFile(metaPath, JSON.stringify(meta, null, 2), 'utf8')
+  return { ok: true, metaPath }
+})
+
 ipcMain.handle('file:pickDirectory', async (event) => {
   const win = BrowserWindow.fromWebContents(event.sender)
   if (!win) return null

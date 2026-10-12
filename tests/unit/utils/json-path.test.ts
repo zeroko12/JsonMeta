@@ -1,5 +1,16 @@
 import { describe, expect, it } from 'vitest'
-import { get, has, set, remove, walk } from '@shared/utils/json-path'
+import {
+  get,
+  has,
+  set,
+  remove,
+  walk,
+  renameKey,
+  moveKey,
+  moveArrayItem,
+  insertArrayItem,
+  addProperty,
+} from '@shared/utils/json-path'
 
 describe('json-path', () => {
   describe('get', () => {
@@ -185,6 +196,57 @@ describe('json-path', () => {
       expect(visited.has('a')).toBe(true)
       expect(visited.has('b')).toBe(true)
       expect(visited.get('c')).toBe(1)
+    })
+  })
+
+  describe('renameKey', () => {
+    it('renames an object key while keeping key order', () => {
+      const orig = { a: 1, b: 2, c: 3 }
+      const res = renameKey(orig, '', 'b', 'bRenamed')
+      expect(Object.keys(res)).toEqual(['a', 'bRenamed', 'c'])
+      expect((res as Record<string, number>).bRenamed).toBe(2)
+    })
+
+    it('renames nested key', () => {
+      const orig = { nested: { x: 10, y: 20 } }
+      const res = renameKey(orig, 'nested', 'x', 'xNew')
+      expect(Object.keys((res as { nested: Record<string, number> }).nested)).toEqual(['xNew', 'y'])
+    })
+  })
+
+  describe('moveKey', () => {
+    it('moves key up and down', () => {
+      const orig = { a: 1, b: 2, c: 3 }
+      const movedUp = moveKey(orig, '', 'b', 'up')
+      expect(Object.keys(movedUp)).toEqual(['b', 'a', 'c'])
+
+      const movedDown = moveKey(orig, '', 'b', 'down')
+      expect(Object.keys(movedDown)).toEqual(['a', 'c', 'b'])
+    })
+  })
+
+  describe('moveArrayItem', () => {
+    it('moves item up and down', () => {
+      const orig = { items: ['first', 'second', 'third'] }
+      const movedUp = moveArrayItem(orig, 'items', 1, 'up')
+      expect((movedUp as { items: string[] }).items).toEqual(['second', 'first', 'third'])
+
+      const movedDown = moveArrayItem(orig, 'items', 1, 'down')
+      expect((movedDown as { items: string[] }).items).toEqual(['first', 'third', 'second'])
+    })
+  })
+
+  describe('insertArrayItem and addProperty', () => {
+    it('inserts array item at index', () => {
+      const orig = { items: [1, 3] }
+      const res = insertArrayItem(orig, 'items', 1, 2)
+      expect((res as { items: number[] }).items).toEqual([1, 2, 3])
+    })
+
+    it('adds property to object', () => {
+      const orig = { a: 1 }
+      const res = addProperty(orig, '', 'b', 2)
+      expect((res as Record<string, number>).b).toBe(2)
     })
   })
 })

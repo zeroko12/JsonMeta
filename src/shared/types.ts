@@ -32,6 +32,10 @@ declare global {
         check(password: string): Promise<boolean>
       }
       file: {
+        pickJsonFile(): Promise<string | null>
+        saveAsJsonFile(defaultName?: string): Promise<string | null>
+        loadMeta<T = { descriptions: Record<string, string> }>(jsonPath: string): Promise<T>
+        saveMeta(jsonPath: string, meta: unknown): Promise<{ ok: boolean; metaPath?: string }>
         pickDirectory(): Promise<string | null>
         resolveConfigPath(pickedDir: string): Promise<string | null>
         readJson<T = unknown>(path: string): Promise<T>

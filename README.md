@@ -1,121 +1,71 @@
-# 系统配置编辑工具
+# JSON MetaEditor — 现代化通用 JSON 可视化编辑器
 
-针对离子注入机控制软件 `SystemConfig.json` 的可视化编辑桌面工具。
+一款极具实用价值、简约美观、丝滑流畅、能为**任意字段添加中文描述/注释**的现代化通用桌面 JSON 编辑器。
 
-## 功能特性
+---
 
-- ✅ **可视化树形浏览** 500+ 字段(左侧树 + 右侧编辑面板)
-- ✅ **每个字段附中文说明**(来源:C# XML 注释 + 行内注释 + 命名启发)
-- ✅ **多种删除能力**:整块删 / 按模式删 / 框选
-- ✅ **修改高亮**(默认黑 / 改过橙 / 删过灰)
-- ✅ **手动保存 + 强制变更清单确认 + 自动备份**(只备份真有变化)
-- ✅ **磁盘实时监控**(5 秒一次),外部修改时弹窗警告
-- ✅ **主程序检测**:运行中则标题栏红字,保存时再次确认
-- ✅ **字段校验**:警告但不阻止,规则来自 schema
-- ✅ **schema 双轨维护**:内置编辑器 + 外部 JSON 编辑器
-- ✅ **启动密码**:`admin123`
-- ✅ **Ctrl+Shift+F 命令面板**(快捷命令):打开文件 / 保存 / 撤销 / 仅显示已修改 / 备份 / 重载 / schema 编辑器等
+## 核心特性
 
-## 技术栈
+- 🎯 **通用开箱即用**：解绑特定业务与硬编码，支持拖拽或打开任意 `.json` 配置文件。
+- 📝 **伴生元数据设计（零污染）**：原 JSON 文件严格保持 100% 标准规范；编辑的中文说明、业务备注伴生保存在同级 `xxx.meta.json` 中。
+- ⚡ **任意节点可增、删、改、移**：
+  - **移动排序**：数组元素与对象属性均支持上移 🔼、下移 🔽，自由调整键值对序列化次序；
+  - **就地修改**：基础值就地直观输入，复杂节点支持结构化展开与 Raw JSON 弹窗自由修改；
+  - **重命名**：双击任意 Key 即可就地重命名属性名；
+  - **自由删除**：任意分支或叶子节点一键删除。
+- ↩ **撤销 / 重做（Undo & Redo）**：全套历史堆栈支持（`Ctrl+Z` / `Ctrl+Y`），误操作随时瞬间还原。
+- ⚖️ **改动对比（Visual Diff）**：实时追踪本次会话的改动，分类统计并直观展示修改前 vs 修改后的对比，支持单项还原。
+- 🛡️ **严格格式防呆与自动备份**：
+  - 源码模式下实时语法 AST 校验，语法错误行号提示并阻止破坏性保存；
+  - 保存前检测实质变更，自动轮转维护最新 10 份时间戳历史备份（`.YYYYMMDD_HHmmss.bak.json`）。
+- 🚀 **极速渲染性能**：平铺树形展开模型，面对大型复杂 JSON 依然保持 60 FPS 丝滑顺畅。
+- 🔍 **毫秒级全文搜索**：`Ctrl+F` 快速聚焦，按键名、数值、JSONPath、中文描述实时高亮过滤。
+- 🎨 **三视图一键切换**：
+  - 🌲 **树形模式 (Visual Mode)**：调参、加描述、重排排序首选；
+  - 📝 **源码模式 (Code Mode)**：全屏代码高亮编辑与格式化（2空格/4空格/压缩）；
+  - ⚖️ **改动比对 (Diff Mode)**：审查修改。
 
-- Electron 33 + electron-vite 2 + Vue 3 + TypeScript 5
-- Pinia
-- chokidar(文件监控)+ ps-list(进程检测)
-- Vitest(单元)+ Playwright(E2E)
+---
 
-## 安装依赖
+## 技术架构
+
+- **桌面运行时**: Electron 33 + TypeScript 5
+- **构建工具**: electron-vite 2 + Vite 5
+- **前端视图**: Vue 3 (Composition API) + Pinia
+- **底层工具**: 纯函数深度路径处理 (`json-path`)、高精度差异计算 (`diff`)、文件监控 (`chokidar`)
+- **测试保障**: 139 个自动化单元测试（Vitest）全面覆盖
+
+---
+
+## 快捷键一览
+
+| 快捷键                          | 功能                       |
+| :------------------------------ | :------------------------- |
+| `Ctrl + O`                      | 打开 JSON 文件             |
+| `Ctrl + S`                      | 保存文件并写入伴生元数据   |
+| `Ctrl + Z`                      | 撤销上一步操作 (Undo)      |
+| `Ctrl + Y` / `Ctrl + Shift + Z` | 重做已撤销的操作 (Redo)    |
+| `Ctrl + F`                      | 聚焦搜索栏，全文实时过滤   |
+| 双击 Key 键名                   | 就地重命名属性名           |
+| 点击 📝 胶囊                    | 就地编辑中文描述与业务备注 |
+
+---
+
+## 常用命令
 
 ```bash
-npm install
+# 启动开发环境 (热更新)
+npm run dev
+
+# 运行类型检查
+npm run typecheck
+
+# 运行 139 项单元测试
+npm run test
+
+# 生产环境编译
+npm run build
+
+# 打包 Windows 安装包 (NSIS + 便携版)
+npm run build:win
 ```
-
-## 开发
-
-```bash
-npm run dev                 # 启动 Electron 开发模式(HMR)
-npm run typecheck           # vue-tsc 类型检查
-npm run test                # 单元测试 (vitest, 127 tests)
-npm run test:coverage       # 覆盖率
-npm run test:e2e            # Playwright E2E (需先 npm run dev)
-npm run lint                # ESLint
-npm run format              # Prettier
-npm run extract-schema      # 从 .NET 项目重新生成 schema.json
-npm run audit-schema        # 统计字段说明覆盖率
-```
-
-## 构建 / 打包
-
-```bash
-npm run build               # 仅编译 out/ 目录
-npm run build:win           # Windows nsis + portable 双产物(在 release/ 下)
-```
-
-## 使用流程
-
-1. **登录**:启动后输入密码 `admin123`
-2. **选目录**:点击"浏览",选择 SystemConfig.json 所在目录(默认 `D:/IonImplantationSystemData/Config/`)
-3. **浏览**:左侧树显示 10 个顶层 sub-config(SoftwareConfig / IHCConfig 等),可展开
-4. **搜索**:顶部搜索框(Ctrl+F 聚焦)按字段名/说明过滤
-5. **修改**:点击字段 → 右侧编辑面板 → 修改 → 树节点变橙
-6. **删除**:选中字段 → 点删除按钮 → 三种模式(整块 / 模式 / 框选)确认
-7. **保存**:顶部"💾 保存" → 弹出变更清单 → 确认 → 自动备份 → 写盘
-8. **恢复**:点"备份"按钮 → 列所有 `.bak.json` → 选一个恢复
-9. **编辑 schema**:Ctrl+Shift+F → "打开字段说明编辑器" → 编辑说明并保存
-
-## 目录结构
-
-```
-src/
-  main/                 # Electron 主进程
-  preload/              # preload 脚本(contextBridge)
-  renderer/             # Vue 3 渲染端
-    views/              # LoginView / FilePickerView / EditorView / SchemaEditorView
-    components/         # ConfigTree / EditPanel / *Dialog / TopBar / SearchBar / CommandPalette
-    stores/             # Pinia: config / schema / ui
-  shared/               # 主进程与渲染端共享
-    utils/              # json-path / diff / validation / template-merge
-    csharp-parser/      # C# 源码静态分析器(tokenizer + schema-builder)
-scripts/
-  extract-schema.mjs    # C# Schema 提取脚本
-schema.json             # 字段说明元数据(随工具发布)
-tests/
-  unit/                 # 单元测试
-  e2e/                  # E2E 测试
-  manual/               # 手动审计脚本
-docs/
-  PLAN.md               # 实施计划(8 阶段 / 60+ 任务)
-```
-
-## 字段说明覆盖率
-
-`schema.json` 由 C# 源码自动生成,初始覆盖率约 15-20%。**剩余 80% 通过内置 schema 编辑器补充**:
-
-1. 启动工具 → 登录 → 选文件
-2. `Ctrl+Shift+F` 打开命令面板
-3. 选择"打开字段说明编辑器"
-4. 左侧选 sub-config 或模板 → 右侧填写 `_desc`(中文说明)
-5. 点击"保存 schema"
-
-可以反复 `npm run audit-schema` 跟踪覆盖率。
-
-## 风险与限制
-
-- 仅 Windows 平台(NSIS + portable 双打包格式)
-- 密码硬编码(非真实认证,仅作轻量门槛)
-- 字段说明覆盖率初始低,需要通过 schema 编辑器人工补充
-- C# 解析器仅支持 .NET 6/8 写法,简化可见度(getter/setter body 等)
-
-## 实施状态
-
-| Phase | 内容                                                                                                   | 状态 |
-| ----- | ------------------------------------------------------------------------------------------------------ | ---- |
-| 1     | 基础设施                                                                                               | ✅   |
-| 2     | 纯函数工具库(json-path / diff / validation / template-merge)                                           | ✅   |
-| 3     | C# Schema 分析器 + extract-schema.mjs                                                                  | ✅   |
-| 4     | 主进程 IPC(file / schema / auth / watch / process)                                                     | ✅   |
-| 5     | 渲染端基础 UI(Login / FilePicker / Editor + Tree / Edit / Search / TopBar / CommandPalette)            | ✅   |
-| 6     | 对话框 + 关键交互(ChangeListDialog / DeleteConfirmDialog / BackupRestoreDialog / ExternalChangeDialog) | ✅   |
-| 7     | Schema 编辑器                                                                                          | ✅   |
-| 8     | 收尾(E2E / 审计 / build)                                                                               | ✅   |
-
-详见 [docs/PLAN.md](docs/PLAN.md)。

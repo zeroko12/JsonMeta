@@ -12,6 +12,14 @@ type ChangeCallback = (event: { type: 'change' | 'add' | 'unlink'; path: string 
 
 let currentWatcher: FSWatcher | null = null
 let currentPath: string | null = null
+let ignoreUntil = 0
+
+/**
+ * Temporarily ignore file change events caused by internal writes.
+ */
+export function markSelfWrite(durationMs = 1500): void {
+  ignoreUntil = Date.now() + durationMs
+}
 
 /**
  * Start watching `path`. If already watching, replaces the previous watch.
@@ -24,9 +32,15 @@ export async function watchFile(path: string, cb: ChangeCallback): Promise<void>
     awaitWriteFinish: { stabilityThreshold: 300, pollInterval: 50 },
   })
   watcher.on('change', (changedPath) => {
+    if (Date.now() < ignoreUntil) {
+      return
+    }
     cb({ type: 'change', path: changedPath })
   })
   watcher.on('add', (addedPath) => {
+    if (Date.now() < ignoreUntil) {
+      return
+    }
     cb({ type: 'add', path: addedPath })
   })
   watcher.on('unlink', (removedPath) => {

@@ -69,6 +69,8 @@ export const useConfigStore = defineStore('config', () => {
     }
   }
 
+  let lastSaveTimestamp = 0
+
   async function save(): Promise<{
     ok: boolean
     backupPath?: string
@@ -83,14 +85,15 @@ export const useConfigStore = defineStore('config', () => {
       maxBackups: 10,
     })
     if (result.ok) {
-      originalSnapshot.value = structuredClone(current.value)
+      lastSaveTimestamp = Date.now()
+      originalSnapshot.value = JSON.parse(JSON.stringify(current.value))
     }
     return result
   }
 
   function discardChanges() {
     if (originalSnapshot.value !== null) {
-      current.value = structuredClone(originalSnapshot.value)
+      current.value = JSON.parse(JSON.stringify(originalSnapshot.value))
     }
   }
 
@@ -101,8 +104,16 @@ export const useConfigStore = defineStore('config', () => {
 
   // Subscribe to external change events from main process
   function initExternalChangeListener() {
-    window.api.file.onChange((event) => {
+    window.api.file.onChange(async (event) => {
       if (event.path === filePath.value && event.type === 'change') {
+        if (Date.now() - lastSaveTimestamp < 2000) return
+        try {
+          if (!filePath.value) return
+          const diskData = await window.api.file.readJson<unknown>(filePath.value)
+          if (JSON.stringify(diskData) === JSON.stringify(current.value)) return
+        } catch {
+          // ignore
+        }
         externalChangePending.value = true
       }
     })

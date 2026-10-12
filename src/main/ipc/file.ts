@@ -9,6 +9,7 @@
 
 import { readFile, writeFile, readdir, stat, mkdir } from 'node:fs/promises'
 import { basename, dirname, join } from 'node:path'
+import { markSelfWrite } from './file-watch'
 
 const MAX_BACKUPS = 10
 
@@ -51,6 +52,17 @@ export async function createBackup(target: string): Promise<string> {
   const bak = join(dir, `${base}.${stamp}.bak.json`)
   const text = await readFile(target, 'utf8')
   await writeFile(bak, text, 'utf8')
+
+  // 同步备份伴生 .meta.json 描述文件（若存在）
+  const metaPath = join(dir, `${base}.meta.json`)
+  try {
+    const metaText = await readFile(metaPath, 'utf8')
+    const metaBak = join(dir, `${base}.${stamp}.bak.meta.json`)
+    await writeFile(metaBak, metaText, 'utf8')
+  } catch {
+    // 无伴生文件则跳过
+  }
+
   await rotateBackups(target)
   return bak
 }
@@ -100,7 +112,12 @@ export async function rotateBackups(target: string, max = MAX_BACKUPS): Promise<
   if (list.length <= max) return 0
   const toDelete = list.slice(max)
   const { unlink } = await import('node:fs/promises')
-  await Promise.all(toDelete.map((p) => unlink(p).catch(() => undefined)))
+  await Promise.all(
+    toDelete.flatMap((p) => [
+      unlink(p).catch(() => undefined),
+      unlink(p.replace(/\.bak\.json$/i, '.bak.meta.json')).catch(() => undefined),
+    ]),
+  )
   return toDelete.length
 }
 
@@ -113,6 +130,17 @@ export async function restoreBackup(
     const text = await readFile(backupPath, 'utf8')
     await mkdir(dirname(targetPath), { recursive: true })
     await writeFile(targetPath, text, 'utf8')
+
+    // 同步还原伴生 .meta.json 描述文件（若存在）
+    const metaBak = backupPath.replace(/\.bak\.json$/i, '.bak.meta.json')
+    const targetMeta = targetPath.replace(/\.json$/i, '.meta.json')
+    try {
+      const metaText = await readFile(metaBak, 'utf8')
+      await writeFile(targetMeta, metaText, 'utf8')
+    } catch {
+      // 无元数据备份则忽略
+    }
+
     return { ok: true }
   } catch (err) {
     return { ok: false, error: (err as Error).message }
@@ -174,6 +202,7 @@ export async function saveJsonWithBackup(
         backupPath = undefined
       }
     }
+    markSelfWrite(1500)
     await mkdir(dirname(targetPath), { recursive: true })
     await writeFile(targetPath, text, 'utf8')
     return { ok: true, backupPath, changed }

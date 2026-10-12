@@ -1,5 +1,15 @@
 import { contextBridge, ipcRenderer } from 'electron'
 
+function toPlainJson<T>(val: T): T {
+  if (val === null || val === undefined) return val
+  if (typeof val !== 'object') return val
+  try {
+    return JSON.parse(JSON.stringify(val))
+  } catch {
+    return val
+  }
+}
+
 const api = {
   auth: {
     async check(password: string): Promise<boolean> {
@@ -7,6 +17,18 @@ const api = {
     },
   },
   file: {
+    async pickJsonFile(): Promise<string | null> {
+      return ipcRenderer.invoke('file:pickJsonFile')
+    },
+    async saveAsJsonFile(defaultName?: string): Promise<string | null> {
+      return ipcRenderer.invoke('file:saveAsJsonFile', defaultName)
+    },
+    async loadMeta<T = { descriptions: Record<string, string> }>(jsonPath: string): Promise<T> {
+      return ipcRenderer.invoke('file:loadMeta', jsonPath)
+    },
+    async saveMeta(jsonPath: string, meta: unknown): Promise<{ ok: boolean; metaPath?: string }> {
+      return ipcRenderer.invoke('file:saveMeta', jsonPath, toPlainJson(meta))
+    },
     async pickDirectory(): Promise<string | null> {
       return ipcRenderer.invoke('file:pickDirectory')
     },
@@ -21,7 +43,7 @@ const api = {
       data: unknown,
       options?: { backup?: boolean; maxBackups?: number },
     ): Promise<{ ok: boolean; backupPath?: string; changed: boolean; error?: string }> {
-      return ipcRenderer.invoke('file:writeJson', path, data, options)
+      return ipcRenderer.invoke('file:writeJson', path, toPlainJson(data), toPlainJson(options))
     },
     async readText(path: string): Promise<string> {
       return ipcRenderer.invoke('file:readText', path)
@@ -62,7 +84,7 @@ const api = {
       return ipcRenderer.invoke('schema:loadDefault')
     },
     async save(path: string, schema: unknown): Promise<{ ok: boolean }> {
-      return ipcRenderer.invoke('schema:save', path, schema)
+      return ipcRenderer.invoke('schema:save', path, toPlainJson(schema))
     },
   },
   process: {
