@@ -211,6 +211,7 @@ if (DEBUG_PORT > 0) {
 
 function createWindow() {
   const isE2E = process.env.E2E_TEST === '1'
+  const iconPath = join(__dirname, '../../build/icon.ico')
   const win = new BrowserWindow({
     width: 1280,
     height: 800,
@@ -219,6 +220,7 @@ function createWindow() {
     show: false,
     autoHideMenuBar: true,
     title: '系统配置编辑工具',
+    icon: iconPath,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,

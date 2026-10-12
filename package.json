@@ -1,7 +1,7 @@
 {
-  "name": "system-config-editor",
+  "name": "json-meta",
   "version": "0.1.0",
-  "description": "系统配置编辑工具 - SystemConfig.json 可视化编辑器",
+  "description": "JsonMeta - 现代化通用 JSON 可视化元数据编辑器与配置管理工具",
   "main": "out/main/index.js",
   "author": "Configuration Tool Team",
   "license": "MIT",
