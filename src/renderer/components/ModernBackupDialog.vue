@@ -159,7 +159,7 @@ function formatTs(ts: number): string {
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.6);
+  background: var(--bg-modal-backdrop);
   backdrop-filter: blur(2px);
   display: flex;
   align-items: center;
@@ -168,22 +168,22 @@ function formatTs(ts: number): string {
 }
 
 .modal-card {
-  background: #1e1e26;
-  border: 1px solid #333342;
+  background: var(--bg-modal);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   width: 540px;
   max-width: 92vw;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .modal-header {
   padding: 16px 20px;
-  background: #1a1a22;
-  border-bottom: 1px solid #282834;
+  background: var(--bg-drawer-header);
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -196,7 +196,7 @@ function formatTs(ts: number): string {
 .header-main h3 {
   margin: 0;
   font-size: 15px;
-  color: #f1f5f9;
+  color: var(--text-main);
   font-weight: 600;
 }
 .btn-snapshot {
@@ -219,8 +219,8 @@ function formatTs(ts: number): string {
   cursor: not-allowed;
 }
 .backup-rule-box {
-  background: rgba(30, 41, 59, 0.6);
-  border: 1px solid rgba(56, 189, 248, 0.18);
+  background: var(--bg-btn);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   padding: 8px 10px;
   display: flex;
@@ -233,7 +233,7 @@ function formatTs(ts: number): string {
   gap: 6px;
   font-size: 11.5px;
   line-height: 1.45;
-  color: #cbd5e1;
+  color: var(--text-muted);
 }
 .rule-icon {
   font-size: 12px;
@@ -241,7 +241,7 @@ function formatTs(ts: number): string {
   margin-top: 1px;
 }
 .rule-item strong {
-  color: #38bdf8;
+  color: var(--text-highlight);
 }
 
 .modal-body {
@@ -253,7 +253,7 @@ function formatTs(ts: number): string {
 .empty {
   text-align: center;
   padding: 30px;
-  color: #64748b;
+  color: var(--text-dim);
   font-size: 13px;
 }
 
@@ -267,8 +267,8 @@ function formatTs(ts: number): string {
 }
 .backup-list li {
   padding: 10px 12px;
-  border: 1px solid #282834;
-  background: #16161c;
+  border: 1px solid var(--border-color);
+  background: var(--bg-input);
   border-radius: 6px;
   display: flex;
   justify-content: space-between;
@@ -277,12 +277,12 @@ function formatTs(ts: number): string {
   transition: all 0.1s;
 }
 .backup-list li:hover {
-  background: #202028;
-  border-color: #3b3b4a;
+  background: var(--bg-btn-hover);
+  border-color: var(--border-focus);
 }
 .backup-list li.active {
-  background: #1e293b;
-  border-color: #3b82f6;
+  background: var(--bg-row-selected);
+  border-color: var(--border-focus);
 }
 
 .b-info {
@@ -293,23 +293,23 @@ function formatTs(ts: number): string {
 .b-time {
   font-size: 12px;
   font-weight: 600;
-  color: #f1f5f9;
+  color: var(--text-main);
 }
 .b-path {
   font-size: 11px;
-  color: #60a5fa;
+  color: var(--text-code);
   font-family: monospace;
 }
 .selected-mark {
-  color: #38bdf8;
+  color: var(--text-highlight);
   font-size: 12px;
   font-weight: 700;
 }
 
 .modal-footer {
   padding: 12px 20px;
-  background: #1a1a22;
-  border-top: 1px solid #282834;
+  background: var(--bg-drawer-header);
+  border-top: 1px solid var(--border-color);
   display: flex;
   justify-content: flex-end;
   gap: 8px;
@@ -322,13 +322,12 @@ function formatTs(ts: number): string {
   cursor: pointer;
 }
 .btn.secondary {
-  background: #252530;
-  border: 1px solid #363646;
-  color: #cbd5e1;
+  background: var(--bg-btn);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
 }
 .btn.secondary:hover {
-  background: #323240;
-  color: #fff;
+  background: var(--bg-btn-hover);
 }
 .btn.primary {
   background: #2563eb;
@@ -341,7 +340,8 @@ function formatTs(ts: number): string {
 .btn.primary:disabled {
   opacity: 0.35;
   cursor: not-allowed;
-  background: #282834;
-  border-color: #383848;
+  background: var(--bg-btn);
+  border-color: var(--border-subtle);
+  color: var(--text-dim);
 }
 </style>

@@ -646,11 +646,14 @@ watch(
 .visual-tree-container {
   flex: 1;
   overflow: hidden;
-  background: #141417;
-  color: #e2e8f0;
+  background: var(--bg-workspace);
+  color: var(--text-main);
   min-height: 0;
   display: flex;
   flex-direction: column;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .tree-workspace-split {
@@ -663,17 +666,17 @@ watch(
 }
 
 .desc-prefix {
-  color: #eab308;
+  color: var(--desc-prefix);
   font-family: 'Consolas', monospace;
   font-weight: bold;
-  opacity: 0.85;
+  opacity: 0.9;
 }
 
 /* 统一二级子工具条 (38px) */
 .sub-toolbar {
   height: 38px;
-  background: #1a1a20;
-  border-bottom: 1px solid #282832;
+  background: var(--bg-subbar);
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -681,6 +684,9 @@ watch(
   box-sizing: border-box;
   flex-shrink: 0;
   user-select: none;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
 }
 .sub-left {
   display: flex;
@@ -690,15 +696,15 @@ watch(
 .sub-title {
   font-size: 12px;
   font-weight: 600;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 .sub-badge {
-  background: #252530;
-  color: #cbd5e1;
+  background: var(--bg-badge);
+  color: var(--text-muted);
   font-size: 11px;
   padding: 1px 7px;
   border-radius: 4px;
-  border: 1px solid #363644;
+  border: 1px solid var(--border-color);
 }
 
 /* 全模式统一的改动徽章 (支持交互点击跳转) */
@@ -834,9 +840,9 @@ watch(
   gap: 6px;
 }
 .sub-tool-btn {
-  background: #262632;
-  border: 1px solid #383848;
-  color: #cbd5e1;
+  background: var(--bg-btn);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
   padding: 3px 9px;
   border-radius: 5px;
   font-size: 11px;
@@ -845,17 +851,17 @@ watch(
   transition: all 0.1s;
 }
 .sub-tool-btn:hover {
-  background: #333342;
-  color: #fff;
-  border-color: #4c4c60;
+  background: var(--bg-btn-hover);
+  color: var(--text-main);
+  border-color: var(--border-muted);
 }
 .sub-tool-btn.highlight {
-  background: #1e3a8a;
-  border-color: #2563eb;
-  color: #93c5fd;
+  background: #0284c7;
+  border-color: #0369a1;
+  color: #ffffff;
 }
 .sub-tool-btn.highlight:hover {
-  background: #2563eb;
+  background: #0369a1;
   color: #fff;
 }
 
@@ -893,7 +899,7 @@ watch(
   display: flex;
   align-items: center;
   padding: 0 14px;
-  border-bottom: 1px solid #1e1e26;
+  border-bottom: 1px solid var(--border-subtle);
   font-size: 13px;
   height: 34px;
   min-height: 34px;
@@ -902,23 +908,23 @@ watch(
   gap: 8px;
   transition: background 0.1s;
   cursor: default;
-  background: #141417;
+  background: var(--bg-row);
   min-width: 100%;
   width: max-content;
 }
 
 .tree-row:hover {
-  background: #1c1c24;
+  background: var(--bg-row-hover);
 }
 .tree-row.selected {
-  background: #1e293b !important;
-  border-left: 3px solid #3b82f6;
+  background: var(--bg-row-selected) !important;
+  border-left: 3px solid var(--border-focus);
 }
 .tree-row.modified {
-  background: rgba(245, 158, 11, 0.08);
+  background: var(--bg-row-modified);
 }
 .tree-row.modified.selected {
-  background: rgba(245, 158, 11, 0.16) !important;
+  background: var(--bg-row-modified-selected) !important;
 }
 
 /* 缩进导线 */
@@ -932,7 +938,7 @@ watch(
   top: -8px;
   bottom: -8px;
   width: 1px;
-  background: #282834;
+  background: var(--border-subtle);
 }
 
 /* 展开箭头 */
@@ -969,16 +975,16 @@ watch(
 .key-name {
   font-family: 'Consolas', 'Monaco', monospace;
   font-weight: 600;
-  color: #f1f5f9;
+  color: var(--text-main);
   padding: 1px 4px;
   border-radius: 3px;
   cursor: pointer;
 }
 .key-name:hover {
-  background: #282834;
+  background: var(--bg-btn-hover);
 }
 .key-name.isIndex {
-  color: #60a5fa;
+  color: #38bdf8;
   font-style: italic;
 }
 .search-path-hint {
@@ -993,16 +999,16 @@ watch(
   border: 1px solid rgba(56, 189, 248, 0.25);
 }
 .colon {
-  color: #64748b;
+  color: var(--text-dim);
   font-weight: bold;
 }
 .rename-input {
   font-family: monospace;
   font-size: 12px;
   padding: 2px 6px;
-  background: #1c1c24;
-  color: #f1f5f9;
-  border: 1px solid #3b82f6;
+  background: var(--bg-input);
+  color: var(--text-main);
+  border: 1px solid var(--border-focus);
   border-radius: 4px;
   outline: none;
   width: 110px;
@@ -1066,20 +1072,20 @@ watch(
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  background: rgba(234, 179, 8, 0.08);
-  color: #fde047;
+  background: var(--desc-bg);
+  color: var(--desc-text);
   padding: 2px 8px;
   border-radius: 4px;
   font-size: 11.5px;
   cursor: pointer;
-  border: 1px solid rgba(234, 179, 8, 0.25);
+  border: 1px solid var(--desc-border);
   white-space: nowrap;
   transition: all 0.12s ease;
 }
 .desc-pill:hover {
-  background: rgba(234, 179, 8, 0.16);
-  border-color: rgba(234, 179, 8, 0.5);
-  color: #fef08a;
+  background: var(--desc-bg);
+  border-color: var(--desc-prefix);
+  filter: brightness(1.1);
 }
 .desc-pill .desc-text {
   white-space: nowrap;
@@ -1092,14 +1098,14 @@ watch(
   gap: 5px;
 }
 .inspector-toggle-btn.active {
-  background: #1e3a5f;
-  border-color: #3b82f6;
-  color: #93c5fd;
+  background: var(--bg-btn-active);
+  border-color: var(--border-focus);
+  color: var(--text-highlight);
 }
 .add-desc-hover {
   background: transparent;
-  border: 1px dashed #475569;
-  color: #64748b;
+  border: 1px dashed var(--border-muted);
+  color: var(--text-dim);
   border-radius: 12px;
   font-size: 10px;
   padding: 1px 6px;
@@ -1113,9 +1119,9 @@ watch(
   opacity: 1;
 }
 .add-desc-hover:hover {
-  border-color: #3b82f6;
-  color: #60a5fa;
-  background: #172554;
+  border-color: var(--border-focus);
+  color: var(--text-highlight);
+  background: var(--bg-btn-active);
 }
 .desc-editor-inline {
   display: flex;
@@ -1126,9 +1132,9 @@ watch(
 .desc-input {
   font-size: 12px;
   padding: 2px 8px;
-  background: #1e1e26;
-  color: #f1f5f9;
-  border: 1px solid #3b82f6;
+  background: var(--bg-input);
+  color: var(--text-main);
+  border: 1px solid var(--border-focus);
   border-radius: 4px;
   outline: none;
   width: 100%;
@@ -1144,26 +1150,26 @@ watch(
 }
 .val-input {
   padding: 3px 8px;
-  border: 1px solid #333342;
+  border: 1px solid var(--border-input);
   border-radius: 4px;
   font-size: 12px;
   outline: none;
   font-family: 'Consolas', monospace;
-  background: #1b1b22;
-  color: #f1f5f9;
+  background: var(--bg-input);
+  color: var(--text-main);
   transition: border-color 0.15s;
 }
 .val-input:focus {
-  border-color: #3b82f6;
+  border-color: var(--border-focus);
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 .str-input {
   width: 220px;
-  color: #86efac;
+  color: var(--syntax-str);
 }
 .num-input {
   width: 130px;
-  color: #38bdf8;
+  color: var(--syntax-num);
 }
 
 /* 布尔 Toggle */
@@ -1241,9 +1247,9 @@ watch(
   opacity: 1;
 }
 .act-btn {
-  background: #24242f;
-  border: 1px solid #363646;
-  color: #cbd5e1;
+  background: var(--bg-btn);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
   border-radius: 4px;
   padding: 2px 7px;
   height: 24px;
@@ -1257,9 +1263,9 @@ watch(
   transition: all 0.1s;
 }
 .act-btn:hover {
-  background: #323242;
-  color: #fff;
-  border-color: #4b4b60;
+  background: var(--bg-btn-hover);
+  color: var(--text-main);
+  border-color: var(--border-muted);
 }
 .act-btn.highlight:hover {
   background: #1e3a8a;
@@ -1267,8 +1273,8 @@ watch(
   border-color: #2563eb;
 }
 .act-btn.danger:hover {
-  background: #450a0a;
-  color: #fca5a5;
-  border-color: #7f1d1d;
+  background: rgba(239, 68, 68, 0.18);
+  color: #ef4444;
+  border-color: #ef4444;
 }
 </style>

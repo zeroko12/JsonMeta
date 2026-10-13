@@ -182,16 +182,16 @@ const matchCount = computed(() => {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: #141417;
-  color: #f1f5f9;
+  background: var(--bg-workspace);
+  color: var(--text-main);
   min-height: 0;
 }
 
 /* 统一二级子工具条 (38px) */
 .sub-toolbar {
   height: 38px;
-  background: #1a1a20;
-  border-bottom: 1px solid #282832;
+  background: var(--bg-subbar);
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -208,7 +208,7 @@ const matchCount = computed(() => {
 .sub-title {
   font-size: 12px;
   font-weight: 600;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 .sub-badge {
   font-size: 11px;
@@ -217,21 +217,21 @@ const matchCount = computed(() => {
   font-weight: 600;
 }
 .sub-badge.ok {
-  background: #052e16;
-  color: #4ade80;
-  border: 1px solid #14532d;
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
 }
 .sub-badge.error {
-  background: #450a0a;
-  color: #f87171;
-  border: 1px solid #7f1d1d;
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
 /* 全模式统一改动徽章 */
 .unified-change-badge {
-  background: #3b280c;
-  color: #fbbf24;
-  border: 1px solid #634212;
+  background: var(--desc-bg);
+  color: var(--desc-text);
+  border: 1px solid var(--desc-border);
   font-size: 11px;
   padding: 1px 7px;
   border-radius: 4px;
@@ -240,7 +240,7 @@ const matchCount = computed(() => {
 
 .sub-filter-hint {
   font-size: 11px;
-  color: #3b82f6;
+  color: var(--text-highlight);
   font-style: italic;
 }
 
@@ -249,9 +249,9 @@ const matchCount = computed(() => {
   gap: 6px;
 }
 .sub-tool-btn {
-  background: #262632;
-  border: 1px solid #383848;
-  color: #cbd5e1;
+  background: var(--bg-btn);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
   padding: 3px 9px;
   border-radius: 5px;
   font-size: 11px;
@@ -260,9 +260,9 @@ const matchCount = computed(() => {
   transition: all 0.1s;
 }
 .sub-tool-btn:hover {
-  background: #333342;
-  color: #fff;
-  border-color: #4c4c60;
+  background: var(--bg-btn-hover);
+  color: var(--text-main);
+  border-color: var(--border-focus);
 }
 
 .editor-main {
@@ -270,14 +270,14 @@ const matchCount = computed(() => {
   display: flex;
   min-height: 0;
   overflow: hidden;
-  background: #141417;
+  background: var(--bg-workspace);
 }
 
 /* 行号栏 */
 .line-gutter {
   width: 48px;
-  background: #18181f;
-  border-right: 1px solid #24242e;
+  background: var(--bg-subbar);
+  border-right: 1px solid var(--border-color);
   padding: 14px 0;
   user-select: none;
   overflow: hidden;
@@ -289,15 +289,15 @@ const matchCount = computed(() => {
   font-family: 'Consolas', 'Fira Code', 'Monaco', monospace;
   font-size: 13px;
   line-height: 1.6;
-  color: #475569;
+  color: var(--text-dim);
 }
 
 .code-textarea {
   flex: 1;
   width: 100%;
   border: none;
-  background: #141417;
-  color: #38bdf8;
+  background: var(--bg-workspace);
+  color: var(--text-code);
   padding: 14px;
   font-family: 'Consolas', 'Fira Code', 'Monaco', monospace;
   font-size: 13px;
@@ -309,9 +309,9 @@ const matchCount = computed(() => {
 }
 
 .error-bar {
-  background: #450a0a;
-  color: #fca5a5;
-  border-top: 1px solid #7f1d1d;
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  border-top: 1px solid rgba(239, 68, 68, 0.25);
   padding: 8px 14px;
   display: flex;
   align-items: center;

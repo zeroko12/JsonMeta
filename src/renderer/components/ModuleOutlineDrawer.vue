@@ -75,11 +75,14 @@ function isModuleActive(mod: ModuleOutlineItem): boolean {
   min-width: 220px;
   max-width: 220px;
   height: 100%;
-  background: #141418;
-  border-right: 1px solid #23232c;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border-color);
   box-sizing: border-box;
   flex-shrink: 0;
-  transition: width 0.15s ease;
+  transition:
+    width 0.15s ease,
+    background-color 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .module-outline-drawer.collapsed {
@@ -95,10 +98,10 @@ function isModuleActive(mod: ModuleOutlineItem): boolean {
   z-index: 20;
   width: 18px;
   height: 22px;
-  background: #22222c;
-  border: 1px solid #363646;
+  background: var(--bg-btn);
+  border: 1px solid var(--border-color);
   border-radius: 3px;
-  color: #94a3b8;
+  color: var(--text-muted);
   font-size: 8px;
   display: flex;
   align-items: center;
@@ -107,9 +110,9 @@ function isModuleActive(mod: ModuleOutlineItem): boolean {
   transition: all 0.12s;
 }
 .collapse-toggle-btn:hover {
-  background: #2e2e3c;
-  color: #f1f5f9;
-  border-color: #4b4b60;
+  background: var(--bg-btn-hover);
+  color: var(--text-main);
+  border-color: var(--border-muted);
 }
 
 .outline-content {
@@ -127,21 +130,21 @@ function isModuleActive(mod: ModuleOutlineItem): boolean {
   height: 34px;
   min-height: 34px;
   padding: 0 10px;
-  border-bottom: 1px solid #202028;
-  background: #16161b;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-sidebar-header);
   user-select: none;
 }
 
 .outline-title {
   font-size: 11px;
   font-weight: 600;
-  color: #94a3b8;
+  color: var(--text-muted);
   letter-spacing: 0.3px;
 }
 
 .outline-badge {
-  background: #252530;
-  color: #64748b;
+  background: var(--bg-badge);
+  color: var(--text-dim);
   font-size: 10px;
   font-family: 'Consolas', monospace;
   padding: 1px 5px;
@@ -162,7 +165,7 @@ function isModuleActive(mod: ModuleOutlineItem): boolean {
   width: 4px;
 }
 .outline-list::-webkit-scrollbar-thumb {
-  background: #2a2a36;
+  background: var(--scrollbar-thumb);
   border-radius: 2px;
 }
 
@@ -181,14 +184,14 @@ function isModuleActive(mod: ModuleOutlineItem): boolean {
 }
 
 .outline-item-card:hover {
-  background: #1b1b22;
-  border-color: #2b2b38;
+  background: var(--bg-sidebar-hover);
+  border-color: var(--border-subtle);
 }
 
 .outline-item-card.active {
-  background: #1e2538;
-  border-color: #2563eb;
-  border-left: 3px solid #3b82f6;
+  background: var(--bg-sidebar-active);
+  border-color: var(--border-focus);
+  border-left: 3px solid var(--border-focus);
 }
 
 .outline-item-card.modified {
@@ -205,7 +208,7 @@ function isModuleActive(mod: ModuleOutlineItem): boolean {
 
 .mod-icon {
   font-size: 10px;
-  color: #64748b;
+  color: var(--text-dim);
   flex-shrink: 0;
 }
 .outline-item-card.active .mod-icon {
@@ -216,7 +219,7 @@ function isModuleActive(mod: ModuleOutlineItem): boolean {
   font-family: 'Consolas', monospace;
   font-size: 11.5px;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-main);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -224,7 +227,7 @@ function isModuleActive(mod: ModuleOutlineItem): boolean {
 }
 
 .outline-item-card.active .mod-name {
-  color: #93c5fd;
+  color: var(--text-highlight);
 }
 
 .mod-changed-dot {
@@ -236,13 +239,13 @@ function isModuleActive(mod: ModuleOutlineItem): boolean {
 .mod-count {
   font-family: 'Consolas', monospace;
   font-size: 10px;
-  color: #64748b;
+  color: var(--text-dim);
   flex-shrink: 0;
 }
 
 .mod-desc-line {
   font-size: 10.5px;
-  color: #85754e;
+  color: var(--desc-prefix);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

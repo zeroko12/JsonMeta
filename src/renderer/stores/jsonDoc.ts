@@ -92,6 +92,31 @@ export const useJsonDocStore = defineStore('jsonDoc', () => {
   const showAddNodeModal = ref<{ parentPath: string; isArray: boolean } | null>(null)
   const showRawEditModal = ref<{ path: string; title: string; jsonText: string } | null>(null)
 
+  // ─── 黑白主题切换 (dark / light) ───
+  const THEME_STORAGE_KEY = 'json_meta_theme'
+  const theme = ref<'dark' | 'light'>(
+    (localStorage.getItem(THEME_STORAGE_KEY) as 'dark' | 'light') || 'dark',
+  )
+
+  function applyTheme(t: 'dark' | 'light') {
+    if (typeof document !== 'undefined') {
+      document.documentElement.setAttribute('data-theme', t)
+    }
+  }
+
+  function toggleTheme() {
+    theme.value = theme.value === 'dark' ? 'light' : 'dark'
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, theme.value)
+    } catch {
+      // ignore
+    }
+    applyTheme(theme.value)
+  }
+
+  // 初始化应用主题
+  applyTheme(theme.value)
+
   // ─── 最近打开的 3 个文件历史记录 ───
   const RECENT_FILES_KEY = 'json_meta_recent_files'
 
@@ -937,5 +962,8 @@ export const useJsonDocStore = defineStore('jsonDoc', () => {
     totalNodesCount,
     fileSizeFormatted,
     topLevelModules,
+    theme,
+    toggleTheme,
+    applyTheme,
   }
 })

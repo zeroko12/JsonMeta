@@ -1,3 +1,114 @@
+:root,
+[data-theme='dark'] {
+  color-scheme: dark;
+  --bg-app: #141417;
+  --bg-workspace: #141417;
+  --bg-topbar: #1c1c24;
+  --bg-subbar: #181820;
+  --bg-sidebar: #141418;
+  --bg-sidebar-header: #16161b;
+  --bg-sidebar-hover: #1b1b22;
+  --bg-sidebar-active: #1e2538;
+  --bg-card: #191e2a;
+  --bg-row: #141417;
+  --bg-row-hover: #1c1c24;
+  --bg-row-selected: #1e293b;
+  --bg-row-modified: rgba(245, 158, 11, 0.08);
+  --bg-row-modified-selected: rgba(245, 158, 11, 0.16);
+  --bg-drawer: #181820;
+  --bg-drawer-header: #1a1a22;
+  --bg-drawer-section: #1f1f28;
+  --bg-modal: #1e1e26;
+  --bg-modal-backdrop: rgba(10, 10, 14, 0.8);
+  --bg-input: #1b1b22;
+  --bg-input-focus: #1e1e28;
+  --bg-statusbar: #111114;
+  --bg-btn: #252530;
+  --bg-btn-hover: #2e2e3c;
+  --bg-btn-active: #1e3a8a;
+  --bg-badge: #252530;
+
+  --border-color: #282836;
+  --border-subtle: #1e1e26;
+  --border-muted: #333342;
+  --border-input: #333342;
+  --border-focus: #3b82f6;
+
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+  --text-highlight: #38bdf8;
+  --text-code: #93c5fd;
+
+  --syntax-str: #86efac;
+  --syntax-num: #38bdf8;
+  --syntax-bool: #c084fc;
+  --syntax-null: #a1a1aa;
+
+  --desc-bg: rgba(234, 179, 8, 0.08);
+  --desc-border: rgba(234, 179, 8, 0.25);
+  --desc-text: #fde047;
+  --desc-prefix: #eab308;
+
+  --scrollbar-thumb: rgba(148, 163, 184, 0.22);
+  --scrollbar-thumb-hover: rgba(148, 163, 184, 0.45);
+}
+
+[data-theme='light'] {
+  color-scheme: light;
+  --bg-app: #f8fafc;
+  --bg-workspace: #ffffff;
+  --bg-topbar: #ffffff;
+  --bg-subbar: #f1f5f9;
+  --bg-sidebar: #f8fafc;
+  --bg-sidebar-header: #eef2f6;
+  --bg-sidebar-hover: #f1f5f9;
+  --bg-sidebar-active: #e0f2fe;
+  --bg-card: #f8fafc;
+  --bg-row: #ffffff;
+  --bg-row-hover: #f8fafc;
+  --bg-row-selected: #e0f2fe;
+  --bg-row-modified: rgba(245, 158, 11, 0.12);
+  --bg-row-modified-selected: rgba(245, 158, 11, 0.22);
+  --bg-drawer: #ffffff;
+  --bg-drawer-header: #f8fafc;
+  --bg-drawer-section: #f8fafc;
+  --bg-modal: #ffffff;
+  --bg-modal-backdrop: rgba(15, 23, 42, 0.55);
+  --bg-input: #ffffff;
+  --bg-input-focus: #f8fafc;
+  --bg-statusbar: #f1f5f9;
+  --bg-btn: #f1f5f9;
+  --bg-btn-hover: #e2e8f0;
+  --bg-btn-active: #dbeafe;
+  --bg-badge: #e2e8f0;
+
+  --border-color: #e2e8f0;
+  --border-subtle: #f1f5f9;
+  --border-muted: #cbd5e1;
+  --border-input: #cbd5e1;
+  --border-focus: #2563eb;
+
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --text-dim: #94a3b8;
+  --text-highlight: #0284c7;
+  --text-code: #0369a1;
+
+  --syntax-str: #15803d;
+  --syntax-num: #0284c7;
+  --syntax-bool: #7e22ce;
+  --syntax-null: #64748b;
+
+  --desc-bg: rgba(245, 158, 11, 0.1);
+  --desc-border: rgba(245, 158, 11, 0.35);
+  --desc-text: #92400e;
+  --desc-prefix: #b45309;
+
+  --scrollbar-thumb: rgba(100, 116, 139, 0.35);
+  --scrollbar-thumb-hover: rgba(100, 116, 139, 0.6);
+}
+
 html,
 body,
 #app {
@@ -9,22 +120,23 @@ body,
 * {
   box-sizing: border-box;
   scrollbar-width: thin;
-  scrollbar-color: rgba(148, 163, 184, 0.25) transparent;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
 }
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', 'PingFang SC',
     sans-serif;
   font-size: 14px;
-  color: #2c3e50;
-  background: #141417;
+  color: var(--text-main);
+  background: var(--bg-app);
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 button {
   font-family: inherit;
 }
 
-/* 现代化极简纤细深色滚动条 (6px, 透明底色，彻底杜绝粗暴占位) */
+/* 现代化极简纤细滚动条 (6px, 透明底色，响应黑白主题) */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -35,13 +147,13 @@ button {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.22);
+  background: var(--scrollbar-thumb);
   border-radius: 4px;
   transition: background 0.15s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.45);
+  background: var(--scrollbar-thumb-hover);
 }
 
 ::-webkit-scrollbar-corner {

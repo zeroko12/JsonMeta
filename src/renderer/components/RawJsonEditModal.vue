@@ -94,7 +94,7 @@ function confirmSave() {
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.6);
+  background: var(--bg-modal-backdrop);
   backdrop-filter: blur(2px);
   display: flex;
   align-items: center;
@@ -103,7 +103,8 @@ function confirmSave() {
 }
 
 .modal-card {
-  background: #1e1e24;
+  background: var(--bg-modal);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   width: 600px;
   max-width: 90vw;
@@ -111,12 +112,13 @@ function confirmSave() {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  color: var(--text-main);
 }
 
 .modal-header {
   padding: 12px 18px;
-  background: #141418;
-  border-bottom: 1px solid #2d2d35;
+  background: var(--bg-drawer-header);
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -124,7 +126,7 @@ function confirmSave() {
 .modal-header h3 {
   margin: 0;
   font-size: 14px;
-  color: #f1f5f9;
+  color: var(--text-main);
 }
 .header-right {
   display: flex;
@@ -132,27 +134,26 @@ function confirmSave() {
   gap: 8px;
 }
 .small-tool-btn {
-  background: #27272f;
-  border: 1px solid #3b3b47;
-  color: #cbd5e1;
+  background: var(--bg-btn);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
   padding: 3px 8px;
   border-radius: 4px;
   font-size: 11px;
   cursor: pointer;
 }
 .small-tool-btn:hover {
-  background: #32323d;
-  color: #fff;
+  background: var(--bg-btn-hover);
 }
 .close-btn {
   background: transparent;
   border: none;
-  color: #94a3b8;
+  color: var(--text-dim);
   cursor: pointer;
   font-size: 14px;
 }
 .close-btn:hover {
-  color: white;
+  color: var(--text-main);
 }
 
 .modal-body {
@@ -166,11 +167,11 @@ function confirmSave() {
   width: 100%;
   height: 280px;
   box-sizing: border-box;
-  background: #141418;
-  border: 1px solid #383844;
+  background: var(--bg-input);
+  border: 1px solid var(--border-input);
   border-radius: 6px;
   padding: 12px;
-  color: #38bdf8;
+  color: var(--text-code);
   font-family: 'Consolas', monospace;
   font-size: 13px;
   line-height: 1.5;
@@ -178,12 +179,13 @@ function confirmSave() {
   resize: vertical;
 }
 .raw-textarea:focus {
-  border-color: #3b82f6;
+  border-color: var(--border-focus);
 }
 
 .error-alert {
-  background: #450a0a;
-  color: #f87171;
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.25);
   padding: 8px 12px;
   border-radius: 4px;
   font-size: 12px;
@@ -192,8 +194,8 @@ function confirmSave() {
 
 .modal-footer {
   padding: 12px 18px;
-  background: #141418;
-  border-top: 1px solid #2d2d35;
+  background: var(--bg-drawer-header);
+  border-top: 1px solid var(--border-color);
   display: flex;
   justify-content: flex-end;
   gap: 8px;
@@ -206,12 +208,12 @@ function confirmSave() {
   cursor: pointer;
 }
 .btn.secondary {
-  background: #27272f;
-  border: 1px solid #3b3b47;
-  color: #cbd5e1;
+  background: var(--bg-btn);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
 }
 .btn.secondary:hover {
-  background: #32323d;
+  background: var(--bg-btn-hover);
 }
 .btn.primary {
   background: #2563eb;

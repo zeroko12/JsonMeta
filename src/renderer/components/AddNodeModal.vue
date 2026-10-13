@@ -160,7 +160,7 @@ function confirmAdd() {
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.6);
+  background: var(--bg-modal-backdrop);
   backdrop-filter: blur(2px);
   display: flex;
   align-items: center;
@@ -169,34 +169,34 @@ function confirmAdd() {
 }
 
 .modal-card {
-  background: #1e1e26;
-  border: 1px solid #333342;
+  background: var(--bg-modal);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   width: 440px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .modal-header {
   padding: 16px 20px;
-  background: #1a1a22;
-  border-bottom: 1px solid #282834;
+  background: var(--bg-drawer-header);
+  border-bottom: 1px solid var(--border-color);
 }
 .modal-header h3 {
   margin: 0 0 4px;
   font-size: 15px;
-  color: #f1f5f9;
+  color: var(--text-main);
 }
 .subtitle {
   margin: 0;
   font-size: 12px;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 .subtitle code {
-  color: #60a5fa;
+  color: var(--text-code);
   font-family: monospace;
 }
 
@@ -215,19 +215,19 @@ function confirmAdd() {
 .form-label {
   font-size: 12px;
   font-weight: 600;
-  color: #cbd5e1;
+  color: var(--text-muted);
 }
 .form-input {
   padding: 8px 10px;
-  border: 1px solid #333342;
+  border: 1px solid var(--border-input);
   border-radius: 6px;
   font-size: 13px;
   outline: none;
-  background: #16161c;
-  color: #f1f5f9;
+  background: var(--bg-input);
+  color: var(--text-main);
 }
 .form-input:focus {
-  border-color: #3b82f6;
+  border-color: var(--border-focus);
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
@@ -237,19 +237,18 @@ function confirmAdd() {
   gap: 6px;
 }
 .type-selector button {
-  background: #252530;
-  border: 1px solid #363646;
+  background: var(--bg-btn);
+  border: 1px solid var(--border-color);
   padding: 6px;
   border-radius: 5px;
   font-size: 11px;
   cursor: pointer;
-  color: #cbd5e1;
+  color: var(--text-main);
   font-weight: 500;
   transition: all 0.1s;
 }
 .type-selector button:hover {
-  background: #2e2e3a;
-  color: #fff;
+  background: var(--bg-btn-hover);
 }
 .type-selector button.active {
   background: #2563eb;
@@ -264,13 +263,13 @@ function confirmAdd() {
   font-size: 13px;
   margin-right: 12px;
   cursor: pointer;
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .modal-footer {
   padding: 12px 20px;
-  background: #1a1a22;
-  border-top: 1px solid #282834;
+  background: var(--bg-drawer-header);
+  border-top: 1px solid var(--border-color);
   display: flex;
   justify-content: flex-end;
   gap: 8px;
@@ -283,13 +282,12 @@ function confirmAdd() {
   cursor: pointer;
 }
 .btn.secondary {
-  background: #252530;
-  border: 1px solid #363646;
-  color: #cbd5e1;
+  background: var(--bg-btn);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
 }
 .btn.secondary:hover {
-  background: #323240;
-  color: #fff;
+  background: var(--bg-btn-hover);
 }
 .btn.primary {
   background: #2563eb;

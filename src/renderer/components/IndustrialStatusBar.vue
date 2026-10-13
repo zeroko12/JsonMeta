@@ -116,15 +116,18 @@ const descCount = computed(() => Object.keys(doc.descriptions).length)
   justify-content: space-between;
   height: 26px;
   min-height: 26px;
-  background: #111114;
-  border-top: 1px solid #23232c;
-  color: #94a3b8;
+  background: var(--bg-statusbar);
+  border-top: 1px solid var(--border-color);
+  color: var(--text-muted);
   font-size: 11px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Consolas', monospace;
   padding: 0 10px;
   user-select: none;
   z-index: 100;
   box-sizing: border-box;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .status-left {
@@ -151,8 +154,8 @@ const descCount = computed(() => Object.keys(doc.descriptions).length)
   cursor: pointer;
 }
 .breadcrumb-container.active:hover {
-  background: #1e1e26;
-  color: #f1f5f9;
+  background: var(--bg-row-hover);
+  color: var(--text-main);
 }
 
 .status-icon {
@@ -169,16 +172,16 @@ const descCount = computed(() => Object.keys(doc.descriptions).length)
 }
 
 .crumb-sep {
-  color: #475569;
+  color: var(--text-dim);
   margin: 0 3px;
 }
 
 .crumb-name {
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .crumb-name.last-crumb {
-  color: #38bdf8;
+  color: var(--text-highlight);
   font-weight: 600;
 }
 
@@ -193,7 +196,7 @@ const descCount = computed(() => Object.keys(doc.descriptions).length)
 }
 
 .status-idle-text {
-  color: #64748b;
+  color: var(--text-dim);
   font-style: italic;
   font-size: 11px;
 }
@@ -206,13 +209,13 @@ const descCount = computed(() => Object.keys(doc.descriptions).length)
 }
 
 .status-tag {
-  color: #94a3b8;
+  color: var(--text-muted);
   font-family: 'Consolas', monospace;
   font-size: 11px;
 }
 
 .status-divider {
-  color: #334155;
+  color: var(--border-color);
   font-size: 10px;
 }
 
@@ -268,15 +271,15 @@ const descCount = computed(() => Object.keys(doc.descriptions).length)
 }
 
 .shortcut-tip {
-  color: #64748b;
+  color: var(--text-dim);
   font-size: 10.5px;
 }
 
 .shortcut-tip kbd {
-  background: #1e1e28;
-  border: 1px solid #334155;
+  background: var(--bg-btn);
+  border: 1px solid var(--border-color);
   border-radius: 3px;
-  color: #94a3b8;
+  color: var(--text-muted);
   padding: 1px 4px;
   font-size: 9.5px;
   font-family: 'Consolas', monospace;

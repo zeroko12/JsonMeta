@@ -151,9 +151,9 @@ function getFileName(p: string): string {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #0f1115;
+  background: var(--bg-workspace);
   padding: 32px 24px;
-  border: 1px dashed #242936;
+  border: 1px dashed var(--border-muted);
   margin: 18px;
   border-radius: 8px;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -162,8 +162,8 @@ function getFileName(p: string): string {
 }
 
 .dropzone-container.dragging {
-  border-color: #38bdf8;
-  background: #111a2e;
+  border-color: var(--border-focus);
+  background: var(--bg-row-selected);
   transform: scale(1.002);
 }
 
@@ -182,8 +182,8 @@ function getFileName(p: string): string {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: #181d28;
-  border: 1px solid #2a3449;
+  background: var(--bg-btn);
+  border: 1px solid var(--border-muted);
   padding: 4px 12px;
   border-radius: 20px;
 }
@@ -200,7 +200,7 @@ function getFileName(p: string): string {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.8px;
-  color: #94a3b8;
+  color: var(--text-muted);
   font-family: 'JetBrains Mono', Consolas, monospace;
 }
 
@@ -208,32 +208,32 @@ function getFileName(p: string): string {
   width: 64px;
   height: 64px;
   border-radius: 12px;
-  background: #161b26;
-  border: 1px solid #263147;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #94a3b8;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  color: var(--text-muted);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
 .main-title {
   margin: 0;
   font-size: 22px;
   font-weight: 700;
-  color: #f1f5f9;
+  color: var(--text-main);
   letter-spacing: -0.3px;
 }
 
 .sub-desc {
   margin: 0;
   font-size: 13px;
-  color: #8b99ae;
+  color: var(--text-muted);
   line-height: 1.6;
 }
 
 .highlight-code {
-  color: #38bdf8;
+  color: var(--text-highlight);
   font-family: 'JetBrains Mono', Consolas, monospace;
   font-weight: 600;
   background: rgba(56, 189, 248, 0.08);
@@ -277,21 +277,21 @@ function getFileName(p: string): string {
 }
 
 .secondary-btn {
-  background: #181c25;
-  color: #cbd5e1;
-  border: 1px solid #283144;
+  background: var(--bg-btn);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
 }
 .secondary-btn:hover {
-  background: #202633;
-  color: #ffffff;
-  border-color: #3b4964;
+  background: var(--bg-btn-hover);
+  color: var(--text-main);
+  border-color: var(--border-focus);
 }
 
 /* 最近历史 */
 .recent-files-block {
   width: 100%;
-  background: #141720;
-  border: 1px solid #222938;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   padding: 12px 14px;
   text-align: left;
@@ -311,13 +311,13 @@ function getFileName(p: string): string {
   gap: 6px;
   font-size: 12px;
   font-weight: 600;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .clear-recent-btn {
   background: transparent;
   border: none;
-  color: #64748b;
+  color: var(--text-dim);
   font-size: 11px;
   cursor: pointer;
   padding: 2px 6px;
@@ -340,10 +340,10 @@ function getFileName(p: string): string {
   align-items: center;
   gap: 10px;
   padding: 6px 10px;
-  background: #191e2a;
-  border: 1px solid #273145;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
   border-radius: 5px;
-  color: #e2e8f0;
+  color: var(--text-main);
   cursor: pointer;
   text-align: left;
   width: 100%;
@@ -352,14 +352,14 @@ function getFileName(p: string): string {
 }
 
 .recent-card-btn:hover {
-  background: #202838;
-  border-color: #38bdf8;
+  background: var(--bg-btn-hover);
+  border-color: var(--border-focus);
 }
 
 .file-icon-badge {
   font-size: 10px;
   font-weight: 700;
-  color: #38bdf8;
+  color: var(--text-highlight);
   background: rgba(56, 189, 248, 0.1);
   border: 1px solid rgba(56, 189, 248, 0.25);
   padding: 2px 5px;
@@ -378,7 +378,7 @@ function getFileName(p: string): string {
 .recent-name {
   font-size: 12px;
   font-weight: 600;
-  color: #f1f5f9;
+  color: var(--text-main);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -386,7 +386,7 @@ function getFileName(p: string): string {
 
 .recent-path {
   font-size: 11px;
-  color: #64748b;
+  color: var(--text-dim);
   font-family: 'JetBrains Mono', Consolas, monospace;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -395,12 +395,12 @@ function getFileName(p: string): string {
 
 .recent-arrow {
   font-size: 12px;
-  color: #64748b;
+  color: var(--text-dim);
   transition: all 0.15s;
 }
 
 .recent-card-btn:hover .recent-arrow {
-  color: #38bdf8;
+  color: var(--text-highlight);
   transform: translateX(2px);
 }
 </style>

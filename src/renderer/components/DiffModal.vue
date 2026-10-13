@@ -160,8 +160,8 @@ function revertAll() {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: #141417;
-  color: #e2e8f0;
+  background: var(--bg-workspace);
+  color: var(--text-main);
   min-height: 0;
   overflow: hidden;
 }
@@ -169,8 +169,8 @@ function revertAll() {
 /* 统一二级子工具条 (38px) */
 .sub-toolbar {
   height: 38px;
-  background: #1a1a20;
-  border-bottom: 1px solid #282832;
+  background: var(--bg-subbar);
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -187,31 +187,31 @@ function revertAll() {
 .sub-title {
   font-size: 12px;
   font-weight: 600;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 .sub-badge {
-  background: #252530;
-  color: #cbd5e1;
+  background: var(--bg-btn);
+  color: var(--text-main);
   font-size: 11px;
   padding: 1px 7px;
   border-radius: 4px;
-  border: 1px solid #363644;
+  border: 1px solid var(--border-color);
 }
 
 /* 全模式统一改动徽章 */
 .unified-change-badge {
-  background: #3b280c;
-  color: #fbbf24;
-  border: 1px solid #634212;
+  background: var(--desc-bg);
+  color: var(--desc-text);
+  border: 1px solid var(--desc-border);
   font-size: 11px;
   padding: 1px 7px;
   border-radius: 4px;
   font-weight: 600;
 }
 .unified-change-badge.live {
-  background: #1e3a5f;
-  color: #93c5fd;
-  border-color: #2563eb;
+  background: rgba(37, 99, 235, 0.12);
+  color: var(--text-highlight);
+  border-color: rgba(37, 99, 235, 0.35);
 }
 
 .stat-mini {
@@ -221,21 +221,21 @@ function revertAll() {
   font-weight: 600;
 }
 .stat-mini.mod {
-  background: #3b280c;
-  color: #fde68a;
+  background: rgba(245, 158, 11, 0.15);
+  color: #d97706;
 }
 .stat-mini.add {
-  background: #0f3d1e;
-  color: #bbf7d0;
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
 }
 .stat-mini.del {
-  background: #450a0a;
-  color: #fecaca;
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
 }
 
 .sub-filter-hint {
   font-size: 11px;
-  color: #3b82f6;
+  color: var(--text-highlight);
   font-style: italic;
 }
 
@@ -245,9 +245,9 @@ function revertAll() {
   gap: 6px;
 }
 .sub-tool-btn {
-  background: #262632;
-  border: 1px solid #383848;
-  color: #cbd5e1;
+  background: var(--bg-btn);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
   padding: 3px 9px;
   border-radius: 5px;
   font-size: 11px;
@@ -256,20 +256,20 @@ function revertAll() {
   transition: all 0.1s;
 }
 .sub-tool-btn.danger {
-  background: #450a0a;
-  border-color: #7f1d1d;
-  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.35);
+  color: #ef4444;
 }
 .sub-tool-btn.danger:hover:not(:disabled) {
-  background: #7f1d1d;
+  background: #dc2626;
   color: #fff;
 }
 .sub-tool-btn.danger:disabled {
   opacity: 0.35;
   cursor: not-allowed;
-  background: #24242e;
-  border-color: #32323e;
-  color: #64748b;
+  background: var(--bg-btn);
+  border-color: var(--border-subtle);
+  color: var(--text-dim);
 }
 
 .diff-body {
@@ -281,7 +281,7 @@ function revertAll() {
 .empty-diff {
   text-align: center;
   padding: 80px 20px;
-  color: #64748b;
+  color: var(--text-dim);
 }
 .empty-diff .icon {
   font-size: 32px;
@@ -300,27 +300,27 @@ function revertAll() {
 .diff-table td {
   padding: 8px 12px;
   text-align: left;
-  border-bottom: 1px solid #24242e;
+  border-bottom: 1px solid var(--border-subtle);
 }
 .diff-table th {
-  background: #1a1a20;
+  background: var(--bg-subbar);
   font-weight: 600;
-  color: #94a3b8;
-  border-bottom: 1px solid #2d2d38;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .diff-table tbody tr:hover {
-  background: #1c1c24;
+  background: var(--bg-row-hover);
 }
 
 .diff-table tr.modify {
-  background: rgba(245, 158, 11, 0.05);
+  background: rgba(245, 158, 11, 0.04);
 }
 .diff-table tr.add {
-  background: rgba(34, 197, 94, 0.05);
+  background: rgba(34, 197, 94, 0.04);
 }
 .diff-table tr.delete {
-  background: rgba(239, 68, 68, 0.05);
+  background: rgba(239, 68, 68, 0.04);
 }
 
 .type-pill {
@@ -330,19 +330,19 @@ function revertAll() {
   font-weight: 600;
 }
 .type-pill.modify {
-  background: #3b280c;
-  color: #fbbf24;
-  border: 1px solid #634212;
+  background: rgba(245, 158, 11, 0.15);
+  color: #d97706;
+  border: 1px solid rgba(245, 158, 11, 0.3);
 }
 .type-pill.add {
-  background: #0f3d1e;
-  color: #4ade80;
-  border: 1px solid #166534;
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
 }
 .type-pill.delete {
-  background: #450a0a;
-  color: #f87171;
-  border: 1px solid #7f1d1d;
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
 .category-pill {
@@ -353,25 +353,25 @@ function revertAll() {
   white-space: nowrap;
 }
 .category-pill.description {
-  background: #3b280c;
-  color: #fde047;
-  border: 1px solid #715510;
+  background: var(--desc-bg);
+  color: var(--desc-text);
+  border: 1px solid var(--desc-border);
 }
 .category-pill.data {
-  background: #1e293b;
-  color: #93c5fd;
-  border: 1px solid #334155;
+  background: var(--bg-btn);
+  color: var(--text-highlight);
+  border: 1px solid var(--border-color);
 }
 
 .stat-mini.desc {
-  background: #3b280c;
-  color: #fde047;
-  border: 1px solid #715510;
+  background: var(--desc-bg);
+  color: var(--desc-text);
+  border: 1px solid var(--desc-border);
 }
 
 .path-code {
   font-family: 'Consolas', monospace;
-  color: #60a5fa;
+  color: var(--text-code);
   font-weight: 600;
   transition: all 0.15s;
 }
@@ -382,38 +382,38 @@ function revertAll() {
 }
 .path-code.clickable:hover {
   background: rgba(96, 165, 250, 0.15);
-  color: #93c5fd;
+  color: var(--text-highlight);
   text-decoration: underline;
 }
 
 .old-val code {
-  color: #fca5a5;
-  background: #3b1515;
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
   padding: 2px 6px;
   border-radius: 4px;
   font-family: monospace;
 }
 .new-val code {
-  color: #86efac;
-  background: #10331e;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
   padding: 2px 6px;
   border-radius: 4px;
   font-family: monospace;
 }
 
 .revert-btn {
-  background: #24242f;
-  border: 1px solid #363646;
+  background: var(--bg-btn);
+  border: 1px solid var(--border-color);
   padding: 3px 8px;
   border-radius: 4px;
   font-size: 11px;
-  color: #cbd5e1;
+  color: var(--text-muted);
   cursor: pointer;
   transition: all 0.1s;
 }
 .revert-btn:hover {
-  background: #323242;
-  color: #fff;
-  border-color: #4b4b60;
+  background: var(--bg-btn-hover);
+  color: var(--text-main);
+  border-color: var(--border-focus);
 }
 </style>

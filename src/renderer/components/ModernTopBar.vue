@@ -451,6 +451,44 @@ const changeCount = computed(() => doc.totalChangesCount)
           保存 (Ctrl+S)
         </button>
       </div>
+
+      <!-- 黑白主题切换按钮 -->
+      <button
+        class="theme-toggle-btn"
+        :title="doc.theme === 'dark' ? '切换为浅色明亮主题' : '切换为深色暗黑主题'"
+        @click="doc.toggleTheme()"
+      >
+        <svg
+          v-if="doc.theme === 'dark'"
+          viewBox="0 0 24 24"
+          width="14"
+          height="14"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="12" cy="12" r="5" />
+          <line x1="12" y1="1" x2="12" y2="3" />
+          <line x1="12" y1="21" x2="12" y2="23" />
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+          <line x1="1" y1="12" x2="3" y2="12" />
+          <line x1="21" y1="12" x2="23" y2="12" />
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+        </svg>
+        <svg
+          v-else
+          viewBox="0 0 24 24"
+          width="14"
+          height="14"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        </svg>
+      </button>
     </div>
   </header>
 </template>
@@ -462,15 +500,18 @@ const changeCount = computed(() => doc.totalChangesCount)
   align-items: center;
   justify-content: space-between;
   height: 44px;
-  background: #18181c;
-  color: #e6e6ea;
-  border-bottom: 1px solid #282830;
+  background: var(--bg-topbar);
+  color: var(--text-main);
+  border-bottom: 1px solid var(--border-color);
   padding: 0 10px;
   box-sizing: border-box;
   flex-shrink: 0;
   user-select: none;
   gap: 8px;
   overflow: visible;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
 }
 
 /* 左侧品牌与文件 */
@@ -495,19 +536,19 @@ const changeCount = computed(() => doc.totalChangesCount)
   flex-shrink: 0;
 }
 .logo-text {
-  color: #fff;
+  color: var(--text-main);
   display: flex;
   align-items: center;
 }
 .brand-sub {
   font-size: 10px;
-  color: #64748b;
+  color: var(--text-dim);
   font-weight: 500;
   margin-left: 5px;
-  background: #202028;
+  background: var(--bg-subbar);
   padding: 1px 5px;
   border-radius: 3px;
-  border: 1px solid #2d2d38;
+  border: 1px solid var(--border-color);
 }
 .mini-svg,
 .popover-mini-svg {
@@ -520,10 +561,10 @@ const changeCount = computed(() => doc.totalChangesCount)
   display: flex;
   align-items: center;
   gap: 5px;
-  background: #22222a;
+  background: var(--bg-subbar);
   padding: 2px 6px;
   border-radius: 5px;
-  border: 1px solid #32323e;
+  border: 1px solid var(--border-color);
   font-size: 11px;
   max-width: 140px;
   min-width: 75px;
@@ -539,7 +580,7 @@ const changeCount = computed(() => doc.totalChangesCount)
   text-overflow: ellipsis;
   white-space: nowrap;
   font-weight: 500;
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 /* 状态胶囊: 固定槽位防抖 */
@@ -603,9 +644,9 @@ const changeCount = computed(() => doc.totalChangesCount)
 
 .btn-group {
   display: flex;
-  background: #22222a;
+  background: var(--bg-btn);
   border-radius: 5px;
-  border: 1px solid #32323e;
+  border: 1px solid var(--border-color);
   overflow: visible;
   flex-shrink: 0;
   position: relative;
@@ -614,13 +655,13 @@ const changeCount = computed(() => doc.totalChangesCount)
 .split-arrow-btn {
   padding: 3px 5px !important;
   font-size: 10px;
-  border-left: 1px solid #32323e;
-  border-right: 1px solid #32323e;
-  color: #94a3b8;
+  border-left: 1px solid var(--border-color);
+  border-right: 1px solid var(--border-color);
+  color: var(--text-muted);
 }
 .split-arrow-btn:hover {
-  color: #fff;
-  background: #2d2d38;
+  color: var(--text-main);
+  background: var(--bg-btn-hover);
 }
 
 /* 最近文件快捷弹出菜单 */
@@ -628,11 +669,11 @@ const changeCount = computed(() => doc.totalChangesCount)
   position: absolute;
   top: calc(100% + 6px);
   left: 0;
-  background: #1e1e26;
-  border: 1px solid #38384a;
+  background: var(--bg-modal);
+  border: 1px solid var(--border-color);
   box-shadow:
-    0 10px 25px rgba(0, 0, 0, 0.5),
-    0 2px 8px rgba(0, 0, 0, 0.3);
+    0 10px 25px rgba(0, 0, 0, 0.35),
+    0 2px 8px rgba(0, 0, 0, 0.2);
   border-radius: 7px;
   padding: 6px;
   width: 250px;
@@ -647,10 +688,10 @@ const changeCount = computed(() => doc.totalChangesCount)
   justify-content: space-between;
   align-items: center;
   font-size: 10.5px;
-  color: #64748b;
+  color: var(--text-muted);
   font-weight: 600;
   padding: 2px 4px 5px;
-  border-bottom: 1px solid #282836;
+  border-bottom: 1px solid var(--border-color);
   margin-bottom: 2px;
 }
 
@@ -745,17 +786,17 @@ const changeCount = computed(() => doc.totalChangesCount)
 /* 模式切换 Tabs: 紧凑精简 */
 .view-mode-tabs {
   display: flex;
-  background: #111115;
+  background: var(--bg-btn);
   padding: 2px;
   border-radius: 5px;
-  border: 1px solid #2a2a35;
+  border: 1px solid var(--border-color);
   flex-shrink: 0;
 }
 
 .mode-tab-btn {
   background: transparent;
   border: none;
-  color: #94a3b8;
+  color: var(--text-muted);
   padding: 3px 8px;
   font-size: 11px;
   border-radius: 4px;
@@ -772,11 +813,12 @@ const changeCount = computed(() => doc.totalChangesCount)
   box-sizing: border-box;
 }
 .mode-tab-btn:hover {
-  color: #f1f5f9;
+  color: var(--text-main);
+  background: var(--bg-btn-hover);
 }
 .mode-tab-btn.active {
-  background: #2563eb;
-  color: #fff;
+  background: var(--bg-btn-active);
+  color: var(--text-highlight);
   font-weight: 600;
 }
 
@@ -1099,9 +1141,9 @@ const changeCount = computed(() => doc.totalChangesCount)
   flex-shrink: 0;
 }
 .tool-btn {
-  background: #22222a;
-  border: 1px solid #32323e;
-  color: #cbd5e1;
+  background: var(--bg-btn);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
   padding: 3px 7px;
   border-radius: 5px;
   font-size: 11px;
@@ -1110,9 +1152,29 @@ const changeCount = computed(() => doc.totalChangesCount)
   transition: all 0.15s;
 }
 .tool-btn:hover {
-  background: #2d2d38;
-  color: #fff;
-  border-color: #424250;
+  background: var(--bg-btn-hover);
+  color: var(--text-main);
+  border-color: var(--border-muted);
+}
+
+.theme-toggle-btn {
+  background: var(--bg-btn);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  width: 28px;
+  height: 28px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.theme-toggle-btn:hover {
+  background: var(--bg-btn-hover);
+  color: var(--text-main);
+  border-color: var(--border-muted);
 }
 
 .save-btn {
@@ -1136,9 +1198,9 @@ const changeCount = computed(() => doc.totalChangesCount)
 .save-btn:disabled {
   opacity: 0.35;
   cursor: not-allowed;
-  background: #2b2b36;
-  border-color: #2b2b36;
-  color: #808092;
+  background: var(--bg-btn);
+  border-color: var(--border-color);
+  color: var(--text-dim);
 }
 .save-btn.active {
   background: #2563eb;

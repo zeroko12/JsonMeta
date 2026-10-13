@@ -16,6 +16,7 @@ const doc = useJsonDocStore()
 
 onMounted(() => {
   doc.initExternalListener()
+  doc.applyTheme(doc.theme)
 })
 </script>
 
@@ -87,9 +88,12 @@ onMounted(() => {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  background: #141417;
-  color: #f1f5f9;
+  background: var(--bg-app);
+  color: var(--text-main);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .app-workspace {
@@ -98,7 +102,8 @@ onMounted(() => {
   min-height: 0;
   overflow: hidden;
   position: relative;
-  background: #141417;
+  background: var(--bg-workspace);
+  transition: background-color 0.15s ease;
 }
 
 .editor-layout {
@@ -125,7 +130,7 @@ onMounted(() => {
 .external-alert-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(10, 10, 14, 0.8);
+  background: var(--bg-modal-backdrop);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
@@ -133,22 +138,22 @@ onMounted(() => {
   z-index: 1500;
 }
 .external-alert-card {
-  background: #1e1e26;
-  border: 1px solid #333342;
+  background: var(--bg-modal);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   width: 440px;
   padding: 20px 24px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
-  color: #e2e8f0;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+  color: var(--text-main);
 }
 .external-alert-card h3 {
   margin: 0 0 10px;
-  color: #f87171;
+  color: #ef4444;
   font-size: 16px;
 }
 .external-alert-card p {
   margin: 0 0 16px;
-  color: #94a3b8;
+  color: var(--text-muted);
   font-size: 13px;
   line-height: 1.5;
 }
@@ -162,14 +167,13 @@ onMounted(() => {
   border-radius: 6px;
   font-size: 12px;
   cursor: pointer;
-  border: 1px solid #363646;
-  background: #252530;
-  color: #cbd5e1;
+  border: 1px solid var(--border-color);
+  background: var(--bg-btn);
+  color: var(--text-main);
   transition: all 0.1s;
 }
 .alert-btn:hover {
-  background: #323240;
-  color: #fff;
+  background: var(--bg-btn-hover);
 }
 .alert-btn.primary {
   background: #2563eb;
