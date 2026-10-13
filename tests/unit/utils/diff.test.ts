@@ -122,4 +122,18 @@ describe('diff', () => {
     expect(changes.get('x')!.oldValue).toBe(1)
     expect(changes.get('x')!.newValue).toBe('one')
   })
+
+  it('detects object key reordering as a change', () => {
+    const a = { a: 1, b: 2 }
+    const b = { b: 2, a: 1 }
+    const changes = diff(a, b)
+    expect(changes.size).toBe(1)
+    expect(changes.get('(根对象属性排序)')?.type).toBe<ChangeType>('modify')
+
+    const nestedA = { config: { x: 10, y: 20 } }
+    const nestedB = { config: { y: 20, x: 10 } }
+    const nestedChanges = diff(nestedA, nestedB)
+    expect(nestedChanges.size).toBe(1)
+    expect(nestedChanges.get('config')?.type).toBe<ChangeType>('modify')
+  })
 })

@@ -57,7 +57,25 @@ export function diff(original: unknown, current: unknown): ChangeMap {
 function diffInto(original: unknown, current: unknown, basePath: string, changes: ChangeMap): void {
   // Both objects — recurse on keys
   if (isObject(original) && isObject(current)) {
-    const keys = new Set([...Object.keys(original), ...Object.keys(current)])
+    const origKeys = Object.keys(original)
+    const currKeys = Object.keys(current)
+
+    // 检测对象内部属性顺序调整 (保持所有属性存在，仅键名相对顺序发生变更)
+    const sameLength = origKeys.length === currKeys.length
+    if (sameLength && origKeys.some((k, i) => k !== currKeys[i])) {
+      const allExist = origKeys.every((k) => k in current)
+      if (allExist) {
+        const orderKey = basePath || '(根对象属性排序)'
+        changes.set(orderKey, {
+          path: orderKey,
+          type: 'modify',
+          oldValue: origKeys.join(', ') as unknown as JsonValue,
+          newValue: currKeys.join(', ') as unknown as JsonValue,
+        })
+      }
+    }
+
+    const keys = new Set([...origKeys, ...currKeys])
     for (const key of keys) {
       const childPath = basePath ? `${basePath}.${key}` : key
       diffInto(original[key], current[key], childPath, changes)

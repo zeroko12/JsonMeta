@@ -882,12 +882,17 @@ export const useJsonDocStore = defineStore('jsonDoc', () => {
 
   function revertField(path: string) {
     if (originalSnapshot.value === null) return
+    if (path === '(根对象属性排序)') {
+      recordSnapshot('还原根属性排序')
+      current.value = safeClone(originalSnapshot.value)
+      return
+    }
     const originalVal = get(originalSnapshot.value, path)
     recordSnapshot(`还原字段值 ${path}`)
     if (originalVal === undefined) {
       current.value = remove(current.value as JsonValue, path)
     } else {
-      current.value = set(current.value as JsonValue, path, originalVal as JsonValue)
+      current.value = set(current.value as JsonValue, path, safeClone(originalVal as JsonValue))
     }
   }
 
