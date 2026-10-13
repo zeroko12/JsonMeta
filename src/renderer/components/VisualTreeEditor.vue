@@ -376,6 +376,74 @@ async function copyText(text: string, msg: string) {
   closeContextMenu()
 }
 
+function handleMenuInspect() {
+  if (contextMenu.value.row) {
+    openInspector(contextMenu.value.row.path)
+  }
+  closeContextMenu()
+}
+
+function handleMenuEditDesc(e: Event) {
+  if (contextMenu.value.row) {
+    startEditDesc(contextMenu.value.row, e)
+  }
+  closeContextMenu()
+}
+
+function handleMenuRawEdit(e: Event) {
+  if (contextMenu.value.row) {
+    openRawEdit(contextMenu.value.row, e)
+  }
+  closeContextMenu()
+}
+
+function handleMenuRename(e: Event) {
+  if (contextMenu.value.row) {
+    startRename(contextMenu.value.row, e)
+  }
+  closeContextMenu()
+}
+
+function handleMenuAdd(e: Event) {
+  if (contextMenu.value.row) {
+    openAddModal(contextMenu.value.row, e)
+  }
+  closeContextMenu()
+}
+
+function handleMenuCopyPath() {
+  if (contextMenu.value.row) {
+    void copyText(contextMenu.value.row.path, '已复制字段路径 (JSONPath)')
+  }
+}
+
+function handleMenuCopyJson() {
+  if (contextMenu.value.row) {
+    void copyText(JSON.stringify(contextMenu.value.row.value, null, 2), '已复制节点 JSON 数据')
+  }
+}
+
+function handleMenuMove(dir: 'up' | 'down') {
+  if (contextMenu.value.row) {
+    doc.moveNode(contextMenu.value.row.path, dir)
+  }
+  closeContextMenu()
+}
+
+function handleMenuRevert() {
+  if (contextMenu.value.row) {
+    doc.revertField(contextMenu.value.row.path)
+  }
+  closeContextMenu()
+}
+
+function handleMenuDelete() {
+  if (contextMenu.value.row) {
+    doc.deleteNode(contextMenu.value.row.path)
+  }
+  closeContextMenu()
+}
+
 function onGlobalKeyDown(e: KeyboardEvent) {
   if (e.key === 'Escape') {
     closeContextMenu()
@@ -822,36 +890,18 @@ watch(
 
         <div class="ctx-divider" />
 
-        <button
-          class="ctx-item primary"
-          @click="
-            openInspector(contextMenu.row!.path)
-            closeContextMenu()
-          "
-        >
+        <button class="ctx-item primary" @click="handleMenuInspect">
           <span class="ctx-icon">▤</span>
           <span class="ctx-label">属性检查器 (菜单/抽屉)</span>
           <span class="ctx-hint">双击</span>
         </button>
 
-        <button
-          class="ctx-item"
-          @click="
-            startEditDesc(contextMenu.row!, $event)
-            closeContextMenu()
-          "
-        >
+        <button class="ctx-item" @click="handleMenuEditDesc($event)">
           <span class="ctx-icon">📝</span>
           <span class="ctx-label">编辑中文业务描述</span>
         </button>
 
-        <button
-          class="ctx-item"
-          @click="
-            openRawEdit(contextMenu.row!, $event)
-            closeContextMenu()
-          "
-        >
+        <button class="ctx-item" @click="handleMenuRawEdit($event)">
           <span class="ctx-icon">{ }</span>
           <span class="ctx-label">以 JSON 源码编辑</span>
         </button>
@@ -859,10 +909,7 @@ watch(
         <button
           v-if="!contextMenu.row.parentIsArray"
           class="ctx-item"
-          @click="
-            startRename(contextMenu.row!, $event)
-            closeContextMenu()
-          "
+          @click="handleMenuRename($event)"
         >
           <span class="ctx-icon">🏷️</span>
           <span class="ctx-label">重命名属性键名 (Key)</span>
@@ -871,10 +918,7 @@ watch(
         <button
           v-if="contextMenu.row.isContainer"
           class="ctx-item highlight"
-          @click="
-            openAddModal(contextMenu.row!, $event)
-            closeContextMenu()
-          "
+          @click="handleMenuAdd($event)"
         >
           <span class="ctx-icon">➕</span>
           <span class="ctx-label">
@@ -884,67 +928,36 @@ watch(
 
         <div class="ctx-divider" />
 
-        <button
-          class="ctx-item"
-          @click="copyText(contextMenu.row!.path, '已复制字段路径 (JSONPath)')"
-        >
+        <button class="ctx-item" @click="handleMenuCopyPath">
           <span class="ctx-icon">📋</span>
           <span class="ctx-label">复制字段路径 (JSONPath)</span>
         </button>
 
-        <button
-          class="ctx-item"
-          @click="copyText(JSON.stringify(contextMenu.row!.value, null, 2), '已复制节点 JSON 数据')"
-        >
+        <button class="ctx-item" @click="handleMenuCopyJson">
           <span class="ctx-icon">📄</span>
           <span class="ctx-label">复制节点数据 (JSON)</span>
         </button>
 
         <div class="ctx-divider" />
 
-        <button
-          class="ctx-item"
-          @click="
-            doc.moveNode(contextMenu.row!.path, 'up')
-            closeContextMenu()
-          "
-        >
+        <button class="ctx-item" @click="handleMenuMove('up')">
           <span class="ctx-icon">▲</span>
           <span class="ctx-label">上移一行</span>
         </button>
 
-        <button
-          class="ctx-item"
-          @click="
-            doc.moveNode(contextMenu.row!.path, 'down')
-            closeContextMenu()
-          "
-        >
+        <button class="ctx-item" @click="handleMenuMove('down')">
           <span class="ctx-icon">▼</span>
           <span class="ctx-label">下移一行</span>
         </button>
 
         <div class="ctx-divider" />
 
-        <button
-          v-if="contextMenu.row.isModified"
-          class="ctx-item warn"
-          @click="
-            doc.revertField(contextMenu.row!.path)
-            closeContextMenu()
-          "
-        >
+        <button v-if="contextMenu.row.isModified" class="ctx-item warn" @click="handleMenuRevert">
           <span class="ctx-icon">↺</span>
           <span class="ctx-label">还原此项修改</span>
         </button>
 
-        <button
-          class="ctx-item danger"
-          @click="
-            doc.deleteNode(contextMenu.row!.path)
-            closeContextMenu()
-          "
-        >
+        <button class="ctx-item danger" @click="handleMenuDelete">
           <span class="ctx-icon">✕</span>
           <span class="ctx-label">删除此节点</span>
           <span class="ctx-hint">Ctrl+Z 可撤销</span>
