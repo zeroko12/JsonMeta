@@ -10,6 +10,7 @@ import {
   moveArrayItem,
   insertArrayItem,
   addProperty,
+  reorderNode,
 } from '@shared/utils/json-path'
 
 describe('json-path', () => {
@@ -247,6 +248,26 @@ describe('json-path', () => {
       const orig = { a: 1 }
       const res = addProperty(orig, '', 'b', 2)
       expect((res as Record<string, number>).b).toBe(2)
+    })
+  })
+
+  describe('reorderNode', () => {
+    it('reorders siblings in an object', () => {
+      const orig = { a: 1, b: 2, c: 3 }
+      const after = reorderNode(orig, 'c', 'a', 'before')
+      expect(Object.keys(after)).toEqual(['c', 'a', 'b'])
+
+      const before = reorderNode(orig, 'a', 'c', 'after')
+      expect(Object.keys(before)).toEqual(['b', 'c', 'a'])
+    })
+
+    it('reorders siblings in an array', () => {
+      const orig = { list: ['A', 'B', 'C', 'D'] }
+      const res1 = reorderNode(orig, 'list.3', 'list.0', 'before')
+      expect((res1 as { list: string[] }).list).toEqual(['D', 'A', 'B', 'C'])
+
+      const res2 = reorderNode(orig, 'list.0', 'list.2', 'after')
+      expect((res2 as { list: string[] }).list).toEqual(['B', 'C', 'A', 'D'])
     })
   })
 })

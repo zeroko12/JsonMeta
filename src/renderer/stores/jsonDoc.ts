@@ -11,6 +11,7 @@ import {
   moveArrayItem,
   insertArrayItem,
   addProperty,
+  reorderNode as reorderPathNode,
   type JsonValue,
 } from '@shared/utils/json-path'
 
@@ -742,6 +743,94 @@ export const useJsonDocStore = defineStore('jsonDoc', () => {
     }
   }
 
+  function remapArrayDescriptions(
+    descMap: Record<string, string>,
+    parentPath: string,
+    sourceIdx: number,
+    insertIdx: number,
+  ): Record<string, string> {
+    if (sourceIdx === insertIdx) return descMap
+    const prefix = parentPath ? `${parentPath}.` : ''
+    const next: Record<string, string> = {}
+
+    for (const [k, v] of Object.entries(descMap)) {
+      if (k.startsWith(prefix)) {
+        const rest = k.slice(prefix.length)
+        const dotPos = rest.indexOf('.')
+        const idxStr = dotPos === -1 ? rest : rest.slice(0, dotPos)
+        const subPath = dotPos === -1 ? '' : rest.slice(dotPos)
+        const idx = Number.parseInt(idxStr, 10)
+
+        if (!Number.isNaN(idx)) {
+          let newIdx = idx
+          if (idx === sourceIdx) {
+            newIdx = insertIdx
+          } else if (sourceIdx < insertIdx && idx > sourceIdx && idx <= insertIdx) {
+            newIdx = idx - 1
+          } else if (sourceIdx > insertIdx && idx >= insertIdx && idx < sourceIdx) {
+            newIdx = idx + 1
+          }
+          const newKey = `${prefix}${newIdx}${subPath}`
+          next[newKey] = v
+          continue
+        }
+      }
+      next[k] = v
+    }
+    return next
+  }
+
+  function reorderNode(
+    sourcePath: string,
+    targetPath: string,
+    position: 'before' | 'after' | 'inside' = 'before',
+  ) {
+    if (!sourcePath || !targetPath || sourcePath === targetPath) return
+    if (targetPath.startsWith(`${sourcePath}.`)) {
+      showToast('⚠️ 无法将父级节点移动到其自身的子节点内部', 'error')
+      return
+    }
+
+    recordSnapshot(`拖拽调整节点顺序: ${sourcePath} -> ${targetPath}`)
+
+    const sourceSegs = sourcePath.split('.')
+    const sourceKey = sourceSegs.pop()!
+    const sourceParentPath = sourceSegs.join('.')
+
+    const targetSegs = targetPath.split('.')
+    const targetKey = targetSegs.pop()!
+    const targetParentPath = targetSegs.join('.')
+
+    // 同一数组父容器重排序时，智能迁移描述索引
+    if (sourceParentPath === targetParentPath && position !== 'inside') {
+      const parent = sourceParentPath ? get(current.value, sourceParentPath) : current.value
+      if (Array.isArray(parent)) {
+        const sIdx = Number.parseInt(sourceKey, 10)
+        const tIdx = Number.parseInt(targetKey, 10)
+        if (!Number.isNaN(sIdx) && !Number.isNaN(tIdx) && sIdx !== tIdx) {
+          let destIdx =
+            sIdx < tIdx
+              ? position === 'before'
+                ? tIdx - 1
+                : tIdx
+              : position === 'before'
+                ? tIdx
+                : tIdx + 1
+          destIdx = Math.max(0, Math.min(parent.length - 1, destIdx))
+          descriptions.value = remapArrayDescriptions(
+            descriptions.value,
+            sourceParentPath,
+            sIdx,
+            destIdx,
+          )
+        }
+      }
+    }
+
+    current.value = reorderPathNode(current.value, sourcePath, targetPath, position)
+    selectedPath.value = targetPath
+  }
+
   function renameNodeKey(path: string, newKey: string) {
     if (!path || !newKey) return
     const segments = path.split('.')
@@ -931,6 +1020,7 @@ export const useJsonDocStore = defineStore('jsonDoc', () => {
     setNodeDescription,
     deleteNode,
     moveNode,
+    reorderNode,
     renameNodeKey,
     addChildNode,
     revertField,

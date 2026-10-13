@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref, toRaw, watch } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, toRaw, watch } from 'vue'
 import { useJsonDocStore } from '../stores/jsonDoc'
 import type { JsonValue } from '@shared/utils/json-path'
 import { escapeHtml, highlightMatch, matchTextOrPinyin } from '@shared/utils/pinyin'
@@ -248,6 +248,140 @@ function openInspector(path: string) {
   doc.showDetailDrawer = true
 }
 
+// ─── 拖拽排序内核 (HTML5 Drag & Drop) ───
+const draggingRow = ref<TreeRowItem | null>(null)
+const dragOverTarget = ref<{
+  path: string
+  position: 'before' | 'after' | 'inside'
+} | null>(null)
+
+function onDragStart(row: TreeRowItem, e: DragEvent) {
+  if (!e.dataTransfer) return
+  draggingRow.value = row
+  e.dataTransfer.effectAllowed = 'move'
+  e.dataTransfer.setData('text/plain', row.path)
+}
+
+function onDragOver(row: TreeRowItem, e: DragEvent) {
+  if (!draggingRow.value || draggingRow.value.path === row.path) return
+  // 禁止拖入自身子级
+  if (row.path.startsWith(`${draggingRow.value.path}.`)) return
+
+  e.preventDefault()
+  if (e.dataTransfer) {
+    e.dataTransfer.dropEffect = 'move'
+  }
+
+  const targetEl = e.currentTarget as HTMLElement
+  const rect = targetEl.getBoundingClientRect()
+  const relY = e.clientY - rect.top
+
+  let position: 'before' | 'after' | 'inside' = 'before'
+  if (row.isContainer && relY > rect.height * 0.25 && relY < rect.height * 0.75) {
+    position = 'inside'
+  } else if (relY > rect.height * 0.5) {
+    position = 'after'
+  } else {
+    position = 'before'
+  }
+
+  dragOverTarget.value = { path: row.path, position }
+}
+
+function onDragLeave(row: TreeRowItem, e: DragEvent) {
+  const related = e.relatedTarget as Node | null
+  const current = e.currentTarget as Node | null
+  if (current && related && current.contains(related)) return
+  if (dragOverTarget.value?.path === row.path) {
+    dragOverTarget.value = null
+  }
+}
+
+function onDrop(row: TreeRowItem, e: DragEvent) {
+  e.preventDefault()
+  if (draggingRow.value && dragOverTarget.value) {
+    const src = draggingRow.value
+    const targetPos = dragOverTarget.value.position
+    doc.reorderNode(src.path, row.path, targetPos)
+    doc.showToast(`已调整节点顺序: ${src.keyName} ➔ ${row.keyName}`, 'success')
+  }
+  draggingRow.value = null
+  dragOverTarget.value = null
+}
+
+function onDragEnd() {
+  draggingRow.value = null
+  dragOverTarget.value = null
+}
+
+// ─── 双击配置项：快速打开属性检查器 ───
+function onRowDblClick(row: TreeRowItem, e: MouseEvent) {
+  const target = e.target as HTMLElement
+  if (['INPUT', 'SELECT', 'TEXTAREA', 'BUTTON'].includes(target.tagName)) return
+  if (target.closest('.rename-input') || target.closest('.desc-editor-inline')) return
+
+  openInspector(row.path)
+}
+
+// ─── 右键上下文操作菜单 ───
+const contextMenu = ref<{
+  show: boolean
+  x: number
+  y: number
+  row: TreeRowItem | null
+}>({
+  show: false,
+  x: 0,
+  y: 0,
+  row: null,
+})
+
+function openContextMenu(row: TreeRowItem, e: MouseEvent) {
+  e.preventDefault()
+  e.stopPropagation()
+  selectRow(row.path)
+
+  const menuWidth = 240
+  const menuHeight = 380
+  const x = Math.min(e.clientX, window.innerWidth - menuWidth - 12)
+  const y = Math.min(e.clientY, window.innerHeight - menuHeight - 12)
+
+  contextMenu.value = {
+    show: true,
+    x: Math.max(10, x),
+    y: Math.max(10, y),
+    row,
+  }
+}
+
+function closeContextMenu() {
+  if (contextMenu.value.show) {
+    contextMenu.value.show = false
+  }
+}
+
+async function copyText(text: string, msg: string) {
+  try {
+    await navigator.clipboard.writeText(text)
+    doc.showToast(msg, 'success')
+  } catch {
+    const ta = document.createElement('textarea')
+    ta.value = text
+    document.body.appendChild(ta)
+    ta.select()
+    document.execCommand('copy')
+    document.body.removeChild(ta)
+    doc.showToast(msg, 'success')
+  }
+  closeContextMenu()
+}
+
+function onGlobalKeyDown(e: KeyboardEvent) {
+  if (e.key === 'Escape') {
+    closeContextMenu()
+  }
+}
+
 // ─── 高性能虚拟滚动内核 (支持万级节点 60fps 极速展开与滚动) ───
 const ROW_HEIGHT = 34
 const BUFFER = 6
@@ -257,6 +391,7 @@ const viewportHeight = ref(600)
 
 function onScroll(e: Event) {
   scrollTop.value = (e.target as HTMLElement).scrollTop
+  closeContextMenu()
 }
 
 onMounted(() => {
@@ -269,6 +404,13 @@ onMounted(() => {
     })
     observer.observe(treeListRef.value)
   }
+  window.addEventListener('click', closeContextMenu)
+  window.addEventListener('keydown', onGlobalKeyDown)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('click', closeContextMenu)
+  window.removeEventListener('keydown', onGlobalKeyDown)
 })
 
 const totalCount = computed(() => displayRows.value.length)
@@ -423,9 +565,21 @@ watch(
                 'search-target-flash': flashSearchPath === row.path,
                 'active-search-match': activeSearchPath === row.path,
                 'tree-search-match': doc.searchMode === 'tree' && matchedPathSet.has(row.path),
+                'is-dragging': draggingRow?.path === row.path,
+                'drop-before':
+                  dragOverTarget?.path === row.path && dragOverTarget?.position === 'before',
+                'drop-after':
+                  dragOverTarget?.path === row.path && dragOverTarget?.position === 'after',
+                'drop-inside':
+                  dragOverTarget?.path === row.path && dragOverTarget?.position === 'inside',
               }"
               :data-path="row.path"
               @click="selectRow(row.path)"
+              @dblclick="onRowDblClick(row, $event)"
+              @contextmenu.prevent="openContextMenu(row, $event)"
+              @dragover="onDragOver(row, $event)"
+              @dragleave="onDragLeave(row, $event)"
+              @drop="onDrop(row, $event)"
             >
               <!-- 层级缩进占位 -->
               <div class="indent-block" :style="{ width: `${row.depth * 22}px` }">
@@ -436,6 +590,18 @@ watch(
                   :style="{ left: `${(d - 1) * 22 + 8}px` }"
                 />
               </div>
+
+              <!-- 拖拽把手 (Drag handle) -->
+              <span
+                class="drag-handle"
+                draggable="true"
+                title="按住拖拽调整此节点排列次序"
+                @dragstart="onDragStart(row, $event)"
+                @dragend="onDragEnd"
+                @click.stop
+              >
+                ⋮⋮
+              </span>
 
               <!-- 展开 / 折叠小箭头 -->
               <button
@@ -639,6 +805,152 @@ watch(
         </div>
       </div>
     </div>
+
+    <!-- 全局右键快捷上下文菜单 -->
+    <Teleport to="body">
+      <div
+        v-if="contextMenu.show && contextMenu.row"
+        class="tree-context-menu"
+        :style="{ top: `${contextMenu.y}px`, left: `${contextMenu.x}px` }"
+        @click.stop
+        @contextmenu.prevent
+      >
+        <div class="ctx-header">
+          <span class="ctx-title">{{ contextMenu.row.path }}</span>
+          <span class="ctx-type">{{ contextMenu.row.type }}</span>
+        </div>
+
+        <div class="ctx-divider" />
+
+        <button
+          class="ctx-item primary"
+          @click="
+            openInspector(contextMenu.row!.path)
+            closeContextMenu()
+          "
+        >
+          <span class="ctx-icon">▤</span>
+          <span class="ctx-label">属性检查器 (菜单/抽屉)</span>
+          <span class="ctx-hint">双击</span>
+        </button>
+
+        <button
+          class="ctx-item"
+          @click="
+            startEditDesc(contextMenu.row!, $event)
+            closeContextMenu()
+          "
+        >
+          <span class="ctx-icon">📝</span>
+          <span class="ctx-label">编辑中文业务描述</span>
+        </button>
+
+        <button
+          class="ctx-item"
+          @click="
+            openRawEdit(contextMenu.row!, $event)
+            closeContextMenu()
+          "
+        >
+          <span class="ctx-icon">{ }</span>
+          <span class="ctx-label">以 JSON 源码编辑</span>
+        </button>
+
+        <button
+          v-if="!contextMenu.row.parentIsArray"
+          class="ctx-item"
+          @click="
+            startRename(contextMenu.row!, $event)
+            closeContextMenu()
+          "
+        >
+          <span class="ctx-icon">🏷️</span>
+          <span class="ctx-label">重命名属性键名 (Key)</span>
+        </button>
+
+        <button
+          v-if="contextMenu.row.isContainer"
+          class="ctx-item highlight"
+          @click="
+            openAddModal(contextMenu.row!, $event)
+            closeContextMenu()
+          "
+        >
+          <span class="ctx-icon">➕</span>
+          <span class="ctx-label">
+            {{ contextMenu.row.type === 'array' ? '追加数组子项' : '添加子属性' }}
+          </span>
+        </button>
+
+        <div class="ctx-divider" />
+
+        <button
+          class="ctx-item"
+          @click="copyText(contextMenu.row!.path, '已复制字段路径 (JSONPath)')"
+        >
+          <span class="ctx-icon">📋</span>
+          <span class="ctx-label">复制字段路径 (JSONPath)</span>
+        </button>
+
+        <button
+          class="ctx-item"
+          @click="copyText(JSON.stringify(contextMenu.row!.value, null, 2), '已复制节点 JSON 数据')"
+        >
+          <span class="ctx-icon">📄</span>
+          <span class="ctx-label">复制节点数据 (JSON)</span>
+        </button>
+
+        <div class="ctx-divider" />
+
+        <button
+          class="ctx-item"
+          @click="
+            doc.moveNode(contextMenu.row!.path, 'up')
+            closeContextMenu()
+          "
+        >
+          <span class="ctx-icon">▲</span>
+          <span class="ctx-label">上移一行</span>
+        </button>
+
+        <button
+          class="ctx-item"
+          @click="
+            doc.moveNode(contextMenu.row!.path, 'down')
+            closeContextMenu()
+          "
+        >
+          <span class="ctx-icon">▼</span>
+          <span class="ctx-label">下移一行</span>
+        </button>
+
+        <div class="ctx-divider" />
+
+        <button
+          v-if="contextMenu.row.isModified"
+          class="ctx-item warn"
+          @click="
+            doc.revertField(contextMenu.row!.path)
+            closeContextMenu()
+          "
+        >
+          <span class="ctx-icon">↺</span>
+          <span class="ctx-label">还原此项修改</span>
+        </button>
+
+        <button
+          class="ctx-item danger"
+          @click="
+            doc.deleteNode(contextMenu.row!.path)
+            closeContextMenu()
+          "
+        >
+          <span class="ctx-icon">✕</span>
+          <span class="ctx-label">删除此节点</span>
+          <span class="ctx-hint">Ctrl+Z 可撤销</span>
+        </button>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -1276,5 +1588,179 @@ watch(
   background: rgba(239, 68, 68, 0.18);
   color: #ef4444;
   border-color: #ef4444;
+}
+
+/* ─── 拖拽与手柄样式 ─── */
+.drag-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 20px;
+  font-size: 11px;
+  letter-spacing: -2px;
+  color: var(--text-dim);
+  cursor: grab;
+  user-select: none;
+  opacity: 0.2;
+  transition:
+    opacity 0.15s,
+    color 0.15s;
+  flex-shrink: 0;
+  margin-right: 2px;
+}
+.tree-row:hover .drag-handle {
+  opacity: 0.8;
+}
+.drag-handle:hover {
+  opacity: 1 !important;
+  color: var(--text-highlight);
+}
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.tree-row.is-dragging {
+  opacity: 0.35;
+  background: var(--bg-row-selected);
+}
+
+.tree-row.drop-before {
+  box-shadow: inset 0 2px 0 0 #3b82f6;
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.tree-row.drop-after {
+  box-shadow: inset 0 -2px 0 0 #3b82f6;
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.tree-row.drop-inside {
+  outline: 2px dashed #3b82f6;
+  outline-offset: -2px;
+  background: rgba(59, 130, 246, 0.14) !important;
+}
+
+/* ─── 右键快捷菜单 ─── */
+.tree-context-menu {
+  position: fixed;
+  z-index: 99999;
+  width: 236px;
+  background: var(--bg-modal);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.38);
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  user-select: none;
+  animation: ctxFadeIn 0.12s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes ctxFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.ctx-header {
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: var(--bg-drawer-header);
+  border-radius: 5px;
+  margin-bottom: 2px;
+}
+.ctx-title {
+  font-size: 11px;
+  font-family: monospace;
+  color: var(--text-code);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+.ctx-type {
+  font-size: 10px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: var(--bg-btn);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.ctx-divider {
+  height: 1px;
+  background: var(--border-subtle);
+  margin: 3px 0;
+}
+
+.ctx-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 5px;
+  border: none;
+  background: transparent;
+  color: var(--text-main);
+  font-size: 12px;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    background 0.1s,
+    color 0.1s;
+}
+.ctx-item:hover {
+  background: var(--bg-btn-hover);
+}
+.ctx-item.primary {
+  color: var(--text-highlight);
+  font-weight: 600;
+}
+.ctx-item.primary:hover {
+  background: rgba(59, 130, 246, 0.15);
+}
+.ctx-item.highlight {
+  color: #10b981;
+}
+.ctx-item.highlight:hover {
+  background: rgba(16, 185, 129, 0.15);
+}
+.ctx-item.warn {
+  color: #f59e0b;
+}
+.ctx-item.warn:hover {
+  background: rgba(245, 158, 11, 0.15);
+}
+.ctx-item.danger {
+  color: #ef4444;
+}
+.ctx-item.danger:hover {
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.ctx-icon {
+  font-size: 13px;
+  width: 16px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.ctx-label {
+  flex: 1;
+}
+.ctx-hint {
+  font-size: 10px;
+  color: var(--text-dim);
+  font-family: inherit;
 }
 </style>

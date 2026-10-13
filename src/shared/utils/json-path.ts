@@ -284,3 +284,106 @@ export function addProperty<T>(root: T, objectPath: string, key: string, value: 
   obj[key] = value
   return set(root, objectPath, obj as JsonValue)
 }
+
+/**
+ * Reorder a node relative to a target node.
+ * If both share the same parent, reorders them within that parent container.
+ * If position is 'inside', moves source into target (if target is container).
+ */
+export function reorderNode<T>(
+  root: T,
+  sourcePath: string,
+  targetPath: string,
+  position: 'before' | 'after' | 'inside' = 'before',
+): T {
+  if (!sourcePath || !targetPath || sourcePath === targetPath) return root
+  if (targetPath.startsWith(`${sourcePath}.`)) return root // Can't move into descendant
+
+  const sourceSegs = splitPath(sourcePath)
+  const sourceKey = sourceSegs.pop()!
+  const sourceParentPath = sourceSegs.join('.')
+
+  const targetSegs = splitPath(targetPath)
+  const targetKey = targetSegs.pop()!
+  const targetParentPath = targetSegs.join('.')
+
+  // Same parent reorder
+  if (sourceParentPath === targetParentPath && position !== 'inside') {
+    const parent = sourceParentPath ? get(root, sourceParentPath) : root
+    if (isArray(parent)) {
+      const sIdx = Number.parseInt(sourceKey, 10)
+      const tIdx = Number.parseInt(targetKey, 10)
+      if (Number.isNaN(sIdx) || Number.isNaN(tIdx) || sIdx === tIdx) return root
+      if (sIdx < 0 || sIdx >= parent.length || tIdx < 0 || tIdx >= parent.length) return root
+
+      const nextArr = [...parent]
+      const [moved] = nextArr.splice(sIdx, 1)
+      let insertIdx =
+        sIdx < tIdx
+          ? position === 'before'
+            ? tIdx - 1
+            : tIdx
+          : position === 'before'
+            ? tIdx
+            : tIdx + 1
+      insertIdx = Math.max(0, Math.min(nextArr.length, insertIdx))
+      nextArr.splice(insertIdx, 0, moved)
+      return set(root, sourceParentPath, nextArr as JsonValue)
+    }
+
+    if (isObject(parent) && sourceKey in parent && targetKey in parent) {
+      const keys = Object.keys(parent).filter((k) => k !== sourceKey)
+      const tIdx = keys.indexOf(targetKey)
+      if (tIdx === -1) return root
+      const insertIdx = position === 'before' ? tIdx : tIdx + 1
+      keys.splice(insertIdx, 0, sourceKey)
+      const nextObj: JsonObject = {}
+      for (const k of keys) {
+        nextObj[k] = parent[k] as JsonValue
+      }
+      return set(root, sourceParentPath, nextObj as JsonValue)
+    }
+  }
+
+  // Cross parent move or move inside container
+  const sourceVal = get(root, sourcePath)
+  if (sourceVal === undefined) return root
+  const targetVal = get(root, targetPath)
+  const targetIsContainer = isArray(targetVal) || isObject(targetVal)
+
+  const nextDoc = remove(root, sourcePath)
+
+  if (position === 'inside' && targetIsContainer) {
+    if (isArray(targetVal)) {
+      return insertArrayItem(nextDoc, targetPath, targetVal.length, sourceVal as JsonValue)
+    } else {
+      return addProperty(nextDoc, targetPath, sourceKey, sourceVal as JsonValue)
+    }
+  }
+
+  // Insert relative to target in target's parent
+  const destParent = targetParentPath ? get(nextDoc, targetParentPath) : nextDoc
+  if (isArray(destParent)) {
+    const tIdx = Number.parseInt(targetKey, 10)
+    const insertIdx = position === 'before' ? Math.max(0, tIdx) : tIdx + 1
+    return insertArrayItem(nextDoc, targetParentPath, insertIdx, sourceVal as JsonValue)
+  }
+
+  if (isObject(destParent)) {
+    const keys = Object.keys(destParent).filter((k) => k !== sourceKey)
+    const tIdx = keys.indexOf(targetKey)
+    const insertIdx = position === 'before' ? Math.max(0, tIdx) : tIdx + 1
+    keys.splice(insertIdx, 0, sourceKey)
+    const nextObj: JsonObject = {}
+    for (const k of keys) {
+      if (k === sourceKey) {
+        nextObj[k] = sourceVal as JsonValue
+      } else {
+        nextObj[k] = destParent[k] as JsonValue
+      }
+    }
+    return set(nextDoc, targetParentPath, nextObj as JsonValue)
+  }
+
+  return root
+}
