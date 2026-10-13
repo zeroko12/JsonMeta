@@ -34,7 +34,7 @@ onMounted(() => {
         <!-- 模式 1: 可视化树形编辑 -->
         <div v-show="doc.viewMode === 'visual'" class="editor-layout">
           <VisualTreeEditor />
-          <NodeDetailDrawer v-if="doc.selectedPath" />
+          <NodeDetailDrawer v-if="doc.showDetailDrawer && doc.selectedPath" />
         </div>
 
         <!-- 模式 2: Raw JSON 源码模式 -->

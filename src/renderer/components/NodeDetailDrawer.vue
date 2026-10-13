@@ -68,7 +68,7 @@ function openAddChild() {
 }
 
 function closeDrawer() {
-  doc.selectedPath = ''
+  doc.showDetailDrawer = false
 }
 </script>
 

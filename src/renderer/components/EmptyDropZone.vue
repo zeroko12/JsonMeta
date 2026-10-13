@@ -5,8 +5,6 @@ import { useJsonDocStore } from '../stores/jsonDoc'
 const doc = useJsonDocStore()
 const isDragging = ref(false)
 
-const ION_MACHINE_CONFIG_PATH = 'D:\\IonImplantationSystemData\\Config\\SystemConfig.json'
-
 function onDragOver(e: DragEvent) {
   e.preventDefault()
   isDragging.value = true
@@ -47,7 +45,7 @@ function getFileName(p: string): string {
       <!-- 头部控制终端标头 -->
       <div class="terminal-badge">
         <span class="badge-dot"></span>
-        <span class="badge-text">JSONMETA // INDUSTRIAL OPERATIONS TERMINAL</span>
+        <span class="badge-text">JSONMETA // CONFIGURATION TERMINAL</span>
       </div>
 
       <div class="terminal-icon-box">
@@ -67,13 +65,13 @@ function getFileName(p: string): string {
         </svg>
       </div>
 
-      <h1 class="main-title">工控系统配置管理终端</h1>
+      <h1 class="main-title">结构化配置管理终端</h1>
       <p class="sub-desc">
-        面向现场运维与自动化控制系统的结构化配置审校平台。
+        面向现场运维与工程调试的通用结构化配置检视与伴生注释工具。
         <br />
         拖拽任意
         <span class="highlight-code">.json</span>
-        文件至此，或通过快捷入口快速装载。
+        配置文件至此，或通过快捷入口快速打开。
       </p>
 
       <!-- 主要操作按钮 -->
@@ -105,37 +103,6 @@ function getFileName(p: string): string {
           </svg>
           新建空白配置 (Ctrl+N)
         </button>
-      </div>
-
-      <!-- 现场机组主配置文件专属快速装载卡片 -->
-      <div class="machine-target-card">
-        <div class="machine-target-header">
-          <div class="header-left">
-            <span class="status-indicator"></span>
-            <span class="target-title">现场机组主配置目标</span>
-            <span class="target-tag">离子注入机台</span>
-          </div>
-          <button
-            class="machine-load-btn"
-            title="直接载入现场主控配置文件"
-            @click="() => doc.openFile(ION_MACHINE_CONFIG_PATH)"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              width="13"
-              height="13"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <polygon points="5 3 19 12 5 21 5 3" fill="currentColor" />
-            </svg>
-            载入设备配置
-          </button>
-        </div>
-        <div class="machine-target-path" :title="ION_MACHINE_CONFIG_PATH">
-          <code>{{ ION_MACHINE_CONFIG_PATH }}</code>
-        </div>
       </div>
 
       <!-- 最近打开的文件列表 -->
@@ -176,29 +143,6 @@ function getFileName(p: string): string {
           </button>
         </div>
       </div>
-
-      <!-- 底部工控运维标准规范 -->
-      <div class="standards-bar">
-        <span class="standard-item">
-          <span class="item-symbol">//</span>
-          双轨伴生注释存储 (*.meta.json)
-        </span>
-        <span class="separator">|</span>
-        <span class="standard-item">
-          <span class="item-symbol">⊞</span>
-          万级测点实时定位检索
-        </span>
-        <span class="separator">|</span>
-        <span class="standard-item">
-          <span class="item-symbol">⚖</span>
-          防呆差异化审计与安全校验
-        </span>
-        <span class="separator">|</span>
-        <span class="standard-item">
-          <span class="item-symbol">⚡</span>
-          历史版本快照回滚守护
-        </span>
-      </div>
     </div>
   </div>
 </template>
@@ -232,7 +176,7 @@ function getFileName(p: string): string {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 16px;
+  gap: 18px;
 }
 
 /* 标头 */
@@ -343,87 +287,6 @@ function getFileName(p: string): string {
   background: #202633;
   color: #ffffff;
   border-color: #3b4964;
-}
-
-/* 专属机台目标卡片 */
-.machine-target-card {
-  width: 100%;
-  background: #141822;
-  border: 1px solid #232c3f;
-  border-left: 3px solid #38bdf8;
-  border-radius: 6px;
-  padding: 10px 14px;
-  text-align: left;
-  box-sizing: border-box;
-}
-
-.machine-target-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 6px;
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.status-indicator {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #38bdf8;
-  box-shadow: 0 0 6px #38bdf8;
-}
-
-.target-title {
-  font-size: 12px;
-  font-weight: 700;
-  color: #cbd5e1;
-}
-
-.target-tag {
-  font-size: 10px;
-  font-weight: 600;
-  color: #38bdf8;
-  background: rgba(56, 189, 248, 0.12);
-  border: 1px solid rgba(56, 189, 248, 0.25);
-  padding: 1px 6px;
-  border-radius: 3px;
-}
-
-.machine-load-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  background: #1e2636;
-  border: 1px solid #334155;
-  color: #38bdf8;
-  padding: 4px 10px;
-  border-radius: 4px;
-  font-size: 11.5px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.machine-load-btn:hover {
-  background: #273349;
-  border-color: #38bdf8;
-  color: #ffffff;
-}
-
-.machine-target-path {
-  font-size: 11px;
-  color: #7b8ba1;
-  font-family: 'JetBrains Mono', Consolas, monospace;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.machine-target-path code {
-  color: #93c5fd;
 }
 
 /* 最近历史 */
@@ -541,33 +404,5 @@ function getFileName(p: string): string {
 .recent-card-btn:hover .recent-arrow {
   color: #38bdf8;
   transform: translateX(2px);
-}
-
-/* 规范栏 */
-.standards-bar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
-  font-size: 11px;
-  color: #64748b;
-}
-
-.standard-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.item-symbol {
-  color: #38bdf8;
-  font-weight: 700;
-  font-family: 'JetBrains Mono', Consolas, monospace;
-}
-
-.separator {
-  color: #273145;
 }
 </style>

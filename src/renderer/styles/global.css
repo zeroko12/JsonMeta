@@ -8,6 +8,8 @@ body,
 
 * {
   box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.25) transparent;
 }
 
 body {
@@ -15,9 +17,33 @@ body {
     sans-serif;
   font-size: 14px;
   color: #2c3e50;
-  background: #ffffff;
+  background: #141417;
 }
 
 button {
   font-family: inherit;
+}
+
+/* 现代化极简纤细深色滚动条 (6px, 透明底色，彻底杜绝粗暴占位) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.22);
+  border-radius: 4px;
+  transition: background 0.15s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.45);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
 }

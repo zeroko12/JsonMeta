@@ -236,6 +236,18 @@ function quickChangeType(row: TreeRowItem, newType: TreeRowItem['type']) {
   doc.setNodeValue(row.path, defVal, `更改类型为 ${newType}`)
 }
 
+function toggleInspector() {
+  if (!doc.showDetailDrawer && !doc.selectedPath && displayRows.value.length > 0) {
+    doc.selectedPath = displayRows.value[0]?.path || ''
+  }
+  doc.showDetailDrawer = !doc.showDetailDrawer
+}
+
+function openInspector(path: string) {
+  doc.selectedPath = path
+  doc.showDetailDrawer = true
+}
+
 // ─── 高性能虚拟滚动内核 (支持万级节点 60fps 极速展开与滚动) ───
 const ROW_HEIGHT = 34
 const BUFFER = 6
@@ -363,6 +375,25 @@ watch(
         </button>
         <button class="sub-tool-btn highlight" title="在根节点添加新属性" @click="openAddAtRoot">
           + 添加根属性
+        </button>
+        <button
+          class="sub-tool-btn inspector-toggle-btn"
+          :class="{ active: doc.showDetailDrawer }"
+          :title="doc.showDetailDrawer ? '收起右侧属性检查器' : '展开右侧属性检查器'"
+          @click="toggleInspector"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="12"
+            height="12"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <rect x="3" y="3" width="18" height="18" rx="2" />
+            <line x1="15" y1="3" x2="15" y2="21" />
+          </svg>
+          {{ doc.showDetailDrawer ? '收起检查器' : '属性检查器' }}
         </button>
       </div>
     </div>
@@ -587,6 +618,13 @@ watch(
                   @click="openRawEdit(row, $event)"
                 >
                   { } 源码
+                </button>
+                <button
+                  class="act-btn"
+                  title="在右侧抽屉打开此节点的完整检查器与多行备注"
+                  @click="openInspector(row.path)"
+                >
+                  ▤ 检查
                 </button>
                 <button
                   class="act-btn danger"
@@ -841,7 +879,14 @@ watch(
 .tree-list {
   flex: 1;
   overflow-y: auto;
+  overflow-x: auto;
   padding: 4px 0;
+  min-width: 0;
+}
+
+.virtual-spacer {
+  min-width: 100%;
+  width: max-content;
 }
 
 .tree-row {
@@ -858,7 +903,8 @@ watch(
   transition: background 0.1s;
   cursor: default;
   background: #141417;
-  overflow: hidden;
+  min-width: 100%;
+  width: max-content;
 }
 
 .tree-row:hover {
@@ -1008,36 +1054,47 @@ watch(
   color: #a1a1aa;
 }
 
-/* 描述胶囊 */
+/* 描述区域与业务注释 (支持完整展示全貌) */
 .desc-section {
   display: flex;
   align-items: center;
   flex: 1;
   min-width: 0;
+  margin-left: 4px;
 }
 .desc-pill {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  background: #2e2612;
+  gap: 5px;
+  background: rgba(234, 179, 8, 0.08);
   color: #fde047;
   padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 11px;
+  border-radius: 4px;
+  font-size: 11.5px;
   cursor: pointer;
-  border: 1px solid #5a4515;
-  max-width: 100%;
-  min-width: 0;
+  border: 1px solid rgba(234, 179, 8, 0.25);
   white-space: nowrap;
+  transition: all 0.12s ease;
 }
 .desc-pill:hover {
-  background: #423617;
-  border-color: #85631b;
+  background: rgba(234, 179, 8, 0.16);
+  border-color: rgba(234, 179, 8, 0.5);
+  color: #fef08a;
 }
 .desc-pill .desc-text {
-  overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
+  user-select: text;
+}
+
+.inspector-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.inspector-toggle-btn.active {
+  background: #1e3a5f;
+  border-color: #3b82f6;
+  color: #93c5fd;
 }
 .add-desc-hover {
   background: transparent;

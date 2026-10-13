@@ -85,7 +85,8 @@ export const useJsonDocStore = defineStore('jsonDoc', () => {
   const searchQuery = ref<string>('')
   const expandedPaths = ref<Set<string>>(new Set())
 
-  // 对话框
+  // 对话框与右侧抽屉
+  const showDetailDrawer = ref(false)
   const showDiffModal = ref(false)
   const showBackupModal = ref(false)
   const showAddNodeModal = ref<{ parentPath: string; isArray: boolean } | null>(null)
@@ -884,6 +885,7 @@ export const useJsonDocStore = defineStore('jsonDoc', () => {
     canRedo,
     hasFile,
     externalChangePending,
+    showDetailDrawer,
     showDiffModal,
     showBackupModal,
     showAddNodeModal,
