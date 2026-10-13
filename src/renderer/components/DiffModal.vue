@@ -55,7 +55,7 @@ function revertAll() {
     <!-- 统一二级子工具条 (38px, 全模式严格对齐) -->
     <div class="sub-toolbar">
       <div class="sub-left">
-        <span class="sub-title">⚖️ 改动比对</span>
+        <span class="sub-title">改动比对与审计</span>
         <span class="sub-badge">{{ stats.total }} 处改动</span>
         <span class="unified-change-badge live" title="实时审计会话中的数据改动与中文描述修改">
           ● 实时审计
@@ -64,7 +64,7 @@ function revertAll() {
         <span class="stat-mini add">{{ stats.add }} 新增</span>
         <span class="stat-mini del">{{ stats.delete }} 删除</span>
         <span v-if="stats.descCount > 0" class="stat-mini desc">
-          📝 {{ stats.descCount }} 描述修改
+          // {{ stats.descCount }} 描述修改
         </span>
         <span v-if="doc.searchQuery" class="sub-filter-hint">(过滤 "{{ doc.searchQuery }}")</span>
       </div>
@@ -75,7 +75,7 @@ function revertAll() {
           title="放弃所有修改（包括数据与字段描述），全部还原为打开时的状态"
           @click="revertAll"
         >
-          ↩ 全部还原
+          放弃修改并还原
         </button>
       </div>
     </div>
@@ -83,7 +83,17 @@ function revertAll() {
     <!-- 表格内容主体 -->
     <div class="diff-body">
       <div v-if="stats.total === 0" class="empty-diff">
-        <span class="icon">✨</span>
+        <svg
+          viewBox="0 0 24 24"
+          width="28"
+          height="28"
+          fill="none"
+          stroke="#10b981"
+          stroke-width="2"
+        >
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+          <polyline points="22 4 12 14.01 9 11.01" />
+        </svg>
         <p>当前文件与打开时完全一致，未发生任何内容改动或描述修改。</p>
       </div>
 
@@ -111,7 +121,7 @@ function revertAll() {
             </td>
             <td>
               <span :class="['category-pill', item.category]">
-                {{ item.category === 'description' ? '📝 描述' : '📄 数据' }}
+                {{ item.category === 'description' ? '// 注释' : '数据' }}
               </span>
             </td>
             <td>
@@ -120,7 +130,7 @@ function revertAll() {
                 title="点击在树形编辑器中跳转定位到此字段"
                 @click="doc.jumpToSpecificChange(item.path)"
               >
-                {{ item.path }} 🔍
+                {{ item.path }}
               </code>
             </td>
             <td class="old-val">
@@ -135,7 +145,7 @@ function revertAll() {
                 :title="`放弃此项${item.category === 'description' ? '描述' : '数值'}修改，还原为旧值`"
                 @click="doc.revertChange(item)"
               >
-                ↩ 还原
+                还原
               </button>
             </td>
           </tr>

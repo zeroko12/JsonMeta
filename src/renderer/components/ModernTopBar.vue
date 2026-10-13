@@ -138,19 +138,42 @@ const changeCount = computed(() => doc.totalChangesCount)
 
 <template>
   <header class="modern-topbar">
-    <!-- 左侧: 品牌 Logo + 固定尺寸的文件信息槽位 -->
+    <!-- 左侧: 品牌标识 + 工业工控环境标签 -->
     <div class="brand-section">
       <div class="logo">
-        <span class="logo-icon">✨</span>
+        <svg
+          class="brand-svg"
+          width="15"
+          height="15"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"
+          />
+        </svg>
         <span class="logo-text">
-          JSON
-          <span class="highlight">Meta</span>
+          JsonMeta
+          <span class="brand-sub">工控运维终端</span>
         </span>
       </div>
 
-      <!-- 文件芯片: 弹性缩微防挤压 -->
-      <div v-if="doc.hasFile" class="file-chip" :title="doc.filePath || '未命名文件'">
-        <span class="file-icon">📄</span>
+      <!-- 文件信息栏: 工业紧凑风格 -->
+      <div v-if="doc.hasFile" class="file-chip" :title="doc.filePath || '未命名配置'">
+        <svg
+          class="mini-svg"
+          width="12"
+          height="12"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
+          <polyline points="13 2 13 9 20 9" />
+        </svg>
         <span class="file-name">{{ doc.fileName }}</span>
         <!-- 状态指示胶囊 -->
         <button
@@ -163,7 +186,7 @@ const changeCount = computed(() => doc.totalChangesCount)
           <span class="status-label">{{ doc.changeNavText }}</span>
           <span class="jump-arrow">➔</span>
         </button>
-        <span v-else class="file-status-badge" title="已同步保存">
+        <span v-else class="file-status-badge" title="已同步磁盘">
           <span class="dot" />
           <span class="status-label">已存</span>
         </span>
@@ -180,7 +203,7 @@ const changeCount = computed(() => doc.totalChangesCount)
           :disabled="doc.isLoading"
           @click="() => doc.openFile()"
         >
-          📂 打开
+          打开
         </button>
         <button
           v-if="doc.recentFiles.length > 0"
@@ -190,14 +213,16 @@ const changeCount = computed(() => doc.totalChangesCount)
         >
           ▾
         </button>
-        <button class="nav-btn" title="新建空白 JSON" @click="() => doc.newFile()">✨ 新建</button>
+        <button class="nav-btn" title="新建空白 JSON (Ctrl+N)" @click="() => doc.newFile()">
+          新建
+        </button>
 
         <!-- 最近文件快捷弹出菜单 -->
         <Transition name="fade-popover">
           <div v-if="showRecentMenu && doc.recentFiles.length > 0" class="recent-popover">
             <div class="recent-popover-header">
-              <span>🕒 最近打开的文件</span>
-              <button class="clear-recent-mini" title="清空记录" @click.stop="clearRecent">
+              <span>最近工程文件</span>
+              <button class="clear-recent-mini" title="清空历史记录" @click.stop="clearRecent">
                 清空
               </button>
             </div>
@@ -208,7 +233,18 @@ const changeCount = computed(() => doc.totalChangesCount)
               :title="p"
               @click="openRecent(p)"
             >
-              <span class="popover-file-icon">📄</span>
+              <svg
+                class="popover-mini-svg"
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
+                <polyline points="13 2 13 9 20 9" />
+              </svg>
               <div class="popover-file-meta">
                 <span class="popover-name">{{ getFileName(p) }}</span>
                 <span class="popover-path">{{ p }}</span>
@@ -218,7 +254,7 @@ const changeCount = computed(() => doc.totalChangesCount)
         </Transition>
       </div>
 
-      <!-- 历史撤销/重做 (精简为快捷微图标) -->
+      <!-- 历史撤销/重做 -->
       <div v-if="doc.hasFile" class="btn-group">
         <button
           class="nav-btn icon-btn"
@@ -226,7 +262,7 @@ const changeCount = computed(() => doc.totalChangesCount)
           title="撤销 (Ctrl+Z)"
           @click="doc.undo"
         >
-          ↩
+          ↶
         </button>
         <button
           class="nav-btn icon-btn"
@@ -234,11 +270,11 @@ const changeCount = computed(() => doc.totalChangesCount)
           title="重做 (Ctrl+Y)"
           @click="doc.redo"
         >
-          ↪
+          ↷
         </button>
       </div>
 
-      <!-- 视图模式三联切换 (紧凑标签) -->
+      <!-- 视图模式三联切换 (工控标签) -->
       <div v-if="doc.hasFile" class="view-mode-tabs">
         <button
           class="mode-tab-btn"
@@ -246,7 +282,7 @@ const changeCount = computed(() => doc.totalChangesCount)
           title="可视化树形结构视图"
           @click="doc.viewMode = 'visual'"
         >
-          🌲 树形
+          树形大纲
         </button>
         <button
           class="mode-tab-btn"
@@ -254,7 +290,7 @@ const changeCount = computed(() => doc.totalChangesCount)
           title="JSON 源码编辑器"
           @click="doc.viewMode = 'code'"
         >
-          📝 源码
+          源码视图
         </button>
         <button
           class="mode-tab-btn tab-diff"
@@ -262,7 +298,7 @@ const changeCount = computed(() => doc.totalChangesCount)
           title="审查会话内改动"
           @click="doc.viewMode = 'diff'"
         >
-          ⚖️ 比对
+          改动审查
           <!-- 悬浮角标 -->
           <span v-if="changeCount > 0" class="floating-badge">
             {{ changeCount > 99 ? '99+' : changeCount }}
@@ -292,39 +328,39 @@ const changeCount = computed(() => doc.totalChangesCount)
               <div class="popover-header">搜索匹配范围</div>
               <button
                 class="scope-menu-item"
+                :class="{ active: doc.searchScope === 'desc' }"
+                @click="selectScope('desc')"
+              >
+                <span class="menu-icon">//</span>
+                <span class="menu-title">中文注释 (默认)</span>
+                <span class="menu-desc">业务描述元数据</span>
+              </button>
+              <button
+                class="scope-menu-item"
                 :class="{ active: doc.searchScope === 'all' }"
                 @click="selectScope('all')"
               >
-                <span class="menu-icon">🌟</span>
-                <span class="menu-title">全部范围</span>
-                <span class="menu-desc">键/描述/值</span>
+                <span class="menu-icon">⊞</span>
+                <span class="menu-title">全部字段</span>
+                <span class="menu-desc">键名/描述/数值</span>
               </button>
               <button
                 class="scope-menu-item"
                 :class="{ active: doc.searchScope === 'key' }"
                 @click="selectScope('key')"
               >
-                <span class="menu-icon">🏷️</span>
-                <span class="menu-title">仅键名</span>
-                <span class="menu-desc">Key / 路径</span>
-              </button>
-              <button
-                class="scope-menu-item"
-                :class="{ active: doc.searchScope === 'desc' }"
-                @click="selectScope('desc')"
-              >
-                <span class="menu-icon">📝</span>
-                <span class="menu-title">仅描述</span>
-                <span class="menu-desc">中文注释</span>
+                <span class="menu-icon">#</span>
+                <span class="menu-title">仅键名路径</span>
+                <span class="menu-desc">Key / 层级路径</span>
               </button>
               <button
                 class="scope-menu-item"
                 :class="{ active: doc.searchScope === 'val' }"
                 @click="selectScope('val')"
               >
-                <span class="menu-icon">🔢</span>
-                <span class="menu-title">仅数值</span>
-                <span class="menu-desc">配置值</span>
+                <span class="menu-icon">=</span>
+                <span class="menu-title">仅配置值</span>
+                <span class="menu-desc">具体设定数值/状态</span>
               </button>
             </div>
           </Transition>
@@ -397,22 +433,22 @@ const changeCount = computed(() => doc.totalChangesCount)
         <button
           v-if="doc.filePath"
           class="tool-btn"
-          title="历史备份版本管理"
+          title="历史镜像快照管理与回滚"
           @click="doc.showBackupModal = true"
         >
-          📦 备份
+          快照备份
         </button>
-        <button class="tool-btn" title="另存为新文件" @click="() => doc.saveAsFile()">
+        <button class="tool-btn" title="另存为新配置文件" @click="() => doc.saveAsFile()">
           另存为
         </button>
         <button
           class="save-btn"
           :class="{ active: doc.isDirty }"
           :disabled="!doc.isDirty || doc.isLoading"
-          title="保存所有修改 (Ctrl+S)"
+          title="保存所有修改到磁盘 (Ctrl+S)"
           @click="() => doc.saveFile()"
         >
-          💾 保存
+          保存 (Ctrl+S)
         </button>
       </div>
     </div>
@@ -448,20 +484,35 @@ const changeCount = computed(() => doc.totalChangesCount)
 .logo {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   font-weight: 700;
   font-size: 13px;
   letter-spacing: -0.2px;
   white-space: nowrap;
 }
-.logo-icon {
-  font-size: 15px;
+.brand-svg {
+  color: #38bdf8;
+  flex-shrink: 0;
 }
 .logo-text {
   color: #fff;
+  display: flex;
+  align-items: center;
 }
-.highlight {
-  color: #3b82f6;
+.brand-sub {
+  font-size: 10px;
+  color: #64748b;
+  font-weight: 500;
+  margin-left: 5px;
+  background: #202028;
+  padding: 1px 5px;
+  border-radius: 3px;
+  border: 1px solid #2d2d38;
+}
+.mini-svg,
+.popover-mini-svg {
+  color: #94a3b8;
+  flex-shrink: 0;
 }
 
 /* 文件信息芯片: 弹性缩微自适应 */

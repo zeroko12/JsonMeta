@@ -138,9 +138,9 @@ const matchCount = computed(() => {
     <!-- 统一二级子工具条 (38px, 全模式严格对齐) -->
     <div class="sub-toolbar">
       <div class="sub-left">
-        <span class="sub-title">📝 源码模式</span>
-        <span v-if="!parseError" class="sub-badge ok">✅ 语法正确</span>
-        <span v-else class="sub-badge error">❌ 语法错误</span>
+        <span class="sub-title">{ } 源码模式</span>
+        <span v-if="!parseError" class="sub-badge ok">● 语法正确</span>
+        <span v-else class="sub-badge error">● 语法错误</span>
         <span v-if="changeCount > 0" class="unified-change-badge" title="当前存在未保存改动">
           ● {{ changeCount }} 处改动
         </span>
@@ -171,7 +171,7 @@ const matchCount = computed(() => {
 
     <!-- 底部错误提示栏 -->
     <div v-if="parseError" class="error-bar">
-      <span class="err-icon">⚠️</span>
+      <span class="err-icon">[!]</span>
       <span class="err-text">{{ parseError }}</span>
     </div>
   </div>

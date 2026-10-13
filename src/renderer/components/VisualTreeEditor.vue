@@ -3,6 +3,7 @@ import { computed, nextTick, onMounted, ref, toRaw, watch } from 'vue'
 import { useJsonDocStore } from '../stores/jsonDoc'
 import type { JsonValue } from '@shared/utils/json-path'
 import { escapeHtml, highlightMatch, matchTextOrPinyin } from '@shared/utils/pinyin'
+import ModuleOutlineDrawer from './ModuleOutlineDrawer.vue'
 
 const doc = useJsonDocStore()
 
@@ -24,7 +25,7 @@ export interface TreeRowItem {
 const renamingPath = ref<string | null>(null)
 const renameDraft = ref('')
 
-// 正在就地编辑描述
+// 正在就地编辑中文描述
 const editingDescPath = ref<string | null>(null)
 const descDraft = ref('')
 
@@ -336,7 +337,7 @@ watch(
     <!-- 统一二级子工具条 (38px, 全模式严格对齐) -->
     <div class="sub-toolbar">
       <div class="sub-left">
-        <span class="sub-title">🌲 树形模式</span>
+        <span class="sub-title">结构大纲视图</span>
         <span class="sub-badge">{{ displayRows.length }} 节点</span>
         <button
           v-if="changeCount > 0"
@@ -361,235 +362,240 @@ watch(
           折叠全部
         </button>
         <button class="sub-tool-btn highlight" title="在根节点添加新属性" @click="openAddAtRoot">
-          ➕ 根属性
+          + 添加根属性
         </button>
       </div>
     </div>
 
-    <div v-if="allRows.length === 0" class="empty-state">
-      <p>当前 JSON 根对象为空</p>
-      <button class="primary-btn" @click="openAddAtRoot">➕ 添加根节点属性</button>
-    </div>
+    <!-- 主工作区分割布局: 左侧子系统模块大纲 + 右侧虚拟滚动树 -->
+    <div class="tree-workspace-split">
+      <ModuleOutlineDrawer />
 
-    <!-- 虚拟滚动容器: 仅渲染当前视口 30~40 行，彻底根除万级节点展开时的卡死问题 -->
-    <div v-else ref="treeListRef" class="tree-list" @scroll="onScroll">
-      <div class="virtual-spacer" :style="{ height: `${totalHeight}px`, position: 'relative' }">
-        <div :style="{ transform: `translateY(${offsetY}px)`, willChange: 'transform' }">
-          <!-- 列表行 -->
-          <div
-            v-for="row in visibleRows"
-            :key="row.path"
-            class="tree-row"
-            :class="{
-              selected: doc.selectedPath === row.path,
-              modified: row.isModified,
-              'nav-target-flash': flashNavPath === row.path,
-              'search-target-flash': flashSearchPath === row.path,
-              'active-search-match': activeSearchPath === row.path,
-              'tree-search-match': doc.searchMode === 'tree' && matchedPathSet.has(row.path),
-            }"
-            :data-path="row.path"
-            @click="selectRow(row.path)"
-          >
-            <!-- 层级缩进占位 -->
-            <div class="indent-block" :style="{ width: `${row.depth * 22}px` }">
-              <span
-                v-for="d in row.depth"
-                :key="d"
-                class="guide-line"
-                :style="{ left: `${(d - 1) * 22 + 8}px` }"
-              />
-            </div>
+      <div v-if="allRows.length === 0" class="empty-state">
+        <p>当前 JSON 根对象为空</p>
+        <button class="primary-btn" @click="openAddAtRoot">+ 添加根节点属性</button>
+      </div>
 
-            <!-- 展开 / 折叠小箭头 -->
-            <button
-              v-if="row.isContainer"
-              class="caret-btn"
-              @click.stop="doc.toggleExpanded(row.path)"
+      <!-- 虚拟滚动容器: 仅渲染当前视口 30~40 行，彻底根除万级节点展开时的卡死问题 -->
+      <div v-else ref="treeListRef" class="tree-list" @scroll="onScroll">
+        <div class="virtual-spacer" :style="{ height: `${totalHeight}px`, position: 'relative' }">
+          <div :style="{ transform: `translateY(${offsetY}px)`, willChange: 'transform' }">
+            <!-- 列表行 -->
+            <div
+              v-for="row in visibleRows"
+              :key="row.path"
+              class="tree-row"
+              :class="{
+                selected: doc.selectedPath === row.path,
+                modified: row.isModified,
+                'nav-target-flash': flashNavPath === row.path,
+                'search-target-flash': flashSearchPath === row.path,
+                'active-search-match': activeSearchPath === row.path,
+                'tree-search-match': doc.searchMode === 'tree' && matchedPathSet.has(row.path),
+              }"
+              :data-path="row.path"
+              @click="selectRow(row.path)"
             >
-              {{ row.isExpanded ? '▼' : '▶' }}
-            </button>
-            <span v-else class="caret-placeholder" />
-
-            <!-- 键名 Key 区域 -->
-            <div class="key-section">
-              <!-- 重命名输入框 -->
-              <input
-                v-if="renamingPath === row.path"
-                v-model="renameDraft"
-                class="rename-input"
-                autofocus
-                @click.stop
-                @keydown.enter="commitRename(row)"
-                @keydown.esc="renamingPath = null"
-                @blur="commitRename(row)"
-              />
-              <span
-                v-else
-                class="key-name"
-                :class="{ isIndex: row.parentIsArray }"
-                :title="`完整路径: ${row.path} (双击重命名键名)`"
-                @dblclick="startRename(row, $event)"
-                v-html="
-                  doc.searchQuery && (doc.searchScope === 'all' || doc.searchScope === 'key')
-                    ? highlightMatch(row.keyName, doc.searchQuery)
-                    : escapeHtml(row.keyName)
-                "
-              />
-              <span
-                v-if="doc.searchQuery && row.path !== row.keyName"
-                class="search-path-hint"
-                :title="`所在路径: ${row.path}`"
-                v-html="'[' + highlightMatch(row.path, doc.searchQuery) + ']'"
-              />
-              <span class="colon">:</span>
-            </div>
-
-            <!-- 类型选择下拉框 (可自由切换数据类型) -->
-            <div class="type-selector-wrapper" @click.stop>
-              <select
-                :value="row.type"
-                class="type-select-dropdown"
-                :class="row.type"
-                :title="`当前类型: ${row.type} (点击下拉可切换为其他数据类型)`"
-                @change="
-                  doc.changeNodeType(row.path, ($event.target as HTMLSelectElement).value as any)
-                "
-              >
-                <option value="string">str 文本</option>
-                <option value="number">num 数字</option>
-                <option value="boolean">bool 布尔</option>
-                <option value="array">arr 数组</option>
-                <option value="object">obj 对象</option>
-                <option value="null">null 空值</option>
-              </select>
-            </div>
-
-            <!-- 值编辑控件 -->
-            <div class="val-section" @click.stop>
-              <!-- 布尔值切换 -->
-              <label v-if="row.type === 'boolean'" class="bool-toggle">
-                <input
-                  type="checkbox"
-                  :checked="row.value === true"
-                  @change="toggleBool(row.path, row.value)"
-                />
-                <span class="switch-slider" />
-                <span class="bool-text">{{ row.value ? 'true' : 'false' }}</span>
-              </label>
-
-              <!-- 数字输入框 -->
-              <input
-                v-else-if="row.type === 'number'"
-                type="number"
-                class="val-input num-input"
-                step="any"
-                :value="row.value"
-                @change="updateNumberVal(row.path, $event)"
-              />
-
-              <!-- 文本输入框 -->
-              <input
-                v-else-if="row.type === 'string'"
-                type="text"
-                class="val-input str-input"
-                :value="row.value"
-                @change="updateStringVal(row.path, $event)"
-              />
-
-              <!-- Null 徽标 -->
-              <span v-else-if="row.type === 'null'" class="null-tag">null</span>
-
-              <!-- 容器子项提示 -->
-              <span v-else-if="row.type === 'array'" class="container-summary">
-                [ {{ row.childCount }} 项 ]
-              </span>
-              <span v-else-if="row.type === 'object'" class="container-summary">
-                { {{ row.childCount }} 个属性 }
-              </span>
-            </div>
-
-            <!-- 中文描述胶囊 (显示在值/属性计数之后，充分利用横向空间) -->
-            <div class="desc-section">
-              <!-- 编辑描述状态 -->
-              <div v-if="editingDescPath === row.path" class="desc-editor-inline" @click.stop>
-                <input
-                  v-model="descDraft"
-                  class="desc-input"
-                  placeholder="输入中文描述/备注..."
-                  autofocus
-                  @keydown.enter="commitEditDesc(row)"
-                  @keydown.esc="editingDescPath = null"
-                  @blur="commitEditDesc(row)"
+              <!-- 层级缩进占位 -->
+              <div class="indent-block" :style="{ width: `${row.depth * 22}px` }">
+                <span
+                  v-for="d in row.depth"
+                  :key="d"
+                  class="guide-line"
+                  :style="{ left: `${(d - 1) * 22 + 8}px` }"
                 />
               </div>
-              <span
-                v-else-if="row.description"
-                class="desc-pill"
-                :title="`中文描述: ${row.description} (点击修改)`"
-                @click="startEditDesc(row, $event)"
-              >
-                📝
-                <span
-                  class="desc-text"
-                  v-html="
-                    doc.searchQuery && (doc.searchScope === 'all' || doc.searchScope === 'desc')
-                      ? highlightMatch(row.description, doc.searchQuery)
-                      : escapeHtml(row.description)
-                  "
-                />
-              </span>
-              <button
-                v-else
-                class="add-desc-hover"
-                title="为此字段添加中文说明"
-                @click="startEditDesc(row, $event)"
-              >
-                + 描述
-              </button>
-            </div>
 
-            <!-- 改动小圆点标记 -->
-            <span v-if="row.isModified" class="mod-dot" title="该字段已被修改">●</span>
-
-            <!-- 悬浮操作胶囊栏 (带清晰汉字说明) -->
-            <div class="row-actions" @click.stop>
-              <button
-                class="act-btn"
-                title="上移一行 (调整在 JSON 中的次序)"
-                @click="doc.moveNode(row.path, 'up')"
-              >
-                ▲ 上移
-              </button>
-              <button
-                class="act-btn"
-                title="下移一行 (调整在 JSON 中的次序)"
-                @click="doc.moveNode(row.path, 'down')"
-              >
-                ▼ 下移
-              </button>
+              <!-- 展开 / 折叠小箭头 -->
               <button
                 v-if="row.isContainer"
-                class="act-btn highlight"
-                :title="row.type === 'array' ? '追加数组子项' : '添加子属性'"
-                @click="openAddModal(row, $event)"
+                class="caret-btn"
+                @click.stop="doc.toggleExpanded(row.path)"
               >
-                ➕ 添加
+                {{ row.isExpanded ? '▼' : '▶' }}
               </button>
-              <button
-                class="act-btn"
-                title="以 Raw JSON 代码直接编辑此节点内容"
-                @click="openRawEdit(row, $event)"
-              >
-                📝 代码
-              </button>
-              <button
-                class="act-btn danger"
-                title="删除此节点 (可 Ctrl+Z 撤销)"
-                @click="doc.deleteNode(row.path)"
-              >
-                🗑 删除
-              </button>
+              <span v-else class="caret-placeholder" />
+
+              <!-- 键名 Key 区域 -->
+              <div class="key-section">
+                <!-- 重命名输入框 -->
+                <input
+                  v-if="renamingPath === row.path"
+                  v-model="renameDraft"
+                  class="rename-input"
+                  autofocus
+                  @click.stop
+                  @keydown.enter="commitRename(row)"
+                  @keydown.esc="renamingPath = null"
+                  @blur="commitRename(row)"
+                />
+                <span
+                  v-else
+                  class="key-name"
+                  :class="{ isIndex: row.parentIsArray }"
+                  :title="`完整路径: ${row.path} (双击重命名键名)`"
+                  @dblclick="startRename(row, $event)"
+                  v-html="
+                    doc.searchQuery && (doc.searchScope === 'all' || doc.searchScope === 'key')
+                      ? highlightMatch(row.keyName, doc.searchQuery)
+                      : escapeHtml(row.keyName)
+                  "
+                />
+                <span
+                  v-if="doc.searchQuery && row.path !== row.keyName"
+                  class="search-path-hint"
+                  :title="`所在路径: ${row.path}`"
+                  v-html="'[' + highlightMatch(row.path, doc.searchQuery) + ']'"
+                />
+                <span class="colon">:</span>
+              </div>
+
+              <!-- 类型选择下拉框 (可自由切换数据类型) -->
+              <div class="type-selector-wrapper" @click.stop>
+                <select
+                  :value="row.type"
+                  class="type-select-dropdown"
+                  :class="row.type"
+                  :title="`当前类型: ${row.type} (点击下拉可切换为其他数据类型)`"
+                  @change="
+                    doc.changeNodeType(row.path, ($event.target as HTMLSelectElement).value as any)
+                  "
+                >
+                  <option value="string">str 文本</option>
+                  <option value="number">num 数字</option>
+                  <option value="boolean">bool 布尔</option>
+                  <option value="array">arr 数组</option>
+                  <option value="object">obj 对象</option>
+                  <option value="null">null 空值</option>
+                </select>
+              </div>
+
+              <!-- 值编辑控件 -->
+              <div class="val-section" @click.stop>
+                <!-- 布尔值切换 -->
+                <label v-if="row.type === 'boolean'" class="bool-toggle">
+                  <input
+                    type="checkbox"
+                    :checked="row.value === true"
+                    @change="toggleBool(row.path, row.value)"
+                  />
+                  <span class="switch-slider" />
+                  <span class="bool-text">{{ row.value ? 'true' : 'false' }}</span>
+                </label>
+
+                <!-- 数字输入框 -->
+                <input
+                  v-else-if="row.type === 'number'"
+                  type="number"
+                  class="val-input num-input"
+                  step="any"
+                  :value="row.value"
+                  @change="updateNumberVal(row.path, $event)"
+                />
+
+                <!-- 文本输入框 -->
+                <input
+                  v-else-if="row.type === 'string'"
+                  type="text"
+                  class="val-input str-input"
+                  :value="row.value"
+                  @change="updateStringVal(row.path, $event)"
+                />
+
+                <!-- Null 徽标 -->
+                <span v-else-if="row.type === 'null'" class="null-tag">null</span>
+
+                <!-- 容器子项提示 -->
+                <span v-else-if="row.type === 'array'" class="container-summary">
+                  [ {{ row.childCount }} 项 ]
+                </span>
+                <span v-else-if="row.type === 'object'" class="container-summary">
+                  { {{ row.childCount }} 个属性 }
+                </span>
+              </div>
+
+              <!-- 中文描述胶囊 (显示在值/属性计数之后，充分利用横向空间) -->
+              <div class="desc-section">
+                <!-- 编辑描述状态 -->
+                <div v-if="editingDescPath === row.path" class="desc-editor-inline" @click.stop>
+                  <input
+                    v-model="descDraft"
+                    class="desc-input"
+                    placeholder="输入中文描述/备注..."
+                    autofocus
+                    @keydown.enter="commitEditDesc(row)"
+                    @keydown.esc="editingDescPath = null"
+                    @blur="commitEditDesc(row)"
+                  />
+                </div>
+                <span
+                  v-else-if="row.description"
+                  class="desc-pill"
+                  :title="`中文描述: ${row.description} (点击修改)`"
+                  @click="startEditDesc(row, $event)"
+                >
+                  <span class="desc-prefix">//</span>
+                  <span
+                    class="desc-text"
+                    v-html="
+                      doc.searchQuery && (doc.searchScope === 'all' || doc.searchScope === 'desc')
+                        ? highlightMatch(row.description, doc.searchQuery)
+                        : escapeHtml(row.description)
+                    "
+                  />
+                </span>
+                <button
+                  v-else
+                  class="add-desc-hover"
+                  title="为此字段添加中文说明"
+                  @click="startEditDesc(row, $event)"
+                >
+                  + 描述
+                </button>
+              </div>
+
+              <!-- 改动小圆点标记 -->
+              <span v-if="row.isModified" class="mod-dot" title="该字段已被修改">●</span>
+
+              <!-- 悬浮操作胶囊栏 (带清晰汉字说明) -->
+              <div class="row-actions" @click.stop>
+                <button
+                  class="act-btn"
+                  title="上移一行 (调整在 JSON 中的次序)"
+                  @click="doc.moveNode(row.path, 'up')"
+                >
+                  ▲ 上移
+                </button>
+                <button
+                  class="act-btn"
+                  title="下移一行 (调整在 JSON 中的次序)"
+                  @click="doc.moveNode(row.path, 'down')"
+                >
+                  ▼ 下移
+                </button>
+                <button
+                  v-if="row.isContainer"
+                  class="act-btn highlight"
+                  :title="row.type === 'array' ? '追加数组子项' : '添加子属性'"
+                  @click="openAddModal(row, $event)"
+                >
+                  + 添加
+                </button>
+                <button
+                  class="act-btn"
+                  title="以 Raw JSON 代码直接编辑此节点内容"
+                  @click="openRawEdit(row, $event)"
+                >
+                  { } 源码
+                </button>
+                <button
+                  class="act-btn danger"
+                  title="删除此节点 (可 Ctrl+Z 撤销)"
+                  @click="doc.deleteNode(row.path)"
+                >
+                  ✕ 删除
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -607,6 +613,22 @@ watch(
   min-height: 0;
   display: flex;
   flex-direction: column;
+}
+
+.tree-workspace-split {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.desc-prefix {
+  color: #eab308;
+  font-family: 'Consolas', monospace;
+  font-weight: bold;
+  opacity: 0.85;
 }
 
 /* 统一二级子工具条 (38px) */

@@ -60,7 +60,7 @@ function confirmSave() {
   <div v-if="modalState" class="modal-backdrop" @click.self="closeModal">
     <div class="modal-card">
       <header class="modal-header">
-        <h3>📄 {{ modalState.title }}</h3>
+        <h3>{ } {{ modalState.title }}</h3>
         <div class="header-right">
           <button class="small-tool-btn" title="格式化为规范 2 空格缩进" @click="formatJson">
             美化格式

@@ -43,6 +43,14 @@ export interface UnifiedChangeItem {
   label: string
 }
 
+export interface ModuleOutlineItem {
+  key: string
+  path: string
+  description?: string
+  childCount: number
+  isModified: boolean
+}
+
 export const useJsonDocStore = defineStore('jsonDoc', () => {
   const filePath = ref<string | null>(null)
   const current = ref<unknown>(null)
@@ -226,6 +234,61 @@ export const useJsonDocStore = defineStore('jsonDoc', () => {
       return `改动 ${changeNavIndex.value + 1}/${total}`
     }
     return `${total} 处改动`
+  })
+
+  // ─── 工业状态栏与结构大纲计算属性 ───
+  const totalNodesCount = computed(() => {
+    if (current.value === null || typeof current.value !== 'object') return 0
+    let count = 0
+    function countNodes(val: unknown, depth = 0) {
+      if (depth > 60 || val === null || typeof val !== 'object') return
+      if (Array.isArray(val)) {
+        count += val.length
+        for (let i = 0; i < val.length; i++) countNodes(val[i], depth + 1)
+      } else {
+        const keys = Object.keys(val as Record<string, unknown>)
+        count += keys.length
+        for (let i = 0; i < keys.length; i++) {
+          countNodes((val as Record<string, unknown>)[keys[i]], depth + 1)
+        }
+      }
+    }
+    countNodes(current.value)
+    return count
+  })
+
+  const fileSizeFormatted = computed(() => {
+    if (current.value === null) return '0 B'
+    try {
+      const bytes = new Blob([JSON.stringify(current.value)]).size
+      if (bytes < 1024) return `${bytes} B`
+      if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+      return `${(bytes / (1024 * 1024)).toFixed(2)} MB`
+    } catch {
+      return '-- KB'
+    }
+  })
+
+  const topLevelModules = computed<ModuleOutlineItem[]>(() => {
+    if (current.value === null || typeof current.value !== 'object' || Array.isArray(current.value))
+      return []
+    const obj = current.value as Record<string, unknown>
+    return Object.keys(obj).map((k) => {
+      const val = obj[k]
+      const isObj = val !== null && typeof val === 'object'
+      const childCount = isObj ? (Array.isArray(val) ? val.length : Object.keys(val).length) : 1
+      const desc = descriptions.value[k]
+      const mod =
+        isPathModified(k) ||
+        Array.from(changes.value.keys()).some((p) => p === k || p.startsWith(`${k}.`))
+      return {
+        key: k,
+        path: k,
+        description: desc,
+        childCount,
+        isModified: mod,
+      }
+    })
   })
 
   function ensurePathExpanded(path: string): boolean {
@@ -869,5 +932,8 @@ export const useJsonDocStore = defineStore('jsonDoc', () => {
     recentFiles,
     addRecentFile,
     clearRecentFiles,
+    totalNodesCount,
+    fileSizeFormatted,
+    topLevelModules,
   }
 })

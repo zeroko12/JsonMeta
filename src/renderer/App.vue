@@ -10,6 +10,7 @@ import DiffModal from './components/DiffModal.vue'
 import AddNodeModal from './components/AddNodeModal.vue'
 import RawJsonEditModal from './components/RawJsonEditModal.vue'
 import ModernBackupDialog from './components/ModernBackupDialog.vue'
+import IndustrialStatusBar from './components/IndustrialStatusBar.vue'
 
 const doc = useJsonDocStore()
 
@@ -43,6 +44,9 @@ onMounted(() => {
         <DiffModal v-if="doc.viewMode === 'diff'" />
       </template>
     </main>
+
+    <!-- 工业级现场运行状态栏 (包含完整路径面包屑、文件与节点统计、改动指示器) -->
+    <IndustrialStatusBar />
 
     <!-- 全局弹窗与模态框 -->
     <AddNodeModal />

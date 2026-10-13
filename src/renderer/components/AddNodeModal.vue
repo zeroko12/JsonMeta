@@ -56,7 +56,7 @@ function confirmAdd() {
   <div v-if="modalState" class="modal-backdrop" @click.self="closeModal">
     <div class="modal-card">
       <header class="modal-header">
-        <h3>➕ {{ isArrayParent ? '插入数组元素' : '添加对象属性' }}</h3>
+        <h3>+ {{ isArrayParent ? '插入数组元素' : '添加对象属性' }}</h3>
         <p class="subtitle">
           目标父节点:
           <code>{{ parentPath || '根对象 (root)' }}</code>

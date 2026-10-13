@@ -5,6 +5,8 @@ import { useJsonDocStore } from '../stores/jsonDoc'
 const doc = useJsonDocStore()
 const isDragging = ref(false)
 
+const ION_MACHINE_CONFIG_PATH = 'D:\\IonImplantationSystemData\\Config\\SystemConfig.json'
+
 function onDragOver(e: DragEvent) {
   e.preventDefault()
   isDragging.value = true
@@ -27,6 +29,7 @@ function onDrop(e: DragEvent) {
     }
   }
 }
+
 function getFileName(p: string): string {
   return p.split(/[\\/]/).pop() || p
 }
@@ -40,30 +43,120 @@ function getFileName(p: string): string {
     @dragleave="onDragLeave"
     @drop="onDrop"
   >
-    <div class="dropzone-card">
-      <div class="icon-circle">
-        <span>📂</span>
+    <div class="dropzone-terminal-card">
+      <!-- 头部控制终端标头 -->
+      <div class="terminal-badge">
+        <span class="badge-dot"></span>
+        <span class="badge-text">JSONMETA // INDUSTRIAL OPERATIONS TERMINAL</span>
       </div>
-      <h2>现代化通用 JSON 编辑器</h2>
-      <p class="desc">
-        拖拽任意
-        <strong>.json</strong>
-        文件到此处直接打开，
+
+      <div class="terminal-icon-box">
+        <svg
+          viewBox="0 0 24 24"
+          width="36"
+          height="36"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+        >
+          <rect x="2" y="3" width="20" height="14" rx="2" stroke="currentColor" />
+          <line x1="8" y1="21" x2="16" y2="21" stroke="currentColor" />
+          <line x1="12" y1="17" x2="12" y2="21" stroke="currentColor" />
+          <path d="M7 8l3 3-3 3" stroke="#38bdf8" />
+          <line x1="12" y1="14" x2="16" y2="14" stroke="#38bdf8" />
+        </svg>
+      </div>
+
+      <h1 class="main-title">工控系统配置管理终端</h1>
+      <p class="sub-desc">
+        面向现场运维与自动化控制系统的结构化配置审校平台。
         <br />
-        或点击下方按钮开始编辑。
+        拖拽任意
+        <span class="highlight-code">.json</span>
+        文件至此，或通过快捷入口快速装载。
       </p>
 
+      <!-- 主要操作按钮 -->
       <div class="cta-actions">
-        <button class="primary-btn" @click="() => doc.openFile()">📂 打开本地 JSON 文件</button>
-        <button class="secondary-btn" @click="() => doc.newFile({})">✨ 创建空 JSON 文件</button>
+        <button class="primary-btn" @click="() => doc.openFile()">
+          <svg
+            viewBox="0 0 24 24"
+            width="15"
+            height="15"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
+          </svg>
+          打开本地配置 (Ctrl+O)
+        </button>
+        <button class="secondary-btn" @click="() => doc.newFile({})">
+          <svg
+            viewBox="0 0 24 24"
+            width="15"
+            height="15"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          新建空白配置 (Ctrl+N)
+        </button>
       </div>
 
-      <!-- 最近打开的文件列表 (最多 3 个) -->
+      <!-- 现场机组主配置文件专属快速装载卡片 -->
+      <div class="machine-target-card">
+        <div class="machine-target-header">
+          <div class="header-left">
+            <span class="status-indicator"></span>
+            <span class="target-title">现场机组主配置目标</span>
+            <span class="target-tag">离子注入机台</span>
+          </div>
+          <button
+            class="machine-load-btn"
+            title="直接载入现场主控配置文件"
+            @click="() => doc.openFile(ION_MACHINE_CONFIG_PATH)"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="13"
+              height="13"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polygon points="5 3 19 12 5 21 5 3" fill="currentColor" />
+            </svg>
+            载入设备配置
+          </button>
+        </div>
+        <div class="machine-target-path" :title="ION_MACHINE_CONFIG_PATH">
+          <code>{{ ION_MACHINE_CONFIG_PATH }}</code>
+        </div>
+      </div>
+
+      <!-- 最近打开的文件列表 -->
       <div v-if="doc.recentFiles.length > 0" class="recent-files-block">
         <div class="recent-header">
-          <span class="recent-title">🕒 最近打开的文件 (点击直接打开)</span>
+          <span class="recent-title">
+            <svg
+              viewBox="0 0 24 24"
+              width="13"
+              height="13"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+            最近检视与编辑记录
+          </span>
           <button class="clear-recent-btn" title="清空最近记录" @click="doc.clearRecentFiles()">
-            清空
+            清空历史
           </button>
         </div>
         <div class="recent-list">
@@ -74,21 +167,37 @@ function getFileName(p: string): string {
             :title="`直接打开: ${p}`"
             @click="() => doc.openFile(p)"
           >
-            <span class="recent-file-icon">📄</span>
+            <div class="file-icon-badge">JSON</div>
             <div class="recent-file-meta">
               <span class="recent-name">{{ getFileName(p) }}</span>
               <span class="recent-path">{{ p }}</span>
             </div>
-            <span class="recent-arrow">➔</span>
+            <span class="recent-arrow">→</span>
           </button>
         </div>
       </div>
 
-      <div class="features-badge">
-        <span>✨ 伴生中文描述</span>
-        <span>⚡ 任意节点增删重排</span>
-        <span>↩ 实时撤销重做</span>
-        <span>⚖️ 改动对比审计</span>
+      <!-- 底部工控运维标准规范 -->
+      <div class="standards-bar">
+        <span class="standard-item">
+          <span class="item-symbol">//</span>
+          双轨伴生注释存储 (*.meta.json)
+        </span>
+        <span class="separator">|</span>
+        <span class="standard-item">
+          <span class="item-symbol">⊞</span>
+          万级测点实时定位检索
+        </span>
+        <span class="separator">|</span>
+        <span class="standard-item">
+          <span class="item-symbol">⚖</span>
+          防呆差异化审计与安全校验
+        </span>
+        <span class="separator">|</span>
+        <span class="standard-item">
+          <span class="item-symbol">⚡</span>
+          历史版本快照回滚守护
+        </span>
       </div>
     </div>
   </div>
@@ -100,120 +209,229 @@ function getFileName(p: string): string {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #141417;
-  padding: 40px;
-  border: 2px dashed #2d2d38;
-  margin: 24px;
-  border-radius: 12px;
-  transition: all 0.2s;
+  background: #0f1115;
+  padding: 32px 24px;
+  border: 1px dashed #242936;
+  margin: 18px;
+  border-radius: 8px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+  overflow-y: auto;
 }
 
 .dropzone-container.dragging {
-  border-color: #3b82f6;
-  background: #172033;
-  transform: scale(1.005);
+  border-color: #38bdf8;
+  background: #111a2e;
+  transform: scale(1.002);
 }
 
-.dropzone-card {
-  max-width: 480px;
-  text-align: center;
+.dropzone-terminal-card {
+  max-width: 580px;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
+  text-align: center;
+  gap: 16px;
 }
 
-.icon-circle {
-  width: 68px;
-  height: 68px;
+/* 标头 */
+.terminal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #181d28;
+  border: 1px solid #2a3449;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+.badge-dot {
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background: #1e293b;
-  border: 1px solid #334155;
+  background: #10b981;
+  box-shadow: 0 0 6px #10b981;
+}
+
+.badge-text {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: #94a3b8;
+  font-family: 'JetBrains Mono', Consolas, monospace;
+}
+
+.terminal-icon-box {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  background: #161b26;
+  border: 1px solid #263147;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 30px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  color: #94a3b8;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
-h2 {
+.main-title {
   margin: 0;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
   color: #f1f5f9;
+  letter-spacing: -0.3px;
 }
 
-.desc {
+.sub-desc {
   margin: 0;
   font-size: 13px;
-  color: #94a3b8;
+  color: #8b99ae;
   line-height: 1.6;
 }
-.desc strong {
-  color: #60a5fa;
+
+.highlight-code {
+  color: #38bdf8;
+  font-family: 'JetBrains Mono', Consolas, monospace;
+  font-weight: 600;
+  background: rgba(56, 189, 248, 0.08);
+  padding: 1px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(56, 189, 248, 0.2);
 }
 
+/* 按钮组 */
 .cta-actions {
   display: flex;
   gap: 12px;
-  margin-top: 8px;
+  margin-top: 4px;
+  width: 100%;
+  justify-content: center;
 }
 
-.primary-btn {
-  background: #2563eb;
-  color: white;
-  border: none;
-  padding: 10px 20px;
+.primary-btn,
+.secondary-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 18px;
   border-radius: 6px;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.primary-btn {
+  background: #0284c7;
+  color: #ffffff;
+  border: 1px solid #0369a1;
 }
 .primary-btn:hover {
-  background: #1d4ed8;
+  background: #0369a1;
+  border-color: #075985;
 }
 
 .secondary-btn {
-  background: #22222a;
+  background: #181c25;
   color: #cbd5e1;
-  border: 1px solid #333342;
-  padding: 10px 20px;
+  border: 1px solid #283144;
+}
+.secondary-btn:hover {
+  background: #202633;
+  color: #ffffff;
+  border-color: #3b4964;
+}
+
+/* 专属机台目标卡片 */
+.machine-target-card {
+  width: 100%;
+  background: #141822;
+  border: 1px solid #232c3f;
+  border-left: 3px solid #38bdf8;
   border-radius: 6px;
-  font-size: 13px;
+  padding: 10px 14px;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+.machine-target-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #38bdf8;
+  box-shadow: 0 0 6px #38bdf8;
+}
+
+.target-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #cbd5e1;
+}
+
+.target-tag {
+  font-size: 10px;
+  font-weight: 600;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+
+.machine-load-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #1e2636;
+  border: 1px solid #334155;
+  color: #38bdf8;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11.5px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s;
 }
-.secondary-btn:hover {
-  background: #2c2c36;
-  color: #fff;
-  border-color: #444456;
+.machine-load-btn:hover {
+  background: #273349;
+  border-color: #38bdf8;
+  color: #ffffff;
 }
 
-.features-badge {
-  display: flex;
-  gap: 8px;
-  margin-top: 14px;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-.features-badge span {
-  background: #1c1c24;
-  border: 1px solid #2a2a36;
-  color: #94a3b8;
-  padding: 4px 10px;
-  border-radius: 20px;
+.machine-target-path {
   font-size: 11px;
+  color: #7b8ba1;
+  font-family: 'JetBrains Mono', Consolas, monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.machine-target-path code {
+  color: #93c5fd;
 }
 
-/* 最近打开的文件区域样式 */
+/* 最近历史 */
 .recent-files-block {
   width: 100%;
-  margin-top: 12px;
-  background: #191922;
-  border: 1px solid #2b2b38;
-  border-radius: 9px;
+  background: #141720;
+  border: 1px solid #222938;
+  border-radius: 6px;
   padding: 12px 14px;
   text-align: left;
   box-sizing: border-box;
@@ -227,6 +445,9 @@ h2 {
 }
 
 .recent-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 12px;
   font-weight: 600;
   color: #94a3b8;
@@ -243,8 +464,8 @@ h2 {
   transition: all 0.15s;
 }
 .clear-recent-btn:hover {
-  color: #ef4444;
-  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.1);
 }
 
 .recent-list {
@@ -257,10 +478,10 @@ h2 {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 7px 10px;
-  background: #21212b;
-  border: 1px solid #30303e;
-  border-radius: 6px;
+  padding: 6px 10px;
+  background: #191e2a;
+  border: 1px solid #273145;
+  border-radius: 5px;
   color: #e2e8f0;
   cursor: pointer;
   text-align: left;
@@ -270,13 +491,19 @@ h2 {
 }
 
 .recent-card-btn:hover {
-  background: #282836;
-  border-color: #3b82f6;
-  transform: translateX(2px);
+  background: #202838;
+  border-color: #38bdf8;
 }
 
-.recent-file-icon {
-  font-size: 16px;
+.file-icon-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  padding: 2px 5px;
+  border-radius: 3px;
+  font-family: 'JetBrains Mono', Consolas, monospace;
   flex-shrink: 0;
 }
 
@@ -288,7 +515,7 @@ h2 {
 }
 
 .recent-name {
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 600;
   color: #f1f5f9;
   overflow: hidden;
@@ -299,21 +526,48 @@ h2 {
 .recent-path {
   font-size: 11px;
   color: #64748b;
+  font-family: 'JetBrains Mono', Consolas, monospace;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .recent-arrow {
-  font-size: 11px;
+  font-size: 12px;
   color: #64748b;
-  opacity: 0.6;
   transition: all 0.15s;
 }
 
 .recent-card-btn:hover .recent-arrow {
-  color: #3b82f6;
-  opacity: 1;
+  color: #38bdf8;
   transform: translateX(2px);
+}
+
+/* 规范栏 */
+.standards-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.standard-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.item-symbol {
+  color: #38bdf8;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', Consolas, monospace;
+}
+
+.separator {
+  color: #273145;
 }
 </style>

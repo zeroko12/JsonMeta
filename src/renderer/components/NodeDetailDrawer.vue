@@ -76,7 +76,7 @@ function closeDrawer() {
   <aside v-if="currentPath" class="node-detail-drawer">
     <header class="drawer-header">
       <div class="title-row">
-        <h3>📌 节点详情</h3>
+        <h3>属性检查器 (Inspector)</h3>
         <button class="close-btn" @click="closeDrawer">✕</button>
       </div>
       <div class="path-box" title="点击复制路径" @click="copyPath">
@@ -90,7 +90,7 @@ function closeDrawer() {
       <!-- 数据类型切换 -->
       <section class="section-card">
         <div class="section-title">
-          <span>🔠 数据类型 (Type)</span>
+          <span>数据类型 (Type)</span>
           <small>点击直接切换类型</small>
         </div>
         <select
@@ -112,7 +112,7 @@ function closeDrawer() {
       <!-- 中文业务描述编辑 -->
       <section class="section-card">
         <div class="section-title">
-          <span>📝 字段中文描述 / 备注</span>
+          <span>业务注解与描述 (Annotation)</span>
           <small>伴生存储于同级 .meta.json</small>
         </div>
         <textarea
@@ -127,7 +127,7 @@ function closeDrawer() {
       <!-- 节点值 JSON 预览与快捷编辑 -->
       <section class="section-card">
         <div class="section-title">
-          <span>📄 当前值预览</span>
+          <span>节点数据预览 (Raw Value)</span>
         </div>
         <pre class="json-preview"><code>{{ valueJsonStr }}</code></pre>
       </section>
@@ -135,7 +135,7 @@ function closeDrawer() {
       <!-- 节点快捷操作 -->
       <section class="section-card">
         <div class="section-title">
-          <span>⚡ 快捷操作</span>
+          <span>节点维护操作</span>
         </div>
         <div class="actions-grid">
           <button
@@ -157,7 +157,7 @@ function closeDrawer() {
             title="以 JSON 代码弹窗直接修改此节点"
             @click="openRawEdit"
           >
-            📝 代码编辑
+            { } 源码编辑
           </button>
           <button
             v-if="nodeType === 'array' || nodeType === 'object'"
@@ -165,7 +165,7 @@ function closeDrawer() {
             title="添加子项或属性"
             @click="openAddChild"
           >
-            ➕ 添加子项
+            + 添加子项
           </button>
           <button
             v-if="isModified"
@@ -173,14 +173,14 @@ function closeDrawer() {
             title="还原为打开时的原始值"
             @click="doc.revertField(currentPath)"
           >
-            ↩ 还原修改
+            ↺ 还原修改
           </button>
           <button
             class="action-card-btn danger"
             title="彻底删除此节点 (可随时 Ctrl+Z 撤销)"
             @click="doc.deleteNode(currentPath)"
           >
-            🗑 删除节点
+            ✕ 删除节点
           </button>
         </div>
       </section>

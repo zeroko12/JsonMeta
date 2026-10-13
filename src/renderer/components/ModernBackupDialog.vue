@@ -45,10 +45,10 @@ async function createManualBackup() {
   isCreating.value = true
   try {
     const bak = await window.api.file.createBackup(doc.filePath)
-    doc.showToast(`📸 快照创建成功: ${bak.split(/[\\/]/).pop()}`, 'success')
+    doc.showToast(`快照创建成功: ${bak.split(/[\\/]/).pop()}`, 'success')
     await loadBackups()
   } catch (err) {
-    doc.showToast(`❌ 创建快照失败: ${(err as Error).message}`, 'error')
+    doc.showToast(`创建快照失败: ${(err as Error).message}`, 'error')
   } finally {
     isCreating.value = false
   }
@@ -69,7 +69,7 @@ async function confirmRestore() {
   const res = await window.api.file.restoreBackup(selectedPath.value, doc.filePath)
   if (res.ok) {
     await doc.reloadFromDisk()
-    doc.showToast('✅ 已成功从历史备份还原文件与中文字段描述！', 'success')
+    doc.showToast('已成功从历史备份还原文件与中文字段描述！', 'success')
     doc.showBackupModal = false
   } else {
     alert(`恢复失败: ${res.error}`)
@@ -91,19 +91,19 @@ function formatTs(ts: number): string {
     <div class="modal-card">
       <header class="modal-header">
         <div class="header-main">
-          <h3>📦 历史备份与快照</h3>
+          <h3>历史备份与快照</h3>
           <button
             class="btn-snapshot"
             :disabled="isCreating || !doc.filePath"
             title="对当前磁盘上的文件及中文字段描述创建一份即时备份"
             @click="createManualBackup"
           >
-            {{ isCreating ? '正在生成...' : '📸 立即创建快照' }}
+            {{ isCreating ? '正在生成...' : '+ 立即创建快照' }}
           </button>
         </div>
         <div class="backup-rule-box">
           <div class="rule-item">
-            <span class="rule-icon">💡</span>
+            <span class="rule-icon">//</span>
             <span>
               <strong>自动备份条件：</strong>
               点击“保存”(Ctrl+S) 且文件内容发生实质改变时，覆盖前自动生成带时间戳副本（最多保留 10
@@ -111,7 +111,7 @@ function formatTs(ts: number): string {
             </span>
           </div>
           <div class="rule-item">
-            <span class="rule-icon">🛡️</span>
+            <span class="rule-icon">🛡</span>
             <span>
               <strong>双重同步：</strong>
               备份与还原均完整涵盖 JSON 原始数据与中文字段描述元数据（.meta.json），安全无虞。
@@ -122,7 +122,7 @@ function formatTs(ts: number): string {
 
       <div class="modal-body">
         <div v-if="backups.length === 0" class="empty">
-          <p>暂无历史备份文件。点击右上角“📸 立即创建快照”或在保存修改时将自动生成。</p>
+          <p>暂无历史备份文件。点击右上角“+ 立即创建快照”或在保存修改时将自动生成。</p>
         </div>
 
         <ul v-else class="backup-list">
@@ -133,10 +133,10 @@ function formatTs(ts: number): string {
             @click="selectedPath = b.path"
           >
             <div class="b-info">
-              <span class="b-time">🕒 {{ formatTs(b.timestamp) }}</span>
+              <span class="b-time">{{ formatTs(b.timestamp) }}</span>
               <code class="b-path">{{ b.path.split(/[\\/]/).pop() }}</code>
             </div>
-            <span v-if="selectedPath === b.path" class="selected-mark">✔ 选中</span>
+            <span v-if="selectedPath === b.path" class="selected-mark">● 选中</span>
           </li>
         </ul>
       </div>
