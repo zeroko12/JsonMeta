@@ -34,7 +34,9 @@ onMounted(() => {
         <!-- 模式 1: 可视化树形编辑 -->
         <div v-show="doc.viewMode === 'visual'" class="editor-layout">
           <VisualTreeEditor />
-          <NodeDetailDrawer v-if="doc.showDetailDrawer && doc.selectedPath" />
+          <Transition name="drawer-slide">
+            <NodeDetailDrawer v-if="doc.showDetailDrawer && doc.selectedPath" />
+          </Transition>
         </div>
 
         <!-- 模式 2: Raw JSON 源码模式 -->
@@ -104,6 +106,20 @@ onMounted(() => {
   display: flex;
   min-height: 0;
   width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.drawer-slide-enter-active,
+.drawer-slide-leave-active {
+  transition:
+    transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.2s ease;
+}
+.drawer-slide-enter-from,
+.drawer-slide-leave-to {
+  transform: translateX(100%);
+  opacity: 0.4;
 }
 
 .external-alert-backdrop {

@@ -380,7 +380,7 @@ watch(
           class="sub-tool-btn inspector-toggle-btn"
           :class="{ active: doc.showDetailDrawer }"
           :title="doc.showDetailDrawer ? '收起右侧属性检查器' : '展开右侧属性检查器'"
-          @click="toggleInspector"
+          @click.stop="toggleInspector"
         >
           <svg
             viewBox="0 0 24 24"
@@ -620,9 +620,9 @@ watch(
                   { } 源码
                 </button>
                 <button
-                  class="act-btn"
+                  class="act-btn act-inspect-btn"
                   title="在右侧抽屉打开此节点的完整检查器与多行备注"
-                  @click="openInspector(row.path)"
+                  @click.stop="openInspector(row.path)"
                 >
                   ▤ 检查
                 </button>

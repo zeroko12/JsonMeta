@@ -67,8 +67,6 @@ function getFileName(p: string): string {
 
       <h1 class="main-title">结构化配置管理终端</h1>
       <p class="sub-desc">
-        面向现场运维与工程调试的通用结构化配置检视与伴生注释工具。
-        <br />
         拖拽任意
         <span class="highlight-code">.json</span>
         配置文件至此，或通过快捷入口快速打开。

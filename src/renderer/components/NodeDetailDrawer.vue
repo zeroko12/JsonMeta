@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useJsonDocStore } from '../stores/jsonDoc'
 import { get, type JsonValue } from '@shared/utils/json-path'
 
 const doc = useJsonDocStore()
+const drawerRef = ref<HTMLElement | null>(null)
 
 const currentPath = computed(() => doc.selectedPath)
 const value = computed(() => {
@@ -70,10 +71,47 @@ function openAddChild() {
 function closeDrawer() {
   doc.showDetailDrawer = false
 }
+
+function handleGlobalClick(e: MouseEvent) {
+  if (!doc.showDetailDrawer) return
+  const target = e.target as HTMLElement | null
+  if (!target) return
+
+  // 点击在抽屉内部元素上，不收起
+  if (drawerRef.value && drawerRef.value.contains(target)) {
+    return
+  }
+
+  // 点击了触发抽屉的专用按钮，交由按钮自身处理，避免重复冲突
+  if (target.closest('.inspector-toggle-btn') || target.closest('.act-inspect-btn')) {
+    return
+  }
+
+  // 点击了其他任何位置，自动收起抽屉
+  doc.showDetailDrawer = false
+}
+
+function handleGlobalKeyDown(e: KeyboardEvent) {
+  if (e.key === 'Escape' && doc.showDetailDrawer) {
+    doc.showDetailDrawer = false
+  }
+}
+
+onMounted(() => {
+  requestAnimationFrame(() => {
+    window.addEventListener('click', handleGlobalClick, true)
+    window.addEventListener('keydown', handleGlobalKeyDown)
+  })
+})
+
+onUnmounted(() => {
+  window.removeEventListener('click', handleGlobalClick, true)
+  window.removeEventListener('keydown', handleGlobalKeyDown)
+})
 </script>
 
 <template>
-  <aside v-if="currentPath" class="node-detail-drawer">
+  <aside v-if="currentPath" ref="drawerRef" class="node-detail-drawer">
     <header class="drawer-header">
       <div class="title-row">
         <h3>属性检查器 (Inspector)</h3>
@@ -190,13 +228,17 @@ function closeDrawer() {
 
 <style scoped>
 .node-detail-drawer {
-  width: 340px;
-  background: #18181f;
-  border-left: 1px solid #282834;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 360px;
+  background: #181820;
+  border-left: 1px solid #282836;
+  box-shadow: -8px 0 28px rgba(0, 0, 0, 0.45);
   display: flex;
   flex-direction: column;
-  height: 100%;
-  flex-shrink: 0;
+  z-index: 50;
   overflow: hidden;
   color: #e2e8f0;
 }
