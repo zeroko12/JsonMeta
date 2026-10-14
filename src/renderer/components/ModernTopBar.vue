@@ -489,6 +489,26 @@ const changeCount = computed(() => doc.totalChangesCount)
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
         </svg>
       </button>
+
+      <!-- 关于应用按钮 -->
+      <button
+        class="about-toggle-btn"
+        title="关于应用 (开发者与支持信息)"
+        @click="doc.showAboutModal = true"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          width="14"
+          height="14"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="16" x2="12" y2="12" />
+          <line x1="12" y1="8" x2="12.01" y2="8" />
+        </svg>
+      </button>
     </div>
   </header>
 </template>
@@ -1157,7 +1177,8 @@ const changeCount = computed(() => doc.totalChangesCount)
   border-color: var(--border-muted);
 }
 
-.theme-toggle-btn {
+.theme-toggle-btn,
+.about-toggle-btn {
   background: var(--bg-btn);
   border: 1px solid var(--border-color);
   color: var(--text-muted);
@@ -1171,7 +1192,8 @@ const changeCount = computed(() => doc.totalChangesCount)
   transition: all 0.15s;
   flex-shrink: 0;
 }
-.theme-toggle-btn:hover {
+.theme-toggle-btn:hover,
+.about-toggle-btn:hover {
   background: var(--bg-btn-hover);
   color: var(--text-main);
   border-color: var(--border-muted);

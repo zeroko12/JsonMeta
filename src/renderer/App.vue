@@ -10,6 +10,7 @@ import DiffModal from './components/DiffModal.vue'
 import AddNodeModal from './components/AddNodeModal.vue'
 import RawJsonEditModal from './components/RawJsonEditModal.vue'
 import ModernBackupDialog from './components/ModernBackupDialog.vue'
+import AboutModal from './components/AboutModal.vue'
 import IndustrialStatusBar from './components/IndustrialStatusBar.vue'
 
 const doc = useJsonDocStore()
@@ -55,6 +56,7 @@ onMounted(() => {
     <AddNodeModal />
     <RawJsonEditModal />
     <ModernBackupDialog />
+    <AboutModal />
 
     <!-- 全局 Toast 提示 -->
     <Transition name="toast-fade">

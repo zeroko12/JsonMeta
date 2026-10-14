@@ -90,6 +90,7 @@ export const useJsonDocStore = defineStore('jsonDoc', () => {
   const showDetailDrawer = ref(false)
   const showDiffModal = ref(false)
   const showBackupModal = ref(false)
+  const showAboutModal = ref(false)
   const showAddNodeModal = ref<{ parentPath: string; isArray: boolean } | null>(null)
   const showRawEditModal = ref<{ path: string; title: string; jsonText: string } | null>(null)
 
@@ -1007,6 +1008,7 @@ export const useJsonDocStore = defineStore('jsonDoc', () => {
     showDetailDrawer,
     showDiffModal,
     showBackupModal,
+    showAboutModal,
     showAddNodeModal,
     showRawEditModal,
     recordSnapshot,
