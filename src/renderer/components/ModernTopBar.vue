@@ -490,10 +490,10 @@ const changeCount = computed(() => doc.totalChangesCount)
         </svg>
       </button>
 
-      <!-- 关于应用按钮 -->
+      <!-- 联系开发者按钮 -->
       <button
         class="about-toggle-btn"
-        title="关于应用 (开发者与支持信息)"
+        title="联系开发者 (zeroko12@foxmail.com)"
         @click="doc.showAboutModal = true"
       >
         <svg
@@ -504,9 +504,8 @@ const changeCount = computed(() => doc.totalChangesCount)
           stroke="currentColor"
           stroke-width="2"
         >
-          <circle cx="12" cy="12" r="10" />
-          <line x1="12" y1="16" x2="12" y2="12" />
-          <line x1="12" y1="8" x2="12.01" y2="8" />
+          <rect x="2" y="4" width="20" height="16" rx="2" />
+          <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
         </svg>
       </button>
     </div>
