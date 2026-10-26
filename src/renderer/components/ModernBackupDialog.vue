@@ -101,23 +101,6 @@ function formatTs(ts: number): string {
             {{ isCreating ? '正在生成...' : '+ 立即创建快照' }}
           </button>
         </div>
-        <div class="backup-rule-box">
-          <div class="rule-item">
-            <span class="rule-icon">//</span>
-            <span>
-              <strong>自动备份条件：</strong>
-              点击“保存”(Ctrl+S) 且文件内容发生实质改变时，覆盖前自动生成带时间戳副本（最多保留 10
-              份滚动清理）。无改动保存不会生成冗余副本。
-            </span>
-          </div>
-          <div class="rule-item">
-            <span class="rule-icon">🛡</span>
-            <span>
-              <strong>双重同步：</strong>
-              备份与还原均完整涵盖 JSON 原始数据与中文字段描述元数据（.meta.json），安全无虞。
-            </span>
-          </div>
-        </div>
       </header>
 
       <div class="modal-body">
@@ -181,12 +164,9 @@ function formatTs(ts: number): string {
 }
 
 .modal-header {
-  padding: 16px 20px;
+  padding: 14px 20px;
   background: var(--bg-drawer-header);
   border-bottom: 1px solid var(--border-color);
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
 }
 .header-main {
   display: flex;
@@ -217,31 +197,6 @@ function formatTs(ts: number): string {
 .btn-snapshot:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-.backup-rule-box {
-  background: var(--bg-btn);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  padding: 8px 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-.rule-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 6px;
-  font-size: 11.5px;
-  line-height: 1.45;
-  color: var(--text-muted);
-}
-.rule-icon {
-  font-size: 12px;
-  flex-shrink: 0;
-  margin-top: 1px;
-}
-.rule-item strong {
-  color: var(--text-highlight);
 }
 
 .modal-body {
