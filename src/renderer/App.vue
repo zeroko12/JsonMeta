@@ -18,6 +18,7 @@ const doc = useJsonDocStore()
 onMounted(() => {
   doc.initExternalListener()
   doc.applyTheme(doc.theme)
+  ;(window as unknown as { __jsonDocStore: unknown }).__jsonDocStore = doc
 })
 </script>
 
