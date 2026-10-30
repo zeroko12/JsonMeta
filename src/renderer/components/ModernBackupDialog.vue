@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, toRaw, watch } from 'vue'
+import { computed, nextTick, ref, toRaw, watch } from 'vue'
 import { useJsonDocStore } from '../stores/jsonDoc'
 import type { UnifiedChangeItem } from '../stores/jsonDoc'
 import { diff } from '@shared/utils/diff'
@@ -9,6 +9,7 @@ const doc = useJsonDocStore()
 interface BackupItem {
   path: string
   timestamp: number
+  memo?: string
   size: number
 }
 
@@ -19,6 +20,19 @@ const backups = ref<BackupItem[]>([])
 const selectedPath = ref<string | null>(null)
 const isLoading = ref(false)
 const isCreating = ref(false)
+
+// ─── 创建快照备注输入栏状态 ───
+const showCreateInput = ref(false)
+const snapshotMemoDraft = ref('')
+const memoInputRef = ref<HTMLInputElement | null>(null)
+
+function openCreateInput() {
+  snapshotMemoDraft.value = ''
+  showCreateInput.value = true
+  nextTick(() => {
+    memoInputRef.value?.focus()
+  })
+}
 
 // ─── 快照比对状态 ───
 const diffSourceA = ref<string>('') // 基准版本 (通常为某个历史快照路径)
@@ -33,17 +47,32 @@ async function loadBackups() {
   isLoading.value = true
   try {
     const list = await window.api.file.listBackups(doc.filePath)
-    const items: BackupItem[] = list.map((p) => {
-      const tsMatch = p.match(/\.(\d{8}_\d{6})\./)
-      let ts = 0
-      if (tsMatch && tsMatch[1]) {
-        const str = tsMatch[1]
-        ts = new Date(
-          `${str.slice(0, 4)}-${str.slice(4, 6)}-${str.slice(6, 8)}T${str.slice(9, 11)}:${str.slice(11, 13)}:${str.slice(13, 15)}`,
-        ).getTime()
-      }
-      return { path: p, timestamp: ts, size: 0 }
-    })
+    const items: BackupItem[] = await Promise.all(
+      list.map(async (p) => {
+        const match = p.match(/\.(\d{8}_\d{6})(?:[._]([^\\/]+?))?\.bak\.json$/i)
+        let ts = 0
+        let memo = ''
+        if (match && match[1]) {
+          const str = match[1]
+          ts = new Date(
+            `${str.slice(0, 4)}-${str.slice(4, 6)}-${str.slice(6, 8)}T${str.slice(9, 11)}:${str.slice(11, 13)}:${str.slice(13, 15)}`,
+          ).getTime()
+          if (match[2]) {
+            memo = match[2]
+          }
+        }
+        // 若文件名无备注，则尝试从伴生元数据文件读取
+        if (!memo) {
+          try {
+            const meta = await window.api.file.loadMeta<{ memo?: string }>(p)
+            if (meta?.memo) memo = meta.memo
+          } catch {
+            // ignore
+          }
+        }
+        return { path: p, timestamp: ts, memo: memo || undefined, size: 0 }
+      }),
+    )
     backups.value = items
     if (items.length > 0 && !selectedPath.value) {
       selectedPath.value = items[0]!.path
@@ -57,8 +86,12 @@ async function createManualBackup() {
   if (!doc.filePath) return
   isCreating.value = true
   try {
-    const bak = await window.api.file.createBackup(doc.filePath)
-    doc.showToast(`快照创建成功: ${bak.split(/[\\/]/).pop()}`, 'success')
+    const memo = snapshotMemoDraft.value.trim()
+    const bak = await window.api.file.createBackup(doc.filePath, memo || undefined)
+    const memoTag = memo ? `【${memo}】 ` : ''
+    doc.showToast(`快照创建成功: ${memoTag}${bak.split(/[\\/]/).pop()}`, 'success')
+    showCreateInput.value = false
+    snapshotMemoDraft.value = ''
     await loadBackups()
   } catch (err) {
     doc.showToast(`创建快照失败: ${(err as Error).message}`, 'error')
@@ -72,6 +105,8 @@ watch(
   (show) => {
     if (show) {
       dialogMode.value = 'list'
+      showCreateInput.value = false
+      snapshotMemoDraft.value = ''
       loadBackups()
     } else {
       diffItems.value = []
@@ -83,8 +118,12 @@ watch(
 async function confirmRestore(targetPath?: string) {
   const p = targetPath || selectedPath.value
   if (!doc.filePath || !p) return
+  const item = backups.value.find((b) => b.path === p)
+  const memoStr = item && item.memo ? ` (${item.memo})` : ''
   const fileName = p.split(/[\\/]/).pop()
-  const ok = confirm(`确定从所选历史备份 [${fileName}] 恢复文件？当前本地未保存的改动将被覆盖。`)
+  const ok = confirm(
+    `确定从历史快照 [${fileName}]${memoStr} 恢复文件？当前本地未保存的改动将被覆盖。`,
+  )
   if (!ok) return
 
   const res = await window.api.file.restoreBackup(p, doc.filePath)
@@ -119,7 +158,8 @@ function getSnapshotLabel(p: string): string {
   const item = backups.value.find((b) => b.path === p)
   const timeStr = item && item.timestamp ? formatTs(item.timestamp) : ''
   const name = getSnapshotShortName(p)
-  return timeStr ? `[${timeStr}] ${name}` : name
+  const memoStr = item && item.memo ? ` 【${item.memo}】` : ''
+  return timeStr ? `[${timeStr}]${memoStr} ${name}` : `${memoStr} ${name}`
 }
 
 // ─── 差异比对核心计算 ───
@@ -310,8 +350,8 @@ function formatVal(v: unknown): string {
             <button
               class="btn-snapshot"
               :disabled="isCreating || !doc.filePath"
-              title="对当前磁盘上的文件及中文字段描述创建一份即时备份"
-              @click="createManualBackup"
+              title="为当前配置创建快照，可添加中文工况备注"
+              @click="openCreateInput"
             >
               {{ isCreating ? '正在生成...' : '+ 立即创建快照' }}
             </button>
@@ -320,6 +360,33 @@ function formatVal(v: unknown): string {
       </header>
 
       <div class="modal-body">
+        <!-- 中文工况备注创建面板 -->
+        <div v-if="showCreateInput" class="create-memo-banner">
+          <div class="memo-header-row">
+            <span class="memo-prompt">🏷️ 创建快照 — 请输入中文工况备注（可选）:</span>
+            <button class="btn-memo-close" title="取消" @click="showCreateInput = false">✕</button>
+          </div>
+          <div class="memo-input-row">
+            <input
+              ref="memoInputRef"
+              v-model="snapshotMemoDraft"
+              type="text"
+              class="memo-text-input"
+              placeholder="输入备注（如：更换灯丝后标定、真空度调参）[按回车直接创建]"
+              maxlength="40"
+              @keydown.enter="createManualBackup"
+              @keydown.esc="showCreateInput = false"
+            />
+            <button
+              class="btn primary btn-memo-submit"
+              :disabled="isCreating"
+              @click="createManualBackup"
+            >
+              {{ isCreating ? '创建中...' : '确认创建' }}
+            </button>
+          </div>
+        </div>
+
         <div v-if="backups.length === 0" class="empty">
           <p>暂无历史备份文件。点击右上角“+ 立即创建快照”或在保存修改时将自动生成。</p>
         </div>
@@ -332,7 +399,12 @@ function formatVal(v: unknown): string {
             @click="selectedPath = b.path"
           >
             <div class="b-info">
-              <span class="b-time">{{ formatTs(b.timestamp) }}</span>
+              <div class="b-time-line">
+                <span class="b-time">{{ formatTs(b.timestamp) }}</span>
+                <span v-if="b.memo" class="b-memo-pill" :title="`备注: ${b.memo}`">
+                  🏷️ {{ b.memo }}
+                </span>
+              </div>
               <code class="b-path">{{ getSnapshotShortName(b.path) }}</code>
             </div>
             <div class="b-actions">
@@ -673,8 +745,66 @@ function formatVal(v: unknown): string {
 
 .modal-body {
   padding: 14px 20px;
-  max-height: 380px;
+  max-height: 420px;
   overflow-y: auto;
+}
+
+/* 中文备注输入条 */
+.create-memo-banner {
+  background: var(--bg-input);
+  border: 1px solid var(--border-focus);
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+.memo-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.memo-prompt {
+  font-size: 11px;
+  font-weight: 600;
+  color: #38bdf8;
+}
+.btn-memo-close {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 2px 6px;
+  font-size: 13px;
+  border-radius: 4px;
+}
+.btn-memo-close:hover {
+  color: var(--text-main);
+  background: var(--bg-btn-hover);
+}
+.memo-input-row {
+  display: flex;
+  gap: 8px;
+}
+.memo-text-input {
+  flex: 1;
+  background: var(--bg-modal);
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: var(--text-main);
+  outline: none;
+}
+.memo-text-input:focus {
+  border-color: var(--border-focus);
+}
+.btn-memo-submit {
+  padding: 6px 14px;
+  font-size: 12px;
+  white-space: nowrap;
 }
 
 .empty {
@@ -715,12 +845,30 @@ function formatVal(v: unknown): string {
 .b-info {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
+}
+.b-time-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 .b-time {
   font-size: 12px;
   font-weight: 600;
   color: var(--text-main);
+}
+.b-memo-pill {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 7px;
+  border-radius: 4px;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .b-path {
   font-size: 11px;

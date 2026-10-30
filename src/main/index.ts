@@ -147,8 +147,8 @@ ipcMain.handle('file:restoreBackup', async (_event, backupPath: string, targetPa
   return restoreBackup(backupPath, targetPath)
 })
 
-ipcMain.handle('file:createBackup', async (_event, targetPath: string) => {
-  return createBackup(targetPath)
+ipcMain.handle('file:createBackup', async (_event, targetPath: string, memo?: string) => {
+  return createBackup(targetPath, memo)
 })
 
 ipcMain.handle('file:watchStart', async (_event, path: string) => {

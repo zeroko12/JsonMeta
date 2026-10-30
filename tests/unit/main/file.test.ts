@@ -52,6 +52,29 @@ describe('backup rotation', () => {
     expect(content).toBe('{"version": 1}')
   })
 
+  it('generates backup with sanitized Chinese memo and writes meta.json', async () => {
+    const { createBackup, listBackups } = await import('../../../src/main/ipc/file')
+    const target = join(dir, 'SystemConfig.json')
+    const metaTarget = join(dir, 'SystemConfig.meta.json')
+    await writeFile(target, '{"version": 2}', 'utf8')
+    await writeFile(metaTarget, JSON.stringify({ descriptions: { version: '配置版本' } }), 'utf8')
+
+    const memo = '更换灯丝/标定测试'
+    const bak = await createBackup(target, memo)
+    // / should be replaced by _
+    expect(bak).toMatch(/SystemConfig\.\d{8}_\d{6}\.更换灯丝_标定测试\.bak\.json$/)
+
+    // Verify companion .bak.meta.json was created with memo and descriptions
+    const metaBak = bak.replace(/\.bak\.json$/, '.bak.meta.json')
+    const metaBakContent = JSON.parse(await readFile(metaBak, 'utf8'))
+    expect(metaBakContent.memo).toBe('更换灯丝/标定测试')
+    expect(metaBakContent.descriptions.version).toBe('配置版本')
+
+    // Verify listBackups includes this backup
+    const list = await listBackups(target)
+    expect(list).toContain(bak)
+  })
+
   it('lists existing backups in newest-first order', async () => {
     const { createBackup, listBackups } = await import('../../../src/main/ipc/file')
     const target = join(dir, 'SystemConfig.json')

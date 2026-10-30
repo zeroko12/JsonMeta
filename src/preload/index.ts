@@ -60,8 +60,8 @@ const api = {
     ): Promise<{ ok: boolean; error?: string }> {
       return ipcRenderer.invoke('file:restoreBackup', backupPath, targetPath)
     },
-    async createBackup(targetPath: string): Promise<string> {
-      return ipcRenderer.invoke('file:createBackup', targetPath)
+    async createBackup(targetPath: string, memo?: string): Promise<string> {
+      return ipcRenderer.invoke('file:createBackup', targetPath, memo)
     },
     async watchStart(path: string): Promise<{ ok: boolean }> {
       return ipcRenderer.invoke('file:watchStart', path)

@@ -42,25 +42,42 @@ export async function readText(filePath: string): Promise<string> {
  * Create a timestamped backup of `target` in the same directory.
  * Returns the backup file path. Format:
  *   SystemConfig.json -> SystemConfig.YYYYMMDD_HHmmss.bak.json
+ *   Or with memo: SystemConfig.YYYYMMDD_HHmmss.memo.bak.json
  *
  * Also rotates backups so at most MAX_BACKUPS are kept.
  */
-export async function createBackup(target: string): Promise<string> {
+export async function createBackup(target: string, memo?: string): Promise<string> {
   const dir = dirname(target)
   const base = basename(target, '.json')
   const stamp = formatTimestamp(new Date())
-  const bak = join(dir, `${base}.${stamp}.bak.json`)
+  const cleanMemo =
+    memo
+      ?.trim()
+      .replace(/[\\/:*?"<>|]/g, '_')
+      .slice(0, 50) || ''
+  const memoPart = cleanMemo ? `.${cleanMemo}` : ''
+  const bak = join(dir, `${base}.${stamp}${memoPart}.bak.json`)
   const text = await readFile(target, 'utf8')
   await writeFile(bak, text, 'utf8')
 
-  // 同步备份伴生 .meta.json 描述文件（若存在）
+  // 同步备份伴生 .meta.json 描述文件（若存在），并保存 memo 备注
   const metaPath = join(dir, `${base}.meta.json`)
+  const metaBak = join(dir, `${base}.${stamp}${memoPart}.bak.meta.json`)
   try {
     const metaText = await readFile(metaPath, 'utf8')
-    const metaBak = join(dir, `${base}.${stamp}.bak.meta.json`)
-    await writeFile(metaBak, metaText, 'utf8')
+    const metaObj = JSON.parse(metaText) as { memo?: string; descriptions?: Record<string, string> }
+    if (memo?.trim()) {
+      metaObj.memo = memo.trim()
+    }
+    await writeFile(metaBak, JSON.stringify(metaObj, null, 2), 'utf8')
   } catch {
-    // 无伴生文件则跳过
+    if (memo?.trim()) {
+      await writeFile(
+        metaBak,
+        JSON.stringify({ memo: memo.trim(), descriptions: {} }, null, 2),
+        'utf8',
+      )
+    }
   }
 
   await rotateBackups(target)
