@@ -506,6 +506,23 @@ const changeCount = computed(() => doc.totalChangesCount)
 const flashNavPath = ref<string | null>(null)
 let flashTimer: ReturnType<typeof setTimeout> | null = null
 
+// 监听视图模式切换：当从源码视图切回树形大纲模式时，保持选中节点位置一致并滚动居中高亮
+watch(
+  () => doc.viewMode,
+  async (mode) => {
+    if (mode === 'visual' && doc.selectedPath) {
+      doc.ensurePathExpanded(doc.selectedPath)
+      await nextTick()
+      setTimeout(() => {
+        if (doc.selectedPath) {
+          doc.navTargetTrigger = { path: doc.selectedPath, timestamp: Date.now() }
+        }
+      }, 60)
+    }
+  },
+  { immediate: true },
+)
+
 watch(
   () => doc.navTargetTrigger,
   async (trigger) => {
