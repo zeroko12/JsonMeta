@@ -1,10 +1,14 @@
 /**
- * JSON 源码位置与 JSONPath 双向定位工具
+ * JSON 源码位置与 JSONPath 双向高精度定位工具
  *
- * 提供两种核心能力：
- * 1. findPathRange: 根据 JSONPath 查找在 JSON 源码文本中的行号与字符偏移区间（用于 树形大纲 -> 源码视图 定位光标）
- * 2. findPathAtOffset: 根据源码文本中的光标字符偏移量反查对应的 JSONPath（用于 源码视图 -> 树形大纲 同步定位）
+ * 核心指标：
+ * 1. LINE_HEIGHT = 22px, PADDING_TOP = 14px (严格锁定，消除万级行数下的累计像素偏差)
+ * 2. findPathRange: 根据 JSONPath 查找在 JSON 源码文本中的行号与字符偏移区间（用于 树形大纲/大纲抽屉 -> 源码视图 定位光标）
+ * 3. findPathAtOffset: 根据源码文本中的光标字符偏移量反查对应的 JSONPath（用于 源码视图 -> 树形大纲 同步定位）
  */
+
+export const CODE_LINE_HEIGHT = 22
+export const CODE_PADDING_TOP = 14
 
 export interface PathLocation {
   line: number
@@ -259,12 +263,20 @@ export function findPathAtOffset(text: string, offset: number): string | null {
       i++
     } else if (t.type === TokenType.CloseBrace) {
       currentStack.pop()
+      const curPathSegs = currentStack
+        .map((f) => (f.isArray ? f.index : f.currentKey))
+        .filter((x) => x !== '' && x !== -1)
+      lastMatchedPath = curPathSegs.length > 0 ? curPathSegs.join('.') : null
       i++
     } else if (t.type === TokenType.OpenBracket) {
       currentStack.push({ isArray: true, index: 0, currentKey: '' })
       i++
     } else if (t.type === TokenType.CloseBracket) {
       currentStack.pop()
+      const curPathSegs = currentStack
+        .map((f) => (f.isArray ? f.index : f.currentKey))
+        .filter((x) => x !== '' && x !== -1)
+      lastMatchedPath = curPathSegs.length > 0 ? curPathSegs.join('.') : null
       i++
     } else if (t.type === TokenType.Comma) {
       const top = currentStack[currentStack.length - 1]

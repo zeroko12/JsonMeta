@@ -1,7 +1,13 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useJsonDocStore } from '../stores/jsonDoc'
-import { findPathRange, findPathAtOffset, getLineNumber } from '@shared/utils/json-position'
+import {
+  findPathRange,
+  findPathAtOffset,
+  getLineNumber,
+  CODE_LINE_HEIGHT,
+  CODE_PADDING_TOP,
+} from '@shared/utils/json-position'
 
 const doc = useJsonDocStore()
 const codeText = ref('')
@@ -12,9 +18,10 @@ let debounceTimer: ReturnType<typeof setTimeout> | null = null
 const textareaRef = ref<HTMLTextAreaElement | null>(null)
 const lineGutterRef = ref<HTMLDivElement | null>(null)
 
-// 跟踪当前高亮/光标所在的行与路径
+// 跟踪当前高亮/光标所在的行、路径及滚动偏移量
 const activePath = ref<string | null>(null)
 const activeLine = ref<number | null>(null)
+const currentScrollTop = ref(0)
 const flashActive = ref(false)
 let flashTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -24,34 +31,61 @@ let flashTimer: ReturnType<typeof setTimeout> | null = null
 async function locateAndFocusPath(path: string, shouldFlash = true) {
   if (!path || !codeText.value) return
   await nextTick()
+
   const loc = findPathRange(codeText.value, path)
   if (!loc) return
 
   activeLine.value = loc.line
   activePath.value = path
 
+  await nextTick()
+
   if (textareaRef.value) {
     const textarea = textareaRef.value
-    textarea.focus()
+    // 目标行的绝对物理像素高度
+    const linePixelY = CODE_PADDING_TOP + (loc.line - 1) * CODE_LINE_HEIGHT
+    // 居中高度计算
+    const viewHeight = textarea.clientHeight || 500
+    const targetScrollTop = Math.max(0, linePixelY - viewHeight / 2 + CODE_LINE_HEIGHT / 2)
+
+    // 关键: preventScroll 阻止 Chromium 默认将光标强制卷到视口顶部或底部
+    textarea.focus({ preventScroll: true })
     textarea.setSelectionRange(loc.keyStart, loc.keyEnd)
 
-    // 行高 13px * 1.6 ≈ 20.8px
-    const lineHeight = 20.8
-    const targetScrollTop = Math.max(
-      0,
-      (loc.line - 1) * lineHeight - textarea.clientHeight / 2 + lineHeight / 2,
-    )
+    // 立即应用精确居中滚动位置
     textarea.scrollTop = targetScrollTop
+    currentScrollTop.value = targetScrollTop
     if (lineGutterRef.value) {
       lineGutterRef.value.scrollTop = targetScrollTop
     }
+
+    // 浏览器渲染帧二次确认，消除重排可能造成的微小位移
+    requestAnimationFrame(() => {
+      if (textareaRef.value) {
+        textareaRef.value.scrollTop = targetScrollTop
+        currentScrollTop.value = targetScrollTop
+      }
+      if (lineGutterRef.value) {
+        lineGutterRef.value.scrollTop = targetScrollTop
+      }
+    })
+
+    setTimeout(() => {
+      if (textareaRef.value) {
+        textareaRef.value.scrollTop = targetScrollTop
+        currentScrollTop.value = targetScrollTop
+      }
+      if (lineGutterRef.value) {
+        lineGutterRef.value.scrollTop = targetScrollTop
+      }
+    }, 60)
 
     if (shouldFlash) {
       flashActive.value = true
       if (flashTimer) clearTimeout(flashTimer)
       flashTimer = setTimeout(() => {
         flashActive.value = false
-      }, 1800)
+      }, 2000)
     }
   }
 }
@@ -66,12 +100,20 @@ function loadFromDoc() {
     codeText.value = JSON.stringify(doc.current, null, 2)
     validateSyntax()
     if (doc.selectedPath) {
-      void locateAndFocusPath(doc.selectedPath, true)
+      setTimeout(() => {
+        void locateAndFocusPath(doc.selectedPath, true)
+      }, 30)
     }
   } catch (e) {
     codeText.value = String(doc.current)
   }
 }
+
+onMounted(() => {
+  if (doc.viewMode === 'code') {
+    loadFromDoc()
+  }
+})
 
 watch(
   () => doc.viewMode,
@@ -150,10 +192,13 @@ function onCursorMoved() {
   }
 }
 
-// 保证行号栏与输入框纵向滚动绝对同步
+// 保证行号栏与输入框纵向滚动绝对同步，并更新高亮横条位移
 function onTextareaScroll() {
-  if (lineGutterRef.value && textareaRef.value) {
-    lineGutterRef.value.scrollTop = textareaRef.value.scrollTop
+  if (textareaRef.value) {
+    currentScrollTop.value = textareaRef.value.scrollTop
+    if (lineGutterRef.value) {
+      lineGutterRef.value.scrollTop = textareaRef.value.scrollTop
+    }
   }
 }
 
@@ -275,7 +320,7 @@ const matchCount = computed(() => {
       </div>
     </div>
 
-    <!-- 文本编辑区 (带同步滚动与行号栏) -->
+    <!-- 文本编辑区 (带绝对像素对齐行号栏与活动行高亮横条) -->
     <div class="editor-main">
       <div ref="lineGutterRef" class="line-gutter">
         <div
@@ -292,19 +337,31 @@ const matchCount = computed(() => {
           {{ n }}
         </div>
       </div>
-      <textarea
-        ref="textareaRef"
-        v-model="codeText"
-        class="code-textarea"
-        spellcheck="false"
-        placeholder="在此输入或粘贴 JSON 源码..."
-        @input="onCodeInput"
-        @scroll="onTextareaScroll"
-        @click="onCursorMoved"
-        @keyup="onCursorMoved"
-        @select="onCursorMoved"
-        @blur="onCodeBlur"
-      />
+
+      <div class="textarea-viewport">
+        <!-- 活动行整行高亮指示条 (置于文本底层) -->
+        <div
+          v-if="activeLine && activeLine <= lines"
+          :class="['active-line-overlay', { flash: flashActive }]"
+          :style="{
+            top: `${CODE_PADDING_TOP + (activeLine - 1) * CODE_LINE_HEIGHT - currentScrollTop}px`,
+          }"
+        />
+
+        <textarea
+          ref="textareaRef"
+          v-model="codeText"
+          class="code-textarea"
+          spellcheck="false"
+          placeholder="在此输入或粘贴 JSON 源码..."
+          @input="onCodeInput"
+          @scroll="onTextareaScroll"
+          @click="onCursorMoved"
+          @keyup="onCursorMoved"
+          @select="onCursorMoved"
+          @blur="onCodeBlur"
+        />
+      </div>
     </div>
 
     <!-- 底部错误提示栏 -->
@@ -424,9 +481,10 @@ const matchCount = computed(() => {
   min-height: 0;
   overflow: hidden;
   background: var(--bg-workspace);
+  position: relative;
 }
 
-/* 行号栏 */
+/* 行号栏：锁定 14px 上下内边距，每行严格 22px 像素高度 */
 .line-gutter {
   width: 52px;
   background: var(--bg-subbar);
@@ -439,37 +497,76 @@ const matchCount = computed(() => {
   box-sizing: border-box;
 }
 .line-num {
+  height: 22px;
+  line-height: 22px;
   padding-right: 10px;
   font-family: 'Consolas', 'Fira Code', 'Monaco', monospace;
   font-size: 13px;
-  line-height: 1.6;
+  box-sizing: border-box;
   color: var(--text-dim);
-  transition: all 0.15s ease;
+  transition:
+    background 0.12s ease,
+    color 0.12s ease;
 }
 .line-num.active {
   color: #38bdf8;
   font-weight: 700;
-  background: rgba(56, 189, 248, 0.12);
+  background: rgba(56, 189, 248, 0.15);
 }
 .line-num.flash {
-  background: rgba(245, 158, 11, 0.35);
+  background: rgba(245, 158, 11, 0.4);
   color: #f59e0b;
 }
 
+/* 文本编辑视口容器 */
+.textarea-viewport {
+  flex: 1;
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  overflow: hidden;
+}
+
+/* 活动行全宽底层高亮横条 (类似 VS Code 当前行指示器) */
+.active-line-overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 22px;
+  background: rgba(56, 189, 248, 0.08);
+  border-left: 3px solid #38bdf8;
+  pointer-events: none;
+  z-index: 1;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+.active-line-overlay.flash {
+  background: rgba(245, 158, 11, 0.2);
+  border-left-color: #f59e0b;
+}
+
+/* 源码输入框：固定 22px 行高，禁止换行导致行偏移，背景透明以透出活动行横条 */
 .code-textarea {
   flex: 1;
   width: 100%;
   border: none;
-  background: var(--bg-workspace);
+  background: transparent;
   color: var(--text-code);
   padding: 14px;
   font-family: 'Consolas', 'Fira Code', 'Monaco', monospace;
   font-size: 13px;
-  line-height: 1.6;
+  line-height: 22px;
   outline: none;
   resize: none;
   tab-size: 2;
   box-sizing: border-box;
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow-x: auto;
+  position: relative;
+  z-index: 2;
 }
 
 .error-bar {
