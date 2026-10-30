@@ -46,7 +46,11 @@ export async function readText(filePath: string): Promise<string> {
  *
  * Also rotates backups so at most MAX_BACKUPS are kept.
  */
-export async function createBackup(target: string, memo?: string): Promise<string> {
+export async function createBackup(
+  target: string,
+  memo?: string,
+  maxBackups = MAX_BACKUPS,
+): Promise<string> {
   const dir = dirname(target)
   const base = basename(target, '.json')
   const stamp = formatTimestamp(new Date())
@@ -80,7 +84,7 @@ export async function createBackup(target: string, memo?: string): Promise<strin
     }
   }
 
-  await rotateBackups(target)
+  await rotateBackups(target, maxBackups)
   return bak
 }
 
@@ -136,6 +140,20 @@ export async function rotateBackups(target: string, max = MAX_BACKUPS): Promise<
     ]),
   )
   return toDelete.length
+}
+
+/**
+ * Manually delete a backup file and its companion .bak.meta.json.
+ */
+export async function deleteBackup(backupPath: string): Promise<{ ok: boolean; error?: string }> {
+  try {
+    await unlink(backupPath)
+    const metaBak = backupPath.replace(/\.bak\.json$/i, '.bak.meta.json')
+    await unlink(metaBak).catch(() => undefined)
+    return { ok: true }
+  } catch (err) {
+    return { ok: false, error: (err as Error).message }
+  }
 }
 
 /** Restore a backup file to `targetPath`. Returns { ok, error? }. */

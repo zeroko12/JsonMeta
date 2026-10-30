@@ -105,6 +105,53 @@ describe('backup rotation', () => {
     expect(list).not.toContain(files[0])
     expect(list).not.toContain(files[1])
   }, 30_000)
+
+  it('rotates backups with custom max limit', async () => {
+    const { createBackup, rotateBackups, listBackups } = await import('../../../src/main/ipc/file')
+    const target = join(dir, 'SystemConfig.json')
+    await writeFile(target, '{"c":1}', 'utf8')
+    await createBackup(target, undefined, 20)
+    await new Promise((r) => setTimeout(r, 1100))
+    await createBackup(target, undefined, 20)
+    await new Promise((r) => setTimeout(r, 1100))
+    await createBackup(target, undefined, 20)
+    await new Promise((r) => setTimeout(r, 1100))
+    await createBackup(target, undefined, 20)
+
+    let list = await listBackups(target)
+    expect(list.length).toBe(4)
+
+    // Lower quota to 2
+    const deletedCount = await rotateBackups(target, 2)
+    expect(deletedCount).toBe(2)
+    list = await listBackups(target)
+    expect(list.length).toBe(2)
+  }, 10_000)
+})
+
+describe('deleteBackup', () => {
+  it('deletes backup and companion .bak.meta.json', async () => {
+    const dir = join(tmpdir(), `cfg-del-${Date.now()}-${Math.random().toString(36).slice(2)}`)
+    await mkdir(dir, { recursive: true })
+    const target = join(dir, 'SystemConfig.json')
+    await writeFile(target, '{"del": true}', 'utf8')
+
+    const { createBackup, deleteBackup, listBackups } = await import('../../../src/main/ipc/file')
+    const bak = await createBackup(target, '待删除快照')
+    const metaBak = bak.replace(/\.bak\.json$/, '.bak.meta.json')
+    const { stat } = await import('node:fs/promises')
+
+    await expect(stat(bak)).resolves.toBeDefined()
+    await expect(stat(metaBak)).resolves.toBeDefined()
+
+    const res = await deleteBackup(bak)
+    expect(res.ok).toBe(true)
+
+    await expect(stat(bak)).rejects.toThrow()
+    await expect(stat(metaBak)).rejects.toThrow()
+    const list = await listBackups(target)
+    expect(list).not.toContain(bak)
+  })
 })
 
 describe('restoreBackup', () => {

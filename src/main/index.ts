@@ -9,6 +9,8 @@ import {
   listBackups,
   restoreBackup,
   updateBackupMemo,
+  deleteBackup,
+  rotateBackups,
   resolveConfigPath,
 } from './ipc/file'
 import { watchFile, stopWatching } from './ipc/file-watch'
@@ -148,8 +150,19 @@ ipcMain.handle('file:restoreBackup', async (_event, backupPath: string, targetPa
   return restoreBackup(backupPath, targetPath)
 })
 
-ipcMain.handle('file:createBackup', async (_event, targetPath: string, memo?: string) => {
-  return createBackup(targetPath, memo)
+ipcMain.handle(
+  'file:createBackup',
+  async (_event, targetPath: string, memo?: string, maxBackups?: number) => {
+    return createBackup(targetPath, memo, maxBackups)
+  },
+)
+
+ipcMain.handle('file:deleteBackup', async (_event, backupPath: string) => {
+  return deleteBackup(backupPath)
+})
+
+ipcMain.handle('file:rotateBackups', async (_event, targetPath: string, maxBackups: number) => {
+  return rotateBackups(targetPath, maxBackups)
 })
 
 ipcMain.handle('file:updateBackupMemo', async (_event, backupPath: string, memo: string) => {

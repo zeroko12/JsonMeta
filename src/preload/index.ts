@@ -60,8 +60,14 @@ const api = {
     ): Promise<{ ok: boolean; error?: string }> {
       return ipcRenderer.invoke('file:restoreBackup', backupPath, targetPath)
     },
-    async createBackup(targetPath: string, memo?: string): Promise<string> {
-      return ipcRenderer.invoke('file:createBackup', targetPath, memo)
+    async createBackup(targetPath: string, memo?: string, maxBackups?: number): Promise<string> {
+      return ipcRenderer.invoke('file:createBackup', targetPath, memo, maxBackups)
+    },
+    async deleteBackup(backupPath: string): Promise<{ ok: boolean; error?: string }> {
+      return ipcRenderer.invoke('file:deleteBackup', backupPath)
+    },
+    async rotateBackups(targetPath: string, maxBackups: number): Promise<number> {
+      return ipcRenderer.invoke('file:rotateBackups', targetPath, maxBackups)
     },
     async updateBackupMemo(
       backupPath: string,

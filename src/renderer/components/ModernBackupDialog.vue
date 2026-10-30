@@ -93,6 +93,62 @@ async function saveEditMemo(b: BackupItem) {
   }
 }
 
+// ─── 快照最大保留份数上限与配额 ───
+const maxBackupsLimit = ref<number>(Number(localStorage.getItem('json_meta_max_backups')) || 10)
+
+async function handleMaxBackupsChange() {
+  const newMax = maxBackupsLimit.value
+  localStorage.setItem('json_meta_max_backups', String(newMax))
+  if (!doc.filePath) return
+
+  // 如果新上限小于当前已有快照数量，提示确认并执行清理
+  if (backups.value.length > newMax) {
+    const diffCount = backups.value.length - newMax
+    const ok = confirm(
+      `快照上限已调整为 ${newMax} 份。\n当前已有 ${backups.value.length} 份快照，系统将自动清理最旧的 ${diffCount} 份快照，是否确认？`,
+    )
+    if (ok) {
+      await window.api.file.rotateBackups(doc.filePath, newMax)
+      doc.showToast(`已将快照保留上限调整为 ${newMax} 份，并自动清理旧版本`, 'success')
+      await loadBackups()
+    } else {
+      // 恢复旧上限
+      maxBackupsLimit.value = backups.value.length
+      localStorage.setItem('json_meta_max_backups', String(maxBackupsLimit.value))
+    }
+  } else {
+    doc.showToast(`快照保留上限已调整为 ${newMax} 份`, 'success')
+  }
+}
+
+async function handleDeleteBackup(b: BackupItem) {
+  const memoStr = b.memo ? `【${b.memo}】` : ''
+  const shortName = getSnapshotShortName(b.path)
+  const ok = confirm(`确定永久删除该历史快照吗？\n${memoStr} ${shortName}\n此操作不可撤销。`)
+  if (!ok) return
+
+  try {
+    const res = await window.api.file.deleteBackup(b.path)
+    if (!res.ok) {
+      doc.showToast(res.error || '删除快照失败', 'error')
+      return
+    }
+    doc.showToast(`已删除快照: ${shortName}`, 'success')
+    if (selectedPath.value === b.path) {
+      selectedPath.value = null
+    }
+    if (diffSourceA.value === b.path) {
+      diffSourceA.value = ''
+    }
+    if (diffSourceB.value === b.path) {
+      diffSourceB.value = '__CURRENT__'
+    }
+    await loadBackups()
+  } catch (err) {
+    doc.showToast(`删除快照失败: ${(err as Error).message}`, 'error')
+  }
+}
+
 // ─── 快照比对状态 ───
 const diffSourceA = ref<string>('') // 基准版本 (通常为某个历史快照路径)
 const diffSourceB = ref<string>('__CURRENT__') // 对比目标 ('__CURRENT__' 或另一个快照路径)
@@ -146,7 +202,11 @@ async function createManualBackup() {
   isCreating.value = true
   try {
     const memo = snapshotMemoDraft.value.trim()
-    const bak = await window.api.file.createBackup(doc.filePath, memo || undefined)
+    const bak = await window.api.file.createBackup(
+      doc.filePath,
+      memo || undefined,
+      maxBackupsLimit.value,
+    )
     const memoTag = memo ? `【${memo}】 ` : ''
     doc.showToast(`快照创建成功: ${memoTag}${bak.split(/[\\/]/).pop()}`, 'success')
     showCreateInput.value = false
@@ -400,7 +460,32 @@ function formatVal(v: unknown): string {
     <div v-if="dialogMode === 'list'" class="modal-card list-mode">
       <header class="modal-header">
         <div class="header-main">
-          <h3>历史备份与快照</h3>
+          <div class="header-title-row">
+            <h3>历史备份与快照</h3>
+            <div
+              class="quota-pill"
+              title="当前快照数量 / 最大保留上限（满额时自动淘汰最旧快照）。点击可修改上限"
+            >
+              <span class="quota-label">配额:</span>
+              <span class="quota-current" :class="{ 'is-full': backups.length >= maxBackupsLimit }">
+                {{ backups.length }}
+              </span>
+              <span class="quota-sep">/</span>
+              <select
+                v-model.number="maxBackupsLimit"
+                class="quota-select"
+                title="设置最大保留份数上限"
+                @change="handleMaxBackupsChange"
+              >
+                <option :value="5">5 份</option>
+                <option :value="10">10 份</option>
+                <option :value="15">15 份</option>
+                <option :value="20">20 份</option>
+                <option :value="30">30 份</option>
+                <option :value="50">50 份</option>
+              </select>
+            </div>
+          </div>
           <div class="header-actions">
             <button
               v-if="backups.length >= 2"
@@ -521,6 +606,13 @@ function formatVal(v: unknown): string {
                 @click.stop="openDiffWithCurrent(b.path)"
               >
                 与当前对比
+              </button>
+              <button
+                class="btn-row-del"
+                title="永久删除此历史快照"
+                @click.stop="handleDeleteBackup(b)"
+              >
+                🗑️
               </button>
               <span v-if="selectedPath === b.path" class="selected-mark">● 选中</span>
             </div>
@@ -812,11 +904,59 @@ function formatVal(v: unknown): string {
   align-items: center;
   justify-content: space-between;
 }
-.header-main h3 {
+.header-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.header-title-row h3 {
   margin: 0;
   font-size: 15px;
   color: var(--text-main);
   font-weight: 600;
+}
+.quota-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  color: var(--text-dim);
+  transition: all 0.15s;
+}
+.quota-pill:hover {
+  border-color: var(--border-focus);
+}
+.quota-label {
+  font-size: 11px;
+  opacity: 0.8;
+}
+.quota-current {
+  font-weight: 700;
+  color: #38bdf8;
+}
+.quota-current.is-full {
+  color: #f59e0b;
+}
+.quota-sep {
+  opacity: 0.5;
+}
+.quota-select {
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  font-size: 11px;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+  padding: 0 2px;
+}
+.quota-select option {
+  background: var(--bg-modal);
+  color: var(--text-main);
 }
 .header-actions {
   display: flex;
@@ -1107,6 +1247,24 @@ function formatVal(v: unknown): string {
   background: #0284c7;
   border-color: #38bdf8;
   color: white;
+}
+.btn-row-del {
+  background: var(--bg-btn);
+  border: 1px solid var(--border-color);
+  color: var(--text-dim);
+  padding: 3px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-row-del:hover {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: #ef4444;
+  color: #ef4444;
 }
 .selected-mark {
   color: var(--text-highlight);

@@ -626,9 +626,10 @@ export const useJsonDocStore = defineStore('jsonDoc', () => {
     try {
       const cleanData = safeClone(current.value)
       const cleanDescriptions = safeClone(descriptions.value)
+      const maxBackupsSetting = Number(localStorage.getItem('json_meta_max_backups')) || 10
       const writeRes = await window.api.file.writeJson(filePath.value, cleanData, {
         backup: true,
-        maxBackups: 10,
+        maxBackups: maxBackupsSetting,
       })
       if (!writeRes.ok) {
         throw new Error(writeRes.error || '写入失败')

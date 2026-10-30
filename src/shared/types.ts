@@ -51,7 +51,9 @@ declare global {
           backupPath: string,
           targetPath: string,
         ): Promise<{ ok: boolean; error?: string }>
-        createBackup(targetPath: string, memo?: string): Promise<string>
+        createBackup(targetPath: string, memo?: string, maxBackups?: number): Promise<string>
+        deleteBackup(backupPath: string): Promise<{ ok: boolean; error?: string }>
+        rotateBackups(targetPath: string, maxBackups: number): Promise<number>
         updateBackupMemo(
           backupPath: string,
           memo: string,
