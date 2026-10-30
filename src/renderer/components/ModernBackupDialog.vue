@@ -34,6 +34,65 @@ function openCreateInput() {
   })
 }
 
+// ─── 修改快照备注状态 ───
+const editingPath = ref<string | null>(null)
+const editMemoDraft = ref('')
+const editMemoInputRef = ref<HTMLInputElement | null>(null)
+const isSavingMemo = ref(false)
+
+const selectedBackupItem = computed(() => backups.value.find((b) => b.path === selectedPath.value))
+
+function startEditMemo(b: BackupItem) {
+  editingPath.value = b.path
+  editMemoDraft.value = b.memo || ''
+  nextTick(() => {
+    editMemoInputRef.value?.focus()
+    editMemoInputRef.value?.select()
+  })
+}
+
+function cancelEditMemo() {
+  editingPath.value = null
+  editMemoDraft.value = ''
+}
+
+async function saveEditMemo(b: BackupItem) {
+  if (!doc.filePath) return
+  isSavingMemo.value = true
+  try {
+    const newMemo = editMemoDraft.value.trim()
+    const res = await window.api.file.updateBackupMemo(b.path, newMemo)
+    if (!res.ok) {
+      doc.showToast(res.error || '修改快照备注失败', 'error')
+      return
+    }
+
+    const oldPath = b.path
+    const newPath = res.newPath || b.path
+    b.memo = res.memo || undefined
+    b.path = newPath
+
+    if (selectedPath.value === oldPath) {
+      selectedPath.value = newPath
+    }
+    if (diffSourceA.value === oldPath) {
+      diffSourceA.value = newPath
+    }
+    if (diffSourceB.value === oldPath) {
+      diffSourceB.value = newPath
+    }
+
+    editingPath.value = null
+    editMemoDraft.value = ''
+    doc.showToast(res.memo ? `快照备注已修改为【${res.memo}】` : '快照备注已清除', 'success')
+    await loadBackups()
+  } catch (err) {
+    doc.showToast(`修改备注失败: ${(err as Error).message}`, 'error')
+  } finally {
+    isSavingMemo.value = false
+  }
+}
+
 // ─── 快照比对状态 ───
 const diffSourceA = ref<string>('') // 基准版本 (通常为某个历史快照路径)
 const diffSourceB = ref<string>('__CURRENT__') // 对比目标 ('__CURRENT__' 或另一个快照路径)
@@ -107,10 +166,14 @@ watch(
       dialogMode.value = 'list'
       showCreateInput.value = false
       snapshotMemoDraft.value = ''
+      editingPath.value = null
+      editMemoDraft.value = ''
       loadBackups()
     } else {
       diffItems.value = []
       diffSearchQuery.value = ''
+      editingPath.value = null
+      editMemoDraft.value = ''
     }
   },
 )
@@ -401,13 +464,57 @@ function formatVal(v: unknown): string {
             <div class="b-info">
               <div class="b-time-line">
                 <span class="b-time">{{ formatTs(b.timestamp) }}</span>
-                <span v-if="b.memo" class="b-memo-pill" :title="`备注: ${b.memo}`">
+                <span
+                  v-if="b.memo"
+                  class="b-memo-pill"
+                  :title="`工况备注: ${b.memo} (点击修改)`"
+                  @click.stop="startEditMemo(b)"
+                >
                   🏷️ {{ b.memo }}
                 </span>
+                <button
+                  v-else
+                  class="btn-inline-add-memo"
+                  title="为此快照添加备注"
+                  @click.stop="startEditMemo(b)"
+                >
+                  + 备注
+                </button>
               </div>
               <code class="b-path">{{ getSnapshotShortName(b.path) }}</code>
+
+              <!-- 行内修改备注编辑框 -->
+              <div v-if="editingPath === b.path" class="b-memo-inline-edit" @click.stop>
+                <input
+                  ref="editMemoInputRef"
+                  v-model="editMemoDraft"
+                  type="text"
+                  class="memo-inline-input"
+                  placeholder="输入快照备注（清空并保存则清除备注）"
+                  maxlength="40"
+                  @keydown.enter="saveEditMemo(b)"
+                  @keydown.esc="cancelEditMemo"
+                />
+                <div class="inline-edit-btns">
+                  <button
+                    class="btn-memo-confirm"
+                    :disabled="isSavingMemo"
+                    @click="saveEditMemo(b)"
+                  >
+                    {{ isSavingMemo ? '保存中...' : '保存' }}
+                  </button>
+                  <button class="btn-memo-cancel" @click="cancelEditMemo">取消</button>
+                </div>
+              </div>
             </div>
             <div class="b-actions">
+              <button
+                class="btn-row-memo"
+                title="修改此快照的工况备注"
+                @click.stop="startEditMemo(b)"
+              >
+                ✏️ 备注
+              </button>
               <button
                 class="btn-row-diff"
                 title="对比该历史快照与当前编辑中的配置差异"
@@ -430,6 +537,14 @@ function formatVal(v: unknown): string {
             @click="openDiffWithCurrent(selectedPath)"
           >
             与当前对比
+          </button>
+          <button
+            v-if="selectedPath && selectedBackupItem"
+            class="btn secondary"
+            title="修改选中快照的工况备注"
+            @click="startEditMemo(selectedBackupItem)"
+          >
+            ✏️ 修改备注
           </button>
         </div>
         <div class="footer-right">
@@ -869,6 +984,27 @@ function formatVal(v: unknown): string {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.b-memo-pill:hover {
+  background: rgba(245, 158, 11, 0.28);
+  border-color: #f59e0b;
+}
+.btn-inline-add-memo {
+  background: transparent;
+  border: 1px dashed var(--border-color);
+  color: var(--text-dim);
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-inline-add-memo:hover {
+  border-color: #f59e0b;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
 }
 .b-path {
   font-size: 11px;
@@ -876,10 +1012,85 @@ function formatVal(v: unknown): string {
   font-family: monospace;
 }
 
+/* 行内备注编辑条 */
+.b-memo-inline-edit {
+  margin-top: 6px;
+  padding: 6px 8px;
+  background: var(--bg-modal);
+  border: 1px solid var(--border-focus);
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+.memo-inline-input {
+  flex: 1;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 11px;
+  color: var(--text-main);
+  outline: none;
+}
+.memo-inline-input:focus {
+  border-color: var(--border-focus);
+}
+.inline-edit-btns {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-memo-confirm {
+  background: #0284c7;
+  color: white;
+  border: none;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-memo-confirm:hover:not(:disabled) {
+  background: #0369a1;
+}
+.btn-memo-cancel {
+  background: transparent;
+  color: var(--text-dim);
+  border: 1px solid var(--border-color);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-memo-cancel:hover {
+  color: var(--text-main);
+  background: var(--bg-btn-hover);
+}
+
 .b-actions {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+.btn-row-memo {
+  background: var(--bg-btn);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-row-memo:hover {
+  background: rgba(245, 158, 11, 0.18);
+  border-color: #f59e0b;
+  color: #f59e0b;
 }
 .btn-row-diff {
   background: var(--bg-btn);

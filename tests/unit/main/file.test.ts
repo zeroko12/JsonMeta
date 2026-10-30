@@ -123,6 +123,57 @@ describe('restoreBackup', () => {
   })
 })
 
+describe('updateBackupMemo', () => {
+  let dir: string
+  beforeEach(async () => {
+    dir = join(tmpdir(), `cfg-upd-memo-${Date.now()}-${Math.random().toString(36).slice(2)}`)
+    await mkdir(dir, { recursive: true })
+  })
+
+  it('updates memo for an old snapshot created without memo', async () => {
+    const { createBackup, updateBackupMemo } = await import('../../../src/main/ipc/file')
+    const target = join(dir, 'SystemConfig.json')
+    await writeFile(target, '{"version": 10}', 'utf8')
+
+    // Create standard old-style backup (no memo)
+    const oldBak = await createBackup(target)
+    expect(oldBak).toMatch(/SystemConfig\.\d{8}_\d{6}\.bak\.json$/)
+
+    // Update memo
+    const res = await updateBackupMemo(oldBak, '首次工况标定')
+    expect(res.ok).toBe(true)
+    expect(res.memo).toBe('首次工况标定')
+    expect(res.newPath).toMatch(/SystemConfig\.\d{8}_\d{6}\.首次工况标定\.bak\.json$/)
+
+    // Verify old file is gone and new file exists with identical content
+    const { stat } = await import('node:fs/promises')
+    await expect(stat(oldBak)).rejects.toThrow()
+    const content = await readFile(res.newPath!, 'utf8')
+    expect(content).toBe('{"version": 10}')
+
+    // Verify companion meta file
+    const metaBak = res.newPath!.replace(/\.bak\.json$/, '.bak.meta.json')
+    const metaObj = JSON.parse(await readFile(metaBak, 'utf8'))
+    expect(metaObj.memo).toBe('首次工况标定')
+
+    // Update memo again
+    const res2 = await updateBackupMemo(res.newPath!, '更换灯丝后复测')
+    expect(res2.ok).toBe(true)
+    expect(res2.memo).toBe('更换灯丝后复测')
+    expect(res2.newPath).toMatch(/SystemConfig\.\d{8}_\d{6}\.更换灯丝后复测\.bak\.json$/)
+    await expect(stat(res.newPath!)).rejects.toThrow()
+
+    // Clear memo
+    const res3 = await updateBackupMemo(res2.newPath!, '')
+    expect(res3.ok).toBe(true)
+    expect(res3.memo).toBe('')
+    expect(res3.newPath).toMatch(/SystemConfig\.\d{8}_\d{6}\.bak\.json$/)
+    await expect(stat(res2.newPath!)).rejects.toThrow()
+    const cleanContent = await readFile(res3.newPath!, 'utf8')
+    expect(cleanContent).toBe('{"version": 10}')
+  })
+})
+
 describe('hasMeaningfulChange', () => {
   it('returns false for byte-identical content', async () => {
     const { hasMeaningfulChange } = await import('../../../src/main/ipc/file')

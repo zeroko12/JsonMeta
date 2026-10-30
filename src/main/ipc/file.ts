@@ -7,7 +7,7 @@
  *  - diff detection (skip writes when no change)
  */
 
-import { readFile, writeFile, readdir, stat, mkdir } from 'node:fs/promises'
+import { readFile, writeFile, readdir, stat, mkdir, rename, unlink } from 'node:fs/promises'
 import { basename, dirname, join } from 'node:path'
 import { markSelfWrite } from './file-watch'
 
@@ -159,6 +159,84 @@ export async function restoreBackup(
     }
 
     return { ok: true }
+  } catch (err) {
+    return { ok: false, error: (err as Error).message }
+  }
+}
+
+/**
+ * Update the memo of an existing backup file.
+ * Renames the file to include or remove the memo, and synchronizes the companion .bak.meta.json file.
+ * Returns { ok: true, newPath, memo } or { ok: false, error }.
+ */
+export async function updateBackupMemo(
+  backupPath: string,
+  memo: string,
+): Promise<{ ok: boolean; newPath?: string; memo?: string; error?: string }> {
+  try {
+    const dir = dirname(backupPath)
+    const file = basename(backupPath)
+    const cleanMemo = memo
+      .trim()
+      .replace(/[\\/:*?"<>|]/g, '_')
+      .slice(0, 50)
+
+    // Match base, timestamp, and optional existing memo
+    const match = file.match(/^(.+?)\.(\d{8}_\d{6})(?:[._].+?)?\.bak\.json$/i)
+    let newPath = backupPath
+
+    if (match) {
+      const base = match[1]
+      const stamp = match[2]
+      const memoPart = cleanMemo ? `.${cleanMemo}` : ''
+      newPath = join(dir, `${base}.${stamp}${memoPart}.bak.json`)
+    }
+
+    // If filename needs to change and destination already exists (and is different from backupPath)
+    if (newPath !== backupPath) {
+      try {
+        await stat(newPath)
+        return { ok: false, error: '已存在同名快照文件，请更换备注内容' }
+      } catch {
+        // Target does not exist, can proceed to rename
+      }
+      await rename(backupPath, newPath)
+    }
+
+    // Synchronize companion .bak.meta.json
+    const oldMeta = backupPath.replace(/\.bak\.json$/i, '.bak.meta.json')
+    const newMeta = newPath.replace(/\.bak\.json$/i, '.bak.meta.json')
+
+    let metaObj: { memo?: string; descriptions?: Record<string, string> } = { descriptions: {} }
+    let oldMetaExisted = false
+    try {
+      const metaText = await readFile(oldMeta, 'utf8')
+      metaObj = JSON.parse(metaText)
+      oldMetaExisted = true
+    } catch {
+      // old meta did not exist
+    }
+
+    if (cleanMemo) {
+      metaObj.memo = cleanMemo
+    } else {
+      delete metaObj.memo
+    }
+
+    // If paths differ and old meta existed, remove the old meta file
+    if (oldMetaExisted && oldMeta !== newMeta) {
+      await unlink(oldMeta).catch(() => undefined)
+    }
+
+    // Write updated meta file if memo exists or descriptions exist
+    if (cleanMemo || (metaObj.descriptions && Object.keys(metaObj.descriptions).length > 0)) {
+      await writeFile(newMeta, JSON.stringify(metaObj, null, 2), 'utf8')
+    } else if (oldMetaExisted) {
+      // If memo was removed and descriptions are empty, clean up meta file
+      await unlink(newMeta).catch(() => undefined)
+    }
+
+    return { ok: true, newPath, memo: cleanMemo }
   } catch (err) {
     return { ok: false, error: (err as Error).message }
   }

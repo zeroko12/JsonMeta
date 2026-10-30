@@ -52,6 +52,10 @@ declare global {
           targetPath: string,
         ): Promise<{ ok: boolean; error?: string }>
         createBackup(targetPath: string, memo?: string): Promise<string>
+        updateBackupMemo(
+          backupPath: string,
+          memo: string,
+        ): Promise<{ ok: boolean; newPath?: string; memo?: string; error?: string }>
         watchStart(path: string): Promise<{ ok: boolean }>
         watchStop(): Promise<{ ok: boolean }>
         onChange(callback: (event: FileChangeEvent) => void): () => void
