@@ -224,6 +224,139 @@ const diffItems = ref<UnifiedChangeItem[]>([])
 const diffSearchQuery = ref('')
 const diffCategoryFilter = ref<'all' | 'data' | 'description'>('all')
 
+// ─── 下方选中快照自动比对状态 (所选快照 vs 当前配置) ───
+interface AutoDiffItem {
+  path: string
+  type: 'modify' | 'add' | 'delete'
+  category: 'data' | 'description'
+  oldValue: unknown
+  newValue: unknown
+  desc?: string
+}
+
+const autoDiffLoading = ref(false)
+const autoDiffItems = ref<AutoDiffItem[]>([])
+const autoDiffFilter = ref<'all' | 'data' | 'description'>('all')
+const autoDiffSearch = ref('')
+
+async function computeAutoDiff(snapshotPath: string) {
+  if (!snapshotPath || !doc.filePath) {
+    autoDiffItems.value = []
+    return
+  }
+  autoDiffLoading.value = true
+  try {
+    const snapshotData = await window.api.file.readJson(snapshotPath)
+    let snapshotDescs: Record<string, string> = {}
+    try {
+      const meta = await window.api.file.loadMeta<{ descriptions?: Record<string, string> }>(
+        snapshotPath,
+      )
+      snapshotDescs = meta?.descriptions || {}
+    } catch {
+      // ignore
+    }
+
+    const currentData = toRaw(doc.current)
+    const currentDescs = toRaw(doc.descriptions) || {}
+
+    // diff(oldValue: 当前配置, newValue: 快照恢复值)
+    const dataDiffMap = diff(currentData, snapshotData)
+    const items: AutoDiffItem[] = dataDiffMap.toArray().map((c) => ({
+      path: c.path,
+      type: c.type,
+      category: 'data',
+      oldValue: c.oldValue,
+      newValue: c.newValue,
+      desc: currentDescs[c.path] || snapshotDescs[c.path] || undefined,
+    }))
+
+    // 中文业务注释差异比对
+    const allDescKeys = new Set([...Object.keys(currentDescs), ...Object.keys(snapshotDescs)])
+    for (const k of allDescKeys) {
+      const oldD = currentDescs[k]
+      const newD = snapshotDescs[k]
+      if (oldD === undefined && newD !== undefined && newD.trim() !== '') {
+        items.push({
+          path: k,
+          type: 'add',
+          category: 'description',
+          oldValue: '(无)',
+          newValue: newD,
+          desc: newD,
+        })
+      } else if (oldD !== undefined && (newD === undefined || newD.trim() === '')) {
+        items.push({
+          path: k,
+          type: 'delete',
+          category: 'description',
+          oldValue: oldD,
+          newValue: '(无)',
+          desc: oldD,
+        })
+      } else if (oldD !== undefined && newD !== undefined && oldD !== newD) {
+        items.push({
+          path: k,
+          type: 'modify',
+          category: 'description',
+          oldValue: oldD,
+          newValue: newD,
+          desc: newD,
+        })
+      }
+    }
+
+    autoDiffItems.value = items
+  } catch (err) {
+    console.error('Failed to compute auto diff:', err)
+    autoDiffItems.value = []
+  } finally {
+    autoDiffLoading.value = false
+  }
+}
+
+watch(
+  selectedPath,
+  (newP) => {
+    if (newP && doc.showBackupModal && dialogMode.value === 'list') {
+      void computeAutoDiff(newP)
+    } else {
+      autoDiffItems.value = []
+    }
+  },
+  { immediate: true },
+)
+
+const filteredAutoDiffItems = computed(() => {
+  let list = autoDiffItems.value
+  if (autoDiffFilter.value === 'data') {
+    list = list.filter((i) => i.category === 'data')
+  } else if (autoDiffFilter.value === 'description') {
+    list = list.filter((i) => i.category === 'description')
+  }
+  const q = autoDiffSearch.value.trim().toLowerCase()
+  if (!q) return list
+  return list.filter((i) => {
+    if (i.path.toLowerCase().includes(q)) return true
+    if (i.desc && i.desc.toLowerCase().includes(q)) return true
+    if (JSON.stringify(i.oldValue).toLowerCase().includes(q)) return true
+    if (JSON.stringify(i.newValue).toLowerCase().includes(q)) return true
+    return false
+  })
+})
+
+const autoDiffStats = computed(() => {
+  const all = autoDiffItems.value
+  return {
+    total: all.length,
+    modify: all.filter((c) => c.type === 'modify').length,
+    add: all.filter((c) => c.type === 'add').length,
+    delete: all.filter((c) => c.type === 'delete').length,
+    dataCount: all.filter((c) => c.category === 'data').length,
+    descCount: all.filter((c) => c.category === 'description').length,
+  }
+})
+
 async function loadBackups() {
   if (!doc.filePath) return
   isLoading.value = true
@@ -262,8 +395,15 @@ async function loadBackups() {
       }),
     )
     backups.value = items
-    if (items.length > 0 && !selectedPath.value) {
-      selectedPath.value = items[0]!.path
+    if (items.length > 0) {
+      if (!selectedPath.value || !items.some((b) => b.path === selectedPath.value)) {
+        selectedPath.value = items[0]!.path
+      } else {
+        void computeAutoDiff(selectedPath.value)
+      }
+    } else {
+      selectedPath.value = null
+      autoDiffItems.value = []
     }
   } finally {
     isLoading.value = false
@@ -709,7 +849,7 @@ function formatVal(v: unknown): string {
             </div>
             <div class="b-actions">
               <button
-                class="btn-row-lock"
+                class="btn-row-icon btn-row-lock"
                 :class="{ 'is-locked': b.locked }"
                 :title="
                   b.locked
@@ -718,53 +858,132 @@ function formatVal(v: unknown): string {
                 "
                 @click.stop="toggleBackupLock(b)"
               >
-                {{ b.locked ? '🔒 常驻' : '🔓 轮换' }}
+                {{ b.locked ? '🔒' : '🔓' }}
               </button>
               <button
-                class="btn-row-memo"
+                class="btn-row-icon btn-row-memo"
                 title="修改此快照的工况备注"
                 @click.stop="startEditMemo(b)"
               >
-                ✏️ 备注
+                ✏️
               </button>
               <button
-                class="btn-row-diff"
-                title="对比该历史快照与当前编辑中的配置差异"
-                @click.stop="openDiffWithCurrent(b.path)"
-              >
-                与当前对比
-              </button>
-              <button
-                class="btn-row-del"
+                class="btn-row-icon btn-row-del"
                 title="永久删除此历史快照"
                 @click.stop="handleDeleteBackup(b)"
               >
                 🗑️
               </button>
-              <span v-if="selectedPath === b.path" class="selected-mark">● 选中</span>
             </div>
           </li>
         </ul>
+
+        <!-- ─── 自动差异预览面板 (所选快照 vs 当前配置) ─── -->
+        <div v-if="backups.length > 0 && selectedPath" class="auto-diff-card">
+          <div class="auto-diff-header">
+            <div class="diff-header-title">
+              <span class="diff-section-tag">📋 与当前配置差异预览</span>
+              <span v-if="autoDiffLoading" class="diff-badge loading">正在比对...</span>
+              <span v-else-if="autoDiffStats.total === 0" class="diff-badge clean">
+                ✅ 与当前配置完全一致
+              </span>
+              <span v-else class="diff-badge changes">
+                ● 共 {{ autoDiffStats.total }} 处差异 ({{ autoDiffStats.modify }} 修改,
+                {{ autoDiffStats.add }} 新增, {{ autoDiffStats.delete }} 删除)
+              </span>
+            </div>
+            <div v-if="autoDiffStats.total > 0" class="diff-header-filters">
+              <div class="auto-filter-pills">
+                <button
+                  :class="['auto-pill-btn', { active: autoDiffFilter === 'all' }]"
+                  @click="autoDiffFilter = 'all'"
+                >
+                  全部 ({{ autoDiffStats.total }})
+                </button>
+                <button
+                  :class="['auto-pill-btn', { active: autoDiffFilter === 'data' }]"
+                  @click="autoDiffFilter = 'data'"
+                >
+                  数据 ({{ autoDiffStats.dataCount }})
+                </button>
+                <button
+                  v-if="autoDiffStats.descCount > 0"
+                  :class="['auto-pill-btn', { active: autoDiffFilter === 'description' }]"
+                  @click="autoDiffFilter = 'description'"
+                >
+                  注释 ({{ autoDiffStats.descCount }})
+                </button>
+              </div>
+              <input
+                v-model="autoDiffSearch"
+                type="text"
+                class="auto-diff-search"
+                placeholder="过滤字段或数值..."
+              />
+            </div>
+          </div>
+
+          <div class="auto-diff-content">
+            <div v-if="autoDiffLoading" class="auto-diff-hint">正在比对当前配置与快照差异...</div>
+            <div v-else-if="autoDiffStats.total === 0" class="auto-diff-clean">
+              ✅ 所选快照与当前编辑中的配置完全一致（参数与业务注释均无差异）。
+            </div>
+            <div v-else class="auto-diff-table-container">
+              <table class="auto-diff-table">
+                <thead>
+                  <tr>
+                    <th width="48" class="text-center">变动</th>
+                    <th width="210">字段 / 业务注释</th>
+                    <th>当前编辑值</th>
+                    <th width="18" class="text-center"></th>
+                    <th>快照恢复值</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="item in filteredAutoDiffItems" :key="`${item.category}:${item.path}`">
+                    <td class="text-center">
+                      <span :class="['type-pill', item.type]">
+                        {{
+                          item.type === 'modify' ? '修改' : item.type === 'add' ? '新增' : '删除'
+                        }}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="col-field">
+                        <code class="field-path-code" :title="item.path">{{ item.path }}</code>
+                        <span v-if="item.desc" class="field-desc-tag" :title="item.desc">
+                          {{ item.desc }}
+                        </span>
+                      </div>
+                    </td>
+                    <td class="cell-val old-val">
+                      <code :title="formatVal(item.oldValue)">{{ formatVal(item.oldValue) }}</code>
+                    </td>
+                    <td class="cell-arrow">➔</td>
+                    <td class="cell-val new-val">
+                      <code :title="formatVal(item.newValue)">{{ formatVal(item.newValue) }}</code>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
 
       <footer class="modal-footer">
         <div class="footer-left">
-          <button
-            v-if="selectedPath"
-            class="btn secondary diff-btn"
-            title="对比选中的快照与当前配置"
-            @click="openDiffWithCurrent(selectedPath)"
+          <span
+            v-if="selectedBackupItem"
+            class="selected-snapshot-tip"
+            :title="selectedBackupItem.path"
           >
-            与当前对比
-          </button>
-          <button
-            v-if="selectedPath && selectedBackupItem"
-            class="btn secondary"
-            title="修改选中快照的工况备注"
-            @click="startEditMemo(selectedBackupItem)"
-          >
-            ✏️ 修改备注
-          </button>
+            <span class="tip-label">当前选定:</span>
+            <span v-if="selectedBackupItem.memo" class="tip-memo">
+              【{{ selectedBackupItem.memo }}】
+            </span>
+            <code class="tip-name">{{ getSnapshotShortName(selectedBackupItem.path) }}</code>
+          </span>
         </div>
         <div class="footer-right">
           <button class="btn secondary" @click="closeModal">关闭</button>
@@ -1027,8 +1246,9 @@ function formatVal(v: unknown): string {
 
 /* 列表模式 */
 .modal-card.list-mode {
-  width: 580px;
-  max-width: 92vw;
+  width: 740px;
+  max-width: 94vw;
+  max-height: 88vh;
 }
 
 /* 比对模式 */
@@ -1260,10 +1480,12 @@ function formatVal(v: unknown): string {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
+  max-height: 145px;
+  overflow-y: auto;
 }
 .backup-list li {
-  padding: 6px 10px;
+  padding: 5px 8px;
   border: 1px solid var(--border-color);
   background: var(--bg-input);
   border-radius: 5px;
@@ -1286,6 +1508,8 @@ function formatVal(v: unknown): string {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
+  flex: 1;
 }
 .b-time-line {
   display: flex;
@@ -1293,7 +1517,7 @@ function formatVal(v: unknown): string {
   gap: 6px;
 }
 .b-time {
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--text-main);
 }
@@ -1301,11 +1525,11 @@ function formatVal(v: unknown): string {
   background: rgba(245, 158, 11, 0.15);
   color: #f59e0b;
   border: 1px solid rgba(245, 158, 11, 0.35);
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 600;
-  padding: 1px 6px;
+  padding: 0 5px;
   border-radius: 3px;
-  max-width: 200px;
+  max-width: 180px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1320,9 +1544,9 @@ function formatVal(v: unknown): string {
   background: rgba(16, 185, 129, 0.15);
   color: #10b981;
   border: 1px solid rgba(16, 185, 129, 0.35);
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 600;
-  padding: 1px 6px;
+  padding: 0 5px;
   border-radius: 3px;
   white-space: nowrap;
 }
@@ -1330,8 +1554,8 @@ function formatVal(v: unknown): string {
   background: transparent;
   border: 1px dashed var(--border-color);
   color: var(--text-dim);
-  font-size: 10.5px;
-  padding: 1px 5px;
+  font-size: 10px;
+  padding: 0 4px;
   border-radius: 3px;
   cursor: pointer;
   transition: all 0.15s;
@@ -1342,9 +1566,12 @@ function formatVal(v: unknown): string {
   background: rgba(245, 158, 11, 0.1);
 }
 .b-path {
-  font-size: 10.5px;
+  font-size: 10px;
   color: var(--text-code);
   font-family: monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* 行内备注编辑条 */
@@ -1409,21 +1636,27 @@ function formatVal(v: unknown): string {
 .b-actions {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
+  flex-shrink: 0;
 }
-.btn-row-lock {
+.btn-row-icon {
   background: var(--bg-btn);
   border: 1px solid var(--border-color);
   color: var(--text-dim);
-  padding: 2px 6px;
-  border-radius: 3px;
-  font-size: 10.5px;
-  font-weight: 500;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border-radius: 4px;
+  font-size: 11.5px;
   cursor: pointer;
   transition: all 0.15s;
   display: inline-flex;
   align-items: center;
-  gap: 2px;
+  justify-content: center;
+}
+.btn-row-icon:hover {
+  background: var(--bg-btn-hover);
+  color: var(--text-main);
 }
 .btn-row-lock:hover {
   border-color: #10b981;
@@ -1433,62 +1666,223 @@ function formatVal(v: unknown): string {
   background: rgba(16, 185, 129, 0.15);
   border-color: rgba(16, 185, 129, 0.4);
   color: #10b981;
-  font-weight: 600;
-}
-.btn-row-memo {
-  background: var(--bg-btn);
-  border: 1px solid var(--border-color);
-  color: var(--text-main);
-  padding: 2px 6px;
-  border-radius: 3px;
-  font-size: 10.5px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.15s;
 }
 .btn-row-memo:hover {
   background: rgba(245, 158, 11, 0.18);
   border-color: #f59e0b;
   color: #f59e0b;
 }
-.btn-row-diff {
-  background: var(--bg-btn);
-  border: 1px solid var(--border-color);
-  color: var(--text-main);
-  padding: 2px 6px;
-  border-radius: 3px;
-  font-size: 10.5px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.btn-row-diff:hover {
-  background: #0284c7;
-  border-color: #38bdf8;
-  color: white;
-}
-.btn-row-del {
-  background: var(--bg-btn);
-  border: 1px solid var(--border-color);
-  color: var(--text-dim);
-  padding: 2px 5px;
-  border-radius: 3px;
-  font-size: 10.5px;
-  cursor: pointer;
-  transition: all 0.15s;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
 .btn-row-del:hover {
   background: rgba(239, 68, 68, 0.15);
   border-color: #ef4444;
   color: #ef4444;
 }
-.selected-mark {
-  color: var(--text-highlight);
+
+/* ─── 自动差异预览面板样式 ─── */
+.auto-diff-card {
+  margin-top: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-workspace);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.auto-diff-header {
+  padding: 5px 10px;
+  background: var(--bg-drawer-header);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.diff-header-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.diff-section-tag {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+.diff-badge.loading {
+  font-size: 10.5px;
+  color: var(--text-dim);
+}
+.diff-badge.clean {
+  font-size: 10.5px;
+  color: #10b981;
+  font-weight: 600;
+}
+.diff-badge.changes {
+  font-size: 10.5px;
+  color: #38bdf8;
+  font-weight: 600;
+}
+.diff-header-filters {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.auto-filter-pills {
+  display: flex;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.auto-pill-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-size: 10px;
+  padding: 1px 6px;
+  cursor: pointer;
+  transition: all 0.1s;
+}
+.auto-pill-btn.active {
+  background: #2563eb;
+  color: white;
+  font-weight: 600;
+}
+.auto-diff-search {
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-main);
+  padding: 1px 6px;
+  font-size: 10.5px;
+  outline: none;
+  width: 120px;
+}
+.auto-diff-search:focus {
+  border-color: var(--border-focus);
+}
+
+.auto-diff-content {
+  flex: 1;
+}
+.auto-diff-hint {
+  padding: 16px;
+  text-align: center;
+  color: var(--text-dim);
   font-size: 11px;
-  font-weight: 700;
+}
+.auto-diff-clean {
+  padding: 12px 14px;
+  color: #10b981;
+  font-size: 11px;
+  background: rgba(16, 185, 129, 0.08);
+}
+.auto-diff-table-container {
+  max-height: 220px;
+  overflow-y: auto;
+}
+.auto-diff-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+.auto-diff-table th {
+  position: sticky;
+  top: 0;
+  background: var(--bg-table-header, var(--bg-drawer-header));
+  padding: 4px 6px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 10.5px;
+  z-index: 2;
+}
+.auto-diff-table th.text-center,
+.auto-diff-table td.text-center {
+  text-align: center;
+}
+.auto-diff-table td {
+  padding: 3px 6px;
+  border-bottom: 1px solid var(--border-subtle);
+  vertical-align: middle;
+}
+.col-field {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+.field-path-code {
+  font-family: 'Consolas', monospace;
+  color: var(--text-code);
+  font-size: 10.5px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.field-desc-tag {
+  font-size: 9.5px;
+  color: var(--desc-text);
+  background: var(--desc-bg);
+  border: 1px solid var(--desc-border);
+  padding: 0 3px;
+  border-radius: 3px;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.cell-arrow {
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 9px;
+  padding: 0;
+  user-select: none;
+}
+.cell-val code {
+  font-family: 'Consolas', monospace;
+  font-size: 10.5px;
+  padding: 1px 4px;
+  border-radius: 3px;
+  display: inline-block;
+  max-width: 190px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.cell-val.old-val code {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.08);
+}
+.cell-val.new-val code {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.selected-snapshot-tip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-muted);
+  max-width: 460px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tip-label {
+  color: var(--text-dim);
+}
+.tip-memo {
+  color: #f59e0b;
+  font-weight: 600;
+}
+.tip-name {
+  font-family: 'Consolas', monospace;
+  color: var(--text-code);
+  font-size: 10.5px;
 }
 
 .modal-footer {
