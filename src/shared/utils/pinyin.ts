@@ -125,13 +125,24 @@ export function escapeHtml(str: string): string {
 
 /**
  * 将匹配关键词以 `<mark class="search-kw">` 荧光标签包裹
- * 支持直接文本匹配和拼音首字母对应的中文高亮
+ * 支持区分大小写匹配、以及直接文本匹配与拼音首字母中文高亮
  */
-export function highlightMatch(text: unknown, query: string): string {
+export function highlightMatch(text: unknown, query: string, caseSensitive = false): string {
   if (text === null || text === undefined) return ''
   const str = String(text)
   const q = query.trim()
   if (!q) return escapeHtml(str)
+
+  if (caseSensitive) {
+    const idx = str.indexOf(q)
+    if (idx === -1) {
+      return escapeHtml(str)
+    }
+    const before = escapeHtml(str.slice(0, idx))
+    const target = escapeHtml(str.slice(idx, idx + q.length))
+    const after = escapeHtml(str.slice(idx + q.length))
+    return `${before}<mark class="search-kw">${target}</mark>${after}`
+  }
 
   const match = matchTextOrPinyin(str, q)
   if (!match.matched) {

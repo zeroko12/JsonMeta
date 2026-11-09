@@ -371,14 +371,30 @@ export const useJsonDocStore = defineStore('jsonDoc', () => {
   // ─── 搜索与高亮导航系统 ───
   const searchScope = ref<'all' | 'key' | 'desc' | 'val'>('desc') // 默认为按描述搜索
   const searchMode = ref<'filter' | 'tree'>('tree') // 默认为全量树定位
+  const searchCaseSensitive = ref<boolean>(
+    typeof localStorage !== 'undefined' && localStorage.getItem('json_meta_search_case') === 'true',
+  )
   const searchMatchIndex = ref(0)
   const searchTargetTrigger = ref<{ path: string; timestamp: number } | null>(null)
+
+  function toggleSearchCaseSensitive() {
+    searchCaseSensitive.value = !searchCaseSensitive.value
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('json_meta_search_case', String(searchCaseSensitive.value))
+    }
+  }
 
   // 全量搜索匹配路径列表 (内存轻量快速计算，毫秒级响应万级节点)
   const searchMatchPaths = computed<string[]>(() => {
     const q = searchQuery.value.trim()
     if (!q || current.value === null) return []
-    return fastSearchTree(toRaw(current.value), descriptions.value, q, searchScope.value)
+    return fastSearchTree(
+      toRaw(current.value),
+      descriptions.value,
+      q,
+      searchScope.value,
+      searchCaseSensitive.value,
+    )
   })
 
   const searchMatchCount = computed(() => searchMatchPaths.value.length)
@@ -1129,6 +1145,8 @@ export const useJsonDocStore = defineStore('jsonDoc', () => {
     ensurePathExpanded,
     searchScope,
     searchMode,
+    searchCaseSensitive,
+    toggleSearchCaseSensitive,
     searchMatchIndex,
     searchMatchCount,
     searchMatchPaths,

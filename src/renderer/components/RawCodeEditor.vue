@@ -277,14 +277,15 @@ const lines = computed(() => {
 
 // 全局搜索词在当前源码中的匹配计数
 const matchCount = computed(() => {
-  const q = doc.searchQuery.trim().toLowerCase()
+  const q = doc.searchQuery.trim()
   if (!q || !codeText.value) return 0
   let count = 0
   let pos = 0
-  const lower = codeText.value.toLowerCase()
-  while ((pos = lower.indexOf(q, pos)) !== -1) {
+  const target = doc.searchCaseSensitive ? codeText.value : codeText.value.toLowerCase()
+  const needle = doc.searchCaseSensitive ? q : q.toLowerCase()
+  while ((pos = target.indexOf(needle, pos)) !== -1) {
     count++
-    pos += q.length
+    pos += needle.length
   }
   return count
 })

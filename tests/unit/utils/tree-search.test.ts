@@ -74,6 +74,22 @@ describe('fastSearchTree', () => {
     expect(results).toEqual(['server.port'])
   })
 
+  it('supports case-sensitive search toggle', () => {
+    // 默认忽略大小写
+    expect(fastSearchTree(sampleJson, descriptions, 'replicaCount', 'key')).toEqual([
+      'database.replicaCount',
+    ])
+    expect(fastSearchTree(sampleJson, descriptions, 'replicacount', 'key', false)).toEqual([
+      'database.replicaCount',
+    ])
+
+    // 开启大小写敏感
+    expect(fastSearchTree(sampleJson, descriptions, 'replicaCount', 'key', true)).toEqual([
+      'database.replicaCount',
+    ])
+    expect(fastSearchTree(sampleJson, descriptions, 'replicacount', 'key', true)).toEqual([])
+  })
+
   it('returns empty array when query is empty or input is null', () => {
     expect(fastSearchTree(null, descriptions, 'test', 'all')).toEqual([])
     expect(fastSearchTree(sampleJson, descriptions, '', 'all')).toEqual([])

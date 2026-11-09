@@ -43,4 +43,16 @@ describe('pinyin & search utils', () => {
     const html = highlightMatch('<script>alert(1)</script>', 'alert')
     expect(html).toContain('&lt;script&gt;<mark class="search-kw">alert</mark>(1)&lt;/script&gt;')
   })
+
+  it('supports case-sensitive highlight match', () => {
+    // 忽略大小写
+    expect(highlightMatch('ServerPort', 'port', false)).toBe(
+      'Server<mark class="search-kw">Port</mark>',
+    )
+    // 区分大小写
+    expect(highlightMatch('ServerPort', 'port', true)).toBe('ServerPort')
+    expect(highlightMatch('ServerPort', 'Port', true)).toBe(
+      'Server<mark class="search-kw">Port</mark>',
+    )
+  })
 })

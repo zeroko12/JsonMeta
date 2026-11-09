@@ -727,7 +727,7 @@ watch(
                   @dblclick="startRename(row, $event)"
                   v-html="
                     doc.searchQuery && (doc.searchScope === 'all' || doc.searchScope === 'key')
-                      ? highlightMatch(row.keyName, doc.searchQuery)
+                      ? highlightMatch(row.keyName, doc.searchQuery, doc.searchCaseSensitive)
                       : escapeHtml(row.keyName)
                   "
                 />
@@ -735,7 +735,9 @@ watch(
                   v-if="doc.searchQuery && row.path !== row.keyName"
                   class="search-path-hint"
                   :title="`所在路径: ${row.path}`"
-                  v-html="'[' + highlightMatch(row.path, doc.searchQuery) + ']'"
+                  v-html="
+                    '[' + highlightMatch(row.path, doc.searchQuery, doc.searchCaseSensitive) + ']'
+                  "
                 />
                 <span class="colon">:</span>
               </div>
@@ -829,7 +831,7 @@ watch(
                     class="desc-text"
                     v-html="
                       doc.searchQuery && (doc.searchScope === 'all' || doc.searchScope === 'desc')
-                        ? highlightMatch(row.description, doc.searchQuery)
+                        ? highlightMatch(row.description, doc.searchQuery, doc.searchCaseSensitive)
                         : escapeHtml(row.description)
                     "
                   />

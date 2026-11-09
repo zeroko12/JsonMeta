@@ -13,6 +13,7 @@ export function fastSearchTree(
   descriptions: Record<string, string>,
   query: string,
   scope: SearchScope,
+  caseSensitive = false,
 ): string[] {
   const q = query.trim()
   if (!q || obj === null || typeof obj !== 'object') return []
@@ -23,6 +24,9 @@ export function fastSearchTree(
 
   function isMatch(text: string | null | undefined): boolean {
     if (!text) return false
+    if (caseSensitive) {
+      return text.includes(q)
+    }
     // 1. 最快速的原生子串忽略大小写匹配 (针对绝大多数直接汉字或字符搜索)
     if (text.toLowerCase().includes(qLower)) return true
     // 2. 纯英文输入词尝试拼音首字母匹配

@@ -22,14 +22,18 @@ const stats = computed(() => {
 })
 
 const filteredChanges = computed(() => {
-  const q = doc.searchQuery.trim().toLowerCase()
+  const q = doc.searchCaseSensitive ? doc.searchQuery.trim() : doc.searchQuery.trim().toLowerCase()
   if (!q) return changeList.value
   return changeList.value.filter((item) => {
-    if (item.path.toLowerCase().includes(q)) return true
-    if (item.label && item.label.toLowerCase().includes(q)) return true
-    if (JSON.stringify(item.oldValue).toLowerCase().includes(q)) return true
-    if (JSON.stringify(item.newValue).toLowerCase().includes(q)) return true
-    return false
+    const p = doc.searchCaseSensitive ? item.path : item.path.toLowerCase()
+    const l = doc.searchCaseSensitive ? item.label || '' : (item.label || '').toLowerCase()
+    const oldV = doc.searchCaseSensitive
+      ? JSON.stringify(item.oldValue)
+      : JSON.stringify(item.oldValue).toLowerCase()
+    const newV = doc.searchCaseSensitive
+      ? JSON.stringify(item.newValue)
+      : JSON.stringify(item.newValue).toLowerCase()
+    return p.includes(q) || l.includes(q) || oldV.includes(q) || newV.includes(q)
   })
 })
 

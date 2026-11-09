@@ -377,6 +377,20 @@ const changeCount = computed(() => doc.totalChangesCount)
           @keydown.esc="doc.clearSearch()"
         />
 
+        <!-- 大小写敏感切换微按钮 (极简标准 Aa 键) -->
+        <button
+          class="case-sensitive-btn"
+          :class="{ active: doc.searchCaseSensitive }"
+          :title="
+            doc.searchCaseSensitive
+              ? '区分大小写: 开 (点击切换为忽略大小写)'
+              : '区分大小写: 关 (点击切换为区分大小写)'
+          "
+          @click="doc.toggleSearchCaseSensitive()"
+        >
+          Aa
+        </button>
+
         <!-- 当输入搜索词时，按需无缝展开的 IDE 级微控件组 -->
         <div v-if="doc.searchQuery" class="capsule-extra-controls">
           <!-- 命中序号与总数 1/8 -->
@@ -894,7 +908,7 @@ const changeCount = computed(() => doc.totalChangesCount)
   height: 28px;
   padding: 0 5px 0 3px;
   gap: 4px;
-  width: 145px;
+  width: 165px;
   box-sizing: border-box;
   flex-shrink: 0;
   transition:
@@ -905,7 +919,7 @@ const changeCount = computed(() => doc.totalChangesCount)
 
 .search-capsule:focus-within,
 .search-capsule.has-query {
-  width: 245px;
+  width: 275px;
   border-color: var(--border-focus);
 }
 
@@ -1047,6 +1061,41 @@ const changeCount = computed(() => doc.totalChangesCount)
 .capsule-input::placeholder {
   color: var(--text-dim);
   font-size: 11.5px;
+}
+
+/* 大小写敏感切换微按钮 (极简标准 Aa 键) */
+.case-sensitive-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-dim);
+  font-size: 11px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-weight: 600;
+  width: 20px;
+  height: 19px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.12s ease;
+  user-select: none;
+  flex-shrink: 0;
+  letter-spacing: -0.5px;
+}
+
+.case-sensitive-btn:hover {
+  background: var(--bg-btn-hover);
+  color: var(--text-main);
+  border-color: var(--border-color);
+}
+
+.case-sensitive-btn.active {
+  background: rgba(59, 130, 246, 0.18);
+  border-color: rgba(59, 130, 246, 0.45);
+  color: #38bdf8;
+  font-weight: 700;
 }
 
 /* 按需微控件组 */
