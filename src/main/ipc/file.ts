@@ -50,6 +50,8 @@ export async function createBackup(
   target: string,
   memo?: string,
   maxBackups = MAX_BACKUPS,
+  locked = false,
+  autoRotateEnabled = true,
 ): Promise<string> {
   const dir = dirname(target)
   const base = basename(target, '.json')
@@ -64,27 +66,33 @@ export async function createBackup(
   const text = await readFile(target, 'utf8')
   await writeFile(bak, text, 'utf8')
 
-  // 同步备份伴生 .meta.json 描述文件（若存在），并保存 memo 备注
+  // 同步备份伴生 .meta.json 描述文件（若存在），并保存 memo 与 locked 状态
   const metaPath = join(dir, `${base}.meta.json`)
   const metaBak = join(dir, `${base}.${stamp}${memoPart}.bak.meta.json`)
+  let metaObj: { memo?: string; locked?: boolean; descriptions?: Record<string, string> } = {
+    descriptions: {},
+  }
   try {
     const metaText = await readFile(metaPath, 'utf8')
-    const metaObj = JSON.parse(metaText) as { memo?: string; descriptions?: Record<string, string> }
-    if (memo?.trim()) {
-      metaObj.memo = memo.trim()
-    }
-    await writeFile(metaBak, JSON.stringify(metaObj, null, 2), 'utf8')
+    metaObj = JSON.parse(metaText)
   } catch {
-    if (memo?.trim()) {
-      await writeFile(
-        metaBak,
-        JSON.stringify({ memo: memo.trim(), descriptions: {} }, null, 2),
-        'utf8',
-      )
-    }
+    // meta 不存在
+  }
+  if (memo?.trim()) {
+    metaObj.memo = memo.trim()
+  }
+  if (locked) {
+    metaObj.locked = true
+  }
+  if (
+    memo?.trim() ||
+    locked ||
+    (metaObj.descriptions && Object.keys(metaObj.descriptions).length > 0)
+  ) {
+    await writeFile(metaBak, JSON.stringify(metaObj, null, 2), 'utf8')
   }
 
-  await rotateBackups(target, maxBackups)
+  await rotateBackups(target, maxBackups, autoRotateEnabled)
   return bak
 }
 
@@ -127,11 +135,74 @@ export async function listBackups(target: string): Promise<string[]> {
     .map((x) => x.full)
 }
 
-/** Rotate backups so at most MAX_BACKUPS exist (deletes oldest). */
-export async function rotateBackups(target: string, max = MAX_BACKUPS): Promise<number> {
+/**
+ * Check if a backup is locked (permanent retention, exempt from auto-rotation).
+ */
+export async function isBackupLocked(backupPath: string): Promise<boolean> {
+  try {
+    const metaPath = backupPath.replace(/\.bak\.json$/i, '.bak.meta.json')
+    const text = await readFile(metaPath, 'utf8')
+    const obj = JSON.parse(text) as { locked?: boolean }
+    return Boolean(obj.locked)
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Toggle or set the locked status of a backup file.
+ */
+export async function updateBackupLocked(
+  backupPath: string,
+  locked: boolean,
+): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const metaPath = backupPath.replace(/\.bak\.json$/i, '.bak.meta.json')
+    let metaObj: { memo?: string; locked?: boolean; descriptions?: Record<string, string> } = {
+      descriptions: {},
+    }
+    try {
+      const text = await readFile(metaPath, 'utf8')
+      metaObj = JSON.parse(text)
+    } catch {
+      // meta 不存在
+    }
+    if (locked) {
+      metaObj.locked = true
+    } else {
+      delete metaObj.locked
+    }
+    await writeFile(metaPath, JSON.stringify(metaObj, null, 2), 'utf8')
+    return { ok: true }
+  } catch (err) {
+    return { ok: false, error: (err as Error).message }
+  }
+}
+
+/**
+ * Rotate backups so at most MAX_BACKUPS rotatable backups exist (deletes oldest unlocked).
+ * Locked (pinned) backups are permanently preserved and exempt from auto-rotation.
+ * If autoRotateEnabled is false, no backups are deleted.
+ */
+export async function rotateBackups(
+  target: string,
+  max = MAX_BACKUPS,
+  autoRotateEnabled = true,
+): Promise<number> {
+  if (!autoRotateEnabled) return 0
   const list = await listBackups(target)
-  if (list.length <= max) return 0
-  const toDelete = list.slice(max)
+
+  // 过滤出参与自动轮换的快照 (排除锁定的常驻保留快照)
+  const rotatable: string[] = []
+  for (const p of list) {
+    if (await isBackupLocked(p)) {
+      continue
+    }
+    rotatable.push(p)
+  }
+
+  if (rotatable.length <= max) return 0
+  const toDelete = rotatable.slice(max)
   const { unlink } = await import('node:fs/promises')
   await Promise.all(
     toDelete.flatMap((p) => [
@@ -156,22 +227,47 @@ export async function deleteBackup(backupPath: string): Promise<{ ok: boolean; e
   }
 }
 
-/** Restore a backup file to `targetPath`. Returns { ok, error? }. */
+/**
+ * Restore a backup file to `targetPath`. Returns { ok, error? }.
+ * Scheme B: By default (overwriteMeta = false), existing Chinese descriptions in targetPath
+ * are protected from rollback, and only missing field descriptions from the snapshot are supplemented.
+ * If overwriteMeta = true, the snapshot's meta completely overwrites the target's meta.
+ */
 export async function restoreBackup(
   backupPath: string,
   targetPath: string,
+  options: { overwriteMeta?: boolean } = {},
 ): Promise<{ ok: boolean; error?: string }> {
   try {
     const text = await readFile(backupPath, 'utf8')
     await mkdir(dirname(targetPath), { recursive: true })
     await writeFile(targetPath, text, 'utf8')
 
-    // 同步还原伴生 .meta.json 描述文件（若存在）
+    // 伴生元数据描述文件处理 (Scheme B)
     const metaBak = backupPath.replace(/\.bak\.json$/i, '.bak.meta.json')
     const targetMeta = targetPath.replace(/\.json$/i, '.meta.json')
     try {
-      const metaText = await readFile(metaBak, 'utf8')
-      await writeFile(targetMeta, metaText, 'utf8')
+      const metaBakText = await readFile(metaBak, 'utf8')
+      const metaBakObj = JSON.parse(metaBakText) as { descriptions?: Record<string, string> }
+      if (options.overwriteMeta) {
+        // 用户主动要求完全覆盖注释
+        await writeFile(targetMeta, JSON.stringify(metaBakObj, null, 2), 'utf8')
+      } else {
+        // 方案 B：默认保护当前已有最新注释，仅增量补全缺失项
+        let targetMetaObj: { descriptions?: Record<string, string> } = { descriptions: {} }
+        try {
+          const currentText = await readFile(targetMeta, 'utf8')
+          targetMetaObj = JSON.parse(currentText)
+        } catch {
+          // 当前 targetMeta 不存在
+        }
+        const currentDescs = targetMetaObj.descriptions || {}
+        const bakDescs = metaBakObj.descriptions || {}
+        // 增量合并：当前最新注释优先，快照仅补充缺失键
+        const mergedDescs = { ...bakDescs, ...currentDescs }
+        targetMetaObj.descriptions = mergedDescs
+        await writeFile(targetMeta, JSON.stringify(targetMetaObj, null, 2), 'utf8')
+      }
     } catch {
       // 无元数据备份则忽略
     }
@@ -300,7 +396,7 @@ export async function resolveConfigPath(pickedDir: string): Promise<string | nul
 export async function saveJsonWithBackup(
   targetPath: string,
   data: unknown,
-  options: { backup?: boolean; maxBackups?: number } = {},
+  options: { backup?: boolean; maxBackups?: number; autoRotate?: boolean } = {},
 ): Promise<{ ok: boolean; backupPath?: string; changed: boolean; error?: string }> {
   try {
     const text = JSON.stringify(data, null, 2)
@@ -308,8 +404,13 @@ export async function saveJsonWithBackup(
     let backupPath: string | undefined
     if (changed && options.backup !== false) {
       try {
-        backupPath = await createBackup(targetPath)
-        await rotateBackups(targetPath, options.maxBackups ?? MAX_BACKUPS)
+        backupPath = await createBackup(
+          targetPath,
+          undefined,
+          options.maxBackups ?? MAX_BACKUPS,
+          false,
+          options.autoRotate ?? true,
+        )
       } catch {
         // backup failed (e.g. file didn't exist yet) — continue writing
         backupPath = undefined

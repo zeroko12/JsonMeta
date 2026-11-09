@@ -10,6 +10,7 @@ import DiffModal from './components/DiffModal.vue'
 import AddNodeModal from './components/AddNodeModal.vue'
 import RawJsonEditModal from './components/RawJsonEditModal.vue'
 import ModernBackupDialog from './components/ModernBackupDialog.vue'
+import RestoreSectionModal from './components/RestoreSectionModal.vue'
 import AboutModal from './components/AboutModal.vue'
 import IndustrialStatusBar from './components/IndustrialStatusBar.vue'
 
@@ -57,6 +58,7 @@ onMounted(() => {
     <AddNodeModal />
     <RawJsonEditModal />
     <ModernBackupDialog />
+    <RestoreSectionModal />
     <AboutModal />
 
     <!-- 全局 Toast 提示 -->
@@ -213,6 +215,11 @@ onMounted(() => {
   background: rgba(239, 68, 68, 0.92);
   color: #ffffff;
   border: 1px solid rgba(252, 165, 165, 0.35);
+}
+.global-save-toast.info {
+  background: rgba(2, 132, 199, 0.92);
+  color: #ffffff;
+  border: 1px solid rgba(56, 189, 248, 0.35);
 }
 .toast-fade-enter-active,
 .toast-fade-leave-active {

@@ -437,6 +437,14 @@ function handleMenuRevert() {
   closeContextMenu()
 }
 
+function handleMenuRestoreFromSnapshot() {
+  if (contextMenu.value.row) {
+    const row = contextMenu.value.row
+    doc.openRestoreSectionModal(row.path, row.description || row.keyName)
+  }
+  closeContextMenu()
+}
+
 function handleMenuDelete() {
   if (contextMenu.value.row) {
     doc.deleteNode(contextMenu.value.row.path)
@@ -968,6 +976,11 @@ watch(
         </button>
 
         <div class="ctx-divider" />
+
+        <button class="ctx-item" @click="handleMenuRestoreFromSnapshot">
+          <span class="ctx-icon">↺</span>
+          <span class="ctx-label">从历史快照恢复此段配置...</span>
+        </button>
 
         <button v-if="contextMenu.row.isModified" class="ctx-item warn" @click="handleMenuRevert">
           <span class="ctx-icon">↺</span>

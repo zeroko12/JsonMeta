@@ -42,7 +42,7 @@ declare global {
         writeJson(
           path: string,
           data: unknown,
-          options?: { backup?: boolean; maxBackups?: number },
+          options?: { backup?: boolean; maxBackups?: number; autoRotate?: boolean },
         ): Promise<WriteJsonResult>
         readText(path: string): Promise<string>
         writeText(path: string, content: string): Promise<{ ok: boolean }>
@@ -50,14 +50,29 @@ declare global {
         restoreBackup(
           backupPath: string,
           targetPath: string,
+          options?: { overwriteMeta?: boolean },
         ): Promise<{ ok: boolean; error?: string }>
-        createBackup(targetPath: string, memo?: string, maxBackups?: number): Promise<string>
+        createBackup(
+          targetPath: string,
+          memo?: string,
+          maxBackups?: number,
+          locked?: boolean,
+          autoRotateEnabled?: boolean,
+        ): Promise<string>
         deleteBackup(backupPath: string): Promise<{ ok: boolean; error?: string }>
-        rotateBackups(targetPath: string, maxBackups: number): Promise<number>
+        rotateBackups(
+          targetPath: string,
+          maxBackups: number,
+          autoRotateEnabled?: boolean,
+        ): Promise<number>
         updateBackupMemo(
           backupPath: string,
           memo: string,
         ): Promise<{ ok: boolean; newPath?: string; memo?: string; error?: string }>
+        updateBackupLocked(
+          backupPath: string,
+          locked: boolean,
+        ): Promise<{ ok: boolean; error?: string }>
         watchStart(path: string): Promise<{ ok: boolean }>
         watchStop(): Promise<{ ok: boolean }>
         onChange(callback: (event: FileChangeEvent) => void): () => void

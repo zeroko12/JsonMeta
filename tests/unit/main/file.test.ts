@@ -155,18 +155,95 @@ describe('deleteBackup', () => {
 })
 
 describe('restoreBackup', () => {
-  it('overwrites target with backup contents', async () => {
+  it('overwrites target with backup contents and merges descriptions per Scheme B', async () => {
     const dir = join(tmpdir(), `cfg-restore-${Date.now()}-${Math.random().toString(36).slice(2)}`)
     await mkdir(dir, { recursive: true })
     const target = join(dir, 'SystemConfig.json')
+    const targetMeta = join(dir, 'SystemConfig.meta.json')
     await writeFile(target, '{"v":99}', 'utf8')
+    await writeFile(
+      targetMeta,
+      JSON.stringify({ descriptions: { v: '当前最新注释V', newField: '新增字段注释' } }),
+      'utf8',
+    )
+
     const { createBackup, restoreBackup } = await import('../../../src/main/ipc/file')
     const bak = await createBackup(target)
+    // Modify backup meta to simulate older annotations
+    const bakMeta = bak.replace(/\.bak\.json$/, '.bak.meta.json')
+    await writeFile(
+      bakMeta,
+      JSON.stringify({ descriptions: { v: '历史旧注释V', oldOnly: '历史独有注释' } }),
+      'utf8',
+    )
+
+    // Current target has been modified
     await writeFile(target, '{"v":0}', 'utf8')
+
+    // Restore under Scheme B (default overwriteMeta = false)
     const result = await restoreBackup(bak, target)
     expect(result.ok).toBe(true)
     const restored = await readFile(target, 'utf8')
     expect(restored).toBe('{"v":99}')
+
+    // Verify Scheme B: current latest 'v' and 'newField' preserved, 'oldOnly' supplemented
+    const mergedMeta = JSON.parse(await readFile(targetMeta, 'utf8'))
+    expect(mergedMeta.descriptions.v).toBe('当前最新注释V') // Protected! Not overwritten by '历史旧注释V'
+    expect(mergedMeta.descriptions.newField).toBe('新增字段注释') // Protected!
+    expect(mergedMeta.descriptions.oldOnly).toBe('历史独有注释') // Supplemented!
+
+    // If overwriteMeta = true
+    await restoreBackup(bak, target, { overwriteMeta: true })
+    const overwrittenMeta = JSON.parse(await readFile(targetMeta, 'utf8'))
+    expect(overwrittenMeta.descriptions.v).toBe('历史旧注释V')
+    expect(overwrittenMeta.descriptions.newField).toBeUndefined()
+  })
+})
+
+describe('updateBackupLocked & rotation exemption', () => {
+  let dir: string
+  beforeEach(async () => {
+    dir = join(tmpdir(), `cfg-lock-${Date.now()}-${Math.random().toString(36).slice(2)}`)
+    await mkdir(dir, { recursive: true })
+  })
+
+  it('preserves locked backups during auto-rotation', async () => {
+    const { createBackup, rotateBackups, listBackups, updateBackupLocked, isBackupLocked } =
+      await import('../../../src/main/ipc/file')
+    const target = join(dir, 'SystemConfig.json')
+    await writeFile(target, '{"count": 1}', 'utf8')
+
+    const b1 = await createBackup(target, '常驻基准1', 20, true) // locked
+    await new Promise((r) => setTimeout(r, 1100))
+    const b2 = await createBackup(target, '常规快照2', 20, false)
+    await new Promise((r) => setTimeout(r, 1100))
+    const b3 = await createBackup(target, '常驻基准3', 20, true) // locked
+    await new Promise((r) => setTimeout(r, 1100))
+    const b4 = await createBackup(target, '常规快照4', 20, false)
+
+    expect(await isBackupLocked(b1)).toBe(true)
+    expect(await isBackupLocked(b2)).toBe(false)
+    expect(await isBackupLocked(b3)).toBe(true)
+    expect(await isBackupLocked(b4)).toBe(false)
+
+    // Unlock b1, lock b2
+    await updateBackupLocked(b1, false)
+    expect(await isBackupLocked(b1)).toBe(false)
+    await updateBackupLocked(b2, true)
+    expect(await isBackupLocked(b2)).toBe(true)
+
+    // Now locked: b2, b3. Rotatable (unlocked): b1, b4.
+    // If we rotate with max = 1 rotatable backup:
+    // b1 (oldest unlocked) should be deleted, b4 kept.
+    // b2 and b3 (locked) MUST NOT be deleted!
+    const deletedCount = await rotateBackups(target, 1)
+    expect(deletedCount).toBe(1)
+
+    const remaining = await listBackups(target)
+    expect(remaining).toContain(b2)
+    expect(remaining).toContain(b3)
+    expect(remaining).toContain(b4)
+    expect(remaining).not.toContain(b1)
   })
 })
 

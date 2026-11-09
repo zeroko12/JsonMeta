@@ -57,23 +57,47 @@ const api = {
     async restoreBackup(
       backupPath: string,
       targetPath: string,
+      options?: { overwriteMeta?: boolean },
     ): Promise<{ ok: boolean; error?: string }> {
-      return ipcRenderer.invoke('file:restoreBackup', backupPath, targetPath)
+      return ipcRenderer.invoke('file:restoreBackup', backupPath, targetPath, options)
     },
-    async createBackup(targetPath: string, memo?: string, maxBackups?: number): Promise<string> {
-      return ipcRenderer.invoke('file:createBackup', targetPath, memo, maxBackups)
+    async createBackup(
+      targetPath: string,
+      memo?: string,
+      maxBackups?: number,
+      locked?: boolean,
+      autoRotateEnabled?: boolean,
+    ): Promise<string> {
+      return ipcRenderer.invoke(
+        'file:createBackup',
+        targetPath,
+        memo,
+        maxBackups,
+        locked,
+        autoRotateEnabled,
+      )
     },
     async deleteBackup(backupPath: string): Promise<{ ok: boolean; error?: string }> {
       return ipcRenderer.invoke('file:deleteBackup', backupPath)
     },
-    async rotateBackups(targetPath: string, maxBackups: number): Promise<number> {
-      return ipcRenderer.invoke('file:rotateBackups', targetPath, maxBackups)
+    async rotateBackups(
+      targetPath: string,
+      maxBackups: number,
+      autoRotateEnabled?: boolean,
+    ): Promise<number> {
+      return ipcRenderer.invoke('file:rotateBackups', targetPath, maxBackups, autoRotateEnabled)
     },
     async updateBackupMemo(
       backupPath: string,
       memo: string,
     ): Promise<{ ok: boolean; newPath?: string; memo?: string; error?: string }> {
       return ipcRenderer.invoke('file:updateBackupMemo', backupPath, memo)
+    },
+    async updateBackupLocked(
+      backupPath: string,
+      locked: boolean,
+    ): Promise<{ ok: boolean; error?: string }> {
+      return ipcRenderer.invoke('file:updateBackupLocked', backupPath, locked)
     },
     async watchStart(path: string): Promise<{ ok: boolean }> {
       return ipcRenderer.invoke('file:watchStart', path)

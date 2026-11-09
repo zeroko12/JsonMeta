@@ -9,6 +9,7 @@ import {
   listBackups,
   restoreBackup,
   updateBackupMemo,
+  updateBackupLocked,
   deleteBackup,
   rotateBackups,
   resolveConfigPath,
@@ -146,14 +147,24 @@ ipcMain.handle('file:listBackups', async (_event, targetPath: string) => {
   return listBackups(targetPath)
 })
 
-ipcMain.handle('file:restoreBackup', async (_event, backupPath: string, targetPath: string) => {
-  return restoreBackup(backupPath, targetPath)
-})
+ipcMain.handle(
+  'file:restoreBackup',
+  async (_event, backupPath: string, targetPath: string, options?: { overwriteMeta?: boolean }) => {
+    return restoreBackup(backupPath, targetPath, options)
+  },
+)
 
 ipcMain.handle(
   'file:createBackup',
-  async (_event, targetPath: string, memo?: string, maxBackups?: number) => {
-    return createBackup(targetPath, memo, maxBackups)
+  async (
+    _event,
+    targetPath: string,
+    memo?: string,
+    maxBackups?: number,
+    locked?: boolean,
+    autoRotateEnabled?: boolean,
+  ) => {
+    return createBackup(targetPath, memo, maxBackups, locked, autoRotateEnabled)
   },
 )
 
@@ -161,8 +172,15 @@ ipcMain.handle('file:deleteBackup', async (_event, backupPath: string) => {
   return deleteBackup(backupPath)
 })
 
-ipcMain.handle('file:rotateBackups', async (_event, targetPath: string, maxBackups: number) => {
-  return rotateBackups(targetPath, maxBackups)
+ipcMain.handle(
+  'file:rotateBackups',
+  async (_event, targetPath: string, maxBackups: number, autoRotateEnabled?: boolean) => {
+    return rotateBackups(targetPath, maxBackups, autoRotateEnabled)
+  },
+)
+
+ipcMain.handle('file:updateBackupLocked', async (_event, backupPath: string, locked: boolean) => {
+  return updateBackupLocked(backupPath, locked)
 })
 
 ipcMain.handle('file:updateBackupMemo', async (_event, backupPath: string, memo: string) => {

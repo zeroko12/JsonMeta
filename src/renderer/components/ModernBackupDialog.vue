@@ -10,6 +10,7 @@ interface BackupItem {
   path: string
   timestamp: number
   memo?: string
+  locked?: boolean
   size: number
 }
 
@@ -24,10 +25,12 @@ const isCreating = ref(false)
 // ─── 创建快照备注输入栏状态 ───
 const showCreateInput = ref(false)
 const snapshotMemoDraft = ref('')
+const snapshotLockDraft = ref(false)
 const memoInputRef = ref<HTMLInputElement | null>(null)
 
 function openCreateInput() {
   snapshotMemoDraft.value = ''
+  snapshotLockDraft.value = false
   showCreateInput.value = true
   nextTick(() => {
     memoInputRef.value?.focus()
@@ -95,25 +98,55 @@ async function saveEditMemo(b: BackupItem) {
 
 // ─── 快照最大保留份数上限与配额 ───
 const maxBackupsLimit = ref<number>(Number(localStorage.getItem('json_meta_max_backups')) || 10)
+const autoRotateEnabled = ref(localStorage.getItem('json_meta_auto_rotate') !== 'false')
+
+const lockedCount = computed(() => backups.value.filter((b) => b.locked).length)
+const rotatableCount = computed(() => backups.value.filter((b) => !b.locked).length)
+
+function toggleAutoRotate() {
+  autoRotateEnabled.value = !autoRotateEnabled.value
+  localStorage.setItem('json_meta_auto_rotate', String(autoRotateEnabled.value))
+  doc.showToast(
+    autoRotateEnabled.value
+      ? '已开启快照自动轮转清理（将自动维护最新未锁定快照）'
+      : '已关闭快照自动轮转清理（所有快照将常驻保留，不自动删除）',
+    'info',
+  )
+}
+
+async function toggleBackupLock(b: BackupItem) {
+  const nextLocked = !b.locked
+  const res = await window.api.file.updateBackupLocked(b.path, nextLocked)
+  if (res.ok) {
+    b.locked = nextLocked
+    doc.showToast(
+      nextLocked
+        ? `已将快照设为【常驻保留】，免除自动轮转清理`
+        : `已取消快照常驻，将参与常规自动轮转`,
+      'success',
+    )
+  } else {
+    doc.showToast(`切换常驻状态失败: ${res.error}`, 'error')
+  }
+}
 
 async function handleMaxBackupsChange() {
   const newMax = maxBackupsLimit.value
   localStorage.setItem('json_meta_max_backups', String(newMax))
   if (!doc.filePath) return
 
-  // 如果新上限小于当前已有快照数量，提示确认并执行清理
-  if (backups.value.length > newMax) {
-    const diffCount = backups.value.length - newMax
+  // 如果新上限小于当前参与轮转的快照数量，提示确认并执行清理
+  if (rotatableCount.value > newMax && autoRotateEnabled.value) {
+    const diffCount = rotatableCount.value - newMax
     const ok = confirm(
-      `快照上限已调整为 ${newMax} 份。\n当前已有 ${backups.value.length} 份快照，系统将自动清理最旧的 ${diffCount} 份快照，是否确认？`,
+      `快照上限已调整为 ${newMax} 份。\n当前已有 ${rotatableCount.value} 份参与轮转的快照（另有 ${lockedCount.value} 份常驻保留快照不受影响），系统将自动清理最旧的 ${diffCount} 份未锁定快照，是否确认？`,
     )
     if (ok) {
-      await window.api.file.rotateBackups(doc.filePath, newMax)
-      doc.showToast(`已将快照保留上限调整为 ${newMax} 份，并自动清理旧版本`, 'success')
+      await window.api.file.rotateBackups(doc.filePath, newMax, autoRotateEnabled.value)
+      doc.showToast(`已更新快照保留上限为 ${newMax} 份，并自动清理旧版本`, 'success')
       await loadBackups()
     } else {
-      // 恢复旧上限
-      maxBackupsLimit.value = backups.value.length
+      maxBackupsLimit.value = rotatableCount.value
       localStorage.setItem('json_meta_max_backups', String(maxBackupsLimit.value))
     }
   } else {
@@ -176,16 +209,22 @@ async function loadBackups() {
             memo = match[2]
           }
         }
-        // 若文件名无备注，则尝试从伴生元数据文件读取
-        if (!memo) {
-          try {
-            const meta = await window.api.file.loadMeta<{ memo?: string }>(p)
-            if (meta?.memo) memo = meta.memo
-          } catch {
-            // ignore
-          }
+        // 若文件名无备注或锁定状态，则尝试从伴生元数据文件读取
+        let isLocked = false
+        try {
+          const meta = await window.api.file.loadMeta<{ memo?: string; locked?: boolean }>(p)
+          if (!memo && meta?.memo) memo = meta.memo
+          isLocked = Boolean(meta?.locked)
+        } catch {
+          // ignore
         }
-        return { path: p, timestamp: ts, memo: memo || undefined, size: 0 }
+        return {
+          path: p,
+          timestamp: ts,
+          memo: memo || undefined,
+          locked: isLocked,
+          size: 0,
+        }
       }),
     )
     backups.value = items
@@ -206,11 +245,15 @@ async function createManualBackup() {
       doc.filePath,
       memo || undefined,
       maxBackupsLimit.value,
+      snapshotLockDraft.value,
+      autoRotateEnabled.value,
     )
     const memoTag = memo ? `【${memo}】 ` : ''
-    doc.showToast(`快照创建成功: ${memoTag}${bak.split(/[\\/]/).pop()}`, 'success')
+    const lockTag = snapshotLockDraft.value ? ' [🔒常驻保留]' : ''
+    doc.showToast(`快照创建成功: ${memoTag}${lockTag}${bak.split(/[\\/]/).pop()}`, 'success')
     showCreateInput.value = false
     snapshotMemoDraft.value = ''
+    snapshotLockDraft.value = false
     await loadBackups()
   } catch (err) {
     doc.showToast(`创建快照失败: ${(err as Error).message}`, 'error')
@@ -226,6 +269,7 @@ watch(
       dialogMode.value = 'list'
       showCreateInput.value = false
       snapshotMemoDraft.value = ''
+      snapshotLockDraft.value = false
       editingPath.value = null
       editMemoDraft.value = ''
       loadBackups()
@@ -245,14 +289,14 @@ async function confirmRestore(targetPath?: string) {
   const memoStr = item && item.memo ? ` (${item.memo})` : ''
   const fileName = p.split(/[\\/]/).pop()
   const ok = confirm(
-    `确定从历史快照 [${fileName}]${memoStr} 恢复文件？当前本地未保存的改动将被覆盖。`,
+    `确定从历史快照 [${fileName}]${memoStr} 恢复机台配置？\n\n🛡️ 方案 B 默认已开启：将完整保护当前已维护好的最新中文注释字典（仅增量补齐缺失项），不随参数回滚。\n当前本地未保存的改动将被覆盖。`,
   )
   if (!ok) return
 
-  const res = await window.api.file.restoreBackup(p, doc.filePath)
+  const res = await window.api.file.restoreBackup(p, doc.filePath, { overwriteMeta: false })
   if (res.ok) {
     await doc.reloadFromDisk()
-    doc.showToast('已成功从历史备份还原文件与中文字段描述！', 'success')
+    doc.showToast('已成功从历史备份恢复配置参数（已保护最新中文业务注释）！', 'success')
     doc.showBackupModal = false
     dialogMode.value = 'list'
   } else {
@@ -464,17 +508,17 @@ function formatVal(v: unknown): string {
             <h3>历史备份与快照</h3>
             <div
               class="quota-pill"
-              title="当前快照数量 / 最大保留上限（满额时自动淘汰最旧快照）。点击可修改上限"
+              title="当前参与轮换的快照数量 / 最大保留上限（满额时自动淘汰最旧未锁定的快照）。点击可修改上限"
             >
-              <span class="quota-label">配额:</span>
-              <span class="quota-current" :class="{ 'is-full': backups.length >= maxBackupsLimit }">
-                {{ backups.length }}
+              <span class="quota-label">轮换配额:</span>
+              <span class="quota-current" :class="{ 'is-full': rotatableCount >= maxBackupsLimit }">
+                {{ rotatableCount }}
               </span>
               <span class="quota-sep">/</span>
               <select
                 v-model.number="maxBackupsLimit"
                 class="quota-select"
-                title="设置最大保留份数上限"
+                title="设置最大轮转保留份数上限"
                 @change="handleMaxBackupsChange"
               >
                 <option :value="5">5 份</option>
@@ -484,7 +528,27 @@ function formatVal(v: unknown): string {
                 <option :value="30">30 份</option>
                 <option :value="50">50 份</option>
               </select>
+              <span
+                v-if="lockedCount > 0"
+                class="locked-count-badge"
+                title="常驻保留的快照不会被自动轮转清理"
+              >
+                🔒 {{ lockedCount }} 常驻
+              </span>
             </div>
+
+            <button
+              class="btn-autorotate-toggle"
+              :class="{ 'is-off': !autoRotateEnabled }"
+              :title="
+                autoRotateEnabled
+                  ? '自动轮转清理已开启（达到上限后自动淘汰最旧未锁定的快照）。点击可关闭'
+                  : '自动轮转清理已关闭（所有快照将一直保留不自动删除）。点击可开启'
+              "
+              @click="toggleAutoRotate"
+            >
+              {{ autoRotateEnabled ? '🔄 轮换: 开' : '⏸️ 轮换: 关' }}
+            </button>
           </div>
           <div class="header-actions">
             <button
@@ -525,6 +589,13 @@ function formatVal(v: unknown): string {
               @keydown.enter="createManualBackup"
               @keydown.esc="showCreateInput = false"
             />
+            <label
+              class="memo-lock-checkbox"
+              title="设为常驻保留后，该快照将免除自动轮转淘汰清理，永久保存"
+            >
+              <input v-model="snapshotLockDraft" type="checkbox" />
+              <span>🔒 设为常驻保留</span>
+            </label>
             <button
               class="btn primary btn-memo-submit"
               :disabled="isCreating"
@@ -557,8 +628,15 @@ function formatVal(v: unknown): string {
                 >
                   🏷️ {{ b.memo }}
                 </span>
+                <span
+                  v-if="b.locked"
+                  class="b-locked-pill"
+                  title="此快照已被设为常驻保留（免除自动轮转删除）"
+                >
+                  🔒 常驻
+                </span>
                 <button
-                  v-else
+                  v-else-if="!b.memo"
                   class="btn-inline-add-memo"
                   title="为此快照添加备注"
                   @click.stop="startEditMemo(b)"
@@ -593,6 +671,18 @@ function formatVal(v: unknown): string {
               </div>
             </div>
             <div class="b-actions">
+              <button
+                class="btn-row-lock"
+                :class="{ 'is-locked': b.locked }"
+                :title="
+                  b.locked
+                    ? '当前为【常驻保留】快照（免除自动轮转删除）。点击切换为参与轮转'
+                    : '当前参与自动轮转。点击锁定为【常驻保留】'
+                "
+                @click.stop="toggleBackupLock(b)"
+              >
+                {{ b.locked ? '🔒 常驻' : '🔓 轮换' }}
+              </button>
               <button
                 class="btn-row-memo"
                 title="修改此快照的工况备注"
@@ -958,6 +1048,35 @@ function formatVal(v: unknown): string {
   background: var(--bg-modal);
   color: var(--text-main);
 }
+.locked-count-badge {
+  font-size: 10px;
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+.btn-autorotate-toggle {
+  background: var(--bg-btn);
+  border: 1px solid var(--border-color);
+  color: #38bdf8;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-autorotate-toggle:hover {
+  background: var(--bg-btn-hover);
+  border-color: #38bdf8;
+}
+.btn-autorotate-toggle.is-off {
+  color: var(--text-dim);
+  border-color: var(--border-color);
+  opacity: 0.8;
+}
 .header-actions {
   display: flex;
   align-items: center;
@@ -1042,6 +1161,17 @@ function formatVal(v: unknown): string {
 .memo-input-row {
   display: flex;
   gap: 8px;
+  align-items: center;
+}
+.memo-lock-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #10b981;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
 }
 .memo-text-input {
   flex: 1;
@@ -1131,6 +1261,16 @@ function formatVal(v: unknown): string {
   background: rgba(245, 158, 11, 0.28);
   border-color: #f59e0b;
 }
+.b-locked-pill {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
 .btn-inline-add-memo {
   background: transparent;
   border: 1px dashed var(--border-color);
@@ -1215,6 +1355,30 @@ function formatVal(v: unknown): string {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+.btn-row-lock {
+  background: var(--bg-btn);
+  border: 1px solid var(--border-color);
+  color: var(--text-dim);
+  padding: 3px 7px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.btn-row-lock:hover {
+  border-color: #10b981;
+  color: #10b981;
+}
+.btn-row-lock.is-locked {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.4);
+  color: #10b981;
+  font-weight: 600;
 }
 .btn-row-memo {
   background: var(--bg-btn);

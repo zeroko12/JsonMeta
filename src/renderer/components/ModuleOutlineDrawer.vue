@@ -1,9 +1,16 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { useJsonDocStore, type ModuleOutlineItem } from '../stores/jsonDoc'
 
 const doc = useJsonDocStore()
 const isCollapsed = ref(false)
+
+const contextMenu = ref<{
+  show: boolean
+  x: number
+  y: number
+  mod: ModuleOutlineItem | null
+}>({ show: false, x: 0, y: 0, mod: null })
 
 function selectModule(mod: ModuleOutlineItem) {
   doc.ensurePathExpanded(mod.path)
@@ -15,6 +22,54 @@ function isModuleActive(mod: ModuleOutlineItem): boolean {
   if (!doc.selectedPath) return false
   return doc.selectedPath === mod.path || doc.selectedPath.startsWith(`${mod.path}.`)
 }
+
+function openModuleContextMenu(mod: ModuleOutlineItem, e: MouseEvent) {
+  selectModule(mod)
+  const menuWidth = 220
+  const menuHeight = 160
+  const winW = window.innerWidth
+  const winH = window.innerHeight
+  const x = e.clientX + menuWidth > winW ? winW - menuWidth - 8 : e.clientX
+  const y = e.clientY + menuHeight > winH ? winH - menuHeight - 8 : e.clientY
+  contextMenu.value = { show: true, x, y, mod }
+}
+
+function closeContextMenu() {
+  contextMenu.value.show = false
+}
+
+function handleRestoreModule() {
+  if (!contextMenu.value.mod) return
+  const mod = contextMenu.value.mod
+  closeContextMenu()
+  doc.openRestoreSectionModal(mod.path, mod.description || mod.key)
+}
+
+function handleOpenRawJson() {
+  if (!contextMenu.value.mod) return
+  const mod = contextMenu.value.mod
+  closeContextMenu()
+  const val = doc.current ? (doc.current as Record<string, unknown>)[mod.path] : null
+  doc.showRawEditModal = {
+    path: mod.path,
+    title: `编辑模块 ${mod.key} 源码`,
+    jsonText: JSON.stringify(val, null, 2),
+  }
+}
+
+function handleCopyPath() {
+  if (!contextMenu.value.mod) return
+  navigator.clipboard.writeText(contextMenu.value.mod.path)
+  doc.showToast(`已复制模块路径: ${contextMenu.value.mod.path}`, 'info')
+  closeContextMenu()
+}
+
+onMounted(() => {
+  window.addEventListener('click', closeContextMenu)
+})
+onUnmounted(() => {
+  window.removeEventListener('click', closeContextMenu)
+})
 </script>
 
 <template>
@@ -49,8 +104,9 @@ function isModuleActive(mod: ModuleOutlineItem): boolean {
             active: isModuleActive(mod),
             modified: mod.isModified,
           }"
-          :title="`${mod.key}\n${mod.description || '无中文描述'}\n包含 ${mod.childCount} 项属性`"
+          :title="`${mod.key}\n${mod.description || '无中文描述'}\n包含 ${mod.childCount} 项属性 (右键可从快照恢复)`"
           @click="selectModule(mod)"
+          @contextmenu.prevent="openModuleContextMenu(mod, $event)"
         >
           <div class="card-top-row">
             <span class="mod-icon">▤</span>
@@ -64,6 +120,35 @@ function isModuleActive(mod: ModuleOutlineItem): boolean {
         </button>
       </div>
     </div>
+
+    <!-- 模块右键上下文菜单 -->
+    <Teleport to="body">
+      <div
+        v-if="contextMenu.show && contextMenu.mod"
+        class="mod-context-menu"
+        :style="{ top: `${contextMenu.y}px`, left: `${contextMenu.x}px` }"
+        @click.stop
+        @contextmenu.prevent
+      >
+        <div class="ctx-header">
+          <span class="ctx-title">{{ contextMenu.mod.key }}</span>
+          <span class="ctx-type">模块</span>
+        </div>
+        <div class="ctx-divider" />
+        <button class="ctx-item primary" @click="handleRestoreModule">
+          <span class="ctx-icon">↺</span>
+          <span class="ctx-label">从历史快照恢复此模块...</span>
+        </button>
+        <button class="ctx-item" @click="handleOpenRawJson">
+          <span class="ctx-icon">{ }</span>
+          <span class="ctx-label">以 JSON 源码编辑</span>
+        </button>
+        <button class="ctx-item" @click="handleCopyPath">
+          <span class="ctx-icon">📋</span>
+          <span class="ctx-label">复制模块路径</span>
+        </button>
+      </div>
+    </Teleport>
   </aside>
 </template>
 
@@ -251,5 +336,106 @@ function isModuleActive(mod: ModuleOutlineItem): boolean {
   white-space: nowrap;
   margin-top: 2px;
   padding-left: 14px;
+}
+
+/* 模块卡片右键菜单 */
+.mod-context-menu {
+  position: fixed;
+  z-index: 99999;
+  width: 220px;
+  background: var(--bg-modal, #1e293b);
+  border: 1px solid var(--border-color, #334155);
+  border-radius: 8px;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.4);
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  user-select: none;
+  animation: ctxFadeIn 0.12s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes ctxFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.ctx-header {
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: var(--bg-drawer-header, #0f172a);
+  border-radius: 5px;
+  margin-bottom: 2px;
+}
+
+.ctx-title {
+  font-size: 11px;
+  font-family: monospace;
+  color: var(--text-code, #38bdf8);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.ctx-type {
+  font-size: 10px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: var(--bg-btn, #334155);
+  color: var(--text-dim, #94a3b8);
+}
+
+.ctx-divider {
+  height: 1px;
+  background: var(--border-subtle, rgba(255, 255, 255, 0.08));
+  margin: 3px 0;
+}
+
+.ctx-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border: none;
+  background: transparent;
+  color: var(--text-main, #f1f5f9);
+  font-size: 11.5px;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.1s;
+}
+
+.ctx-item:hover {
+  background: var(--bg-btn-hover, #334155);
+}
+
+.ctx-item.primary {
+  color: #38bdf8;
+  font-weight: 600;
+}
+
+.ctx-item.primary:hover {
+  background: rgba(56, 189, 248, 0.12);
+}
+
+.ctx-icon {
+  font-size: 12px;
+  width: 14px;
+  text-align: center;
+}
+
+.ctx-label {
+  flex: 1;
 }
 </style>

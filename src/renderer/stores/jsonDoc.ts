@@ -65,14 +65,14 @@ export const useJsonDocStore = defineStore('jsonDoc', () => {
   let lastSaveTimestamp = 0
 
   // 全局 Toast 提示状态
-  const saveToast = ref<{ show: boolean; msg: string; type: 'success' | 'error' }>({
+  const saveToast = ref<{ show: boolean; msg: string; type: 'success' | 'error' | 'info' }>({
     show: false,
     msg: '',
     type: 'success',
   })
   let toastTimer: ReturnType<typeof setTimeout> | null = null
 
-  function showToast(msg: string, type: 'success' | 'error' = 'success') {
+  function showToast(msg: string, type: 'success' | 'error' | 'info' = 'success') {
     saveToast.value = { show: true, msg, type }
     if (toastTimer) clearTimeout(toastTimer)
     toastTimer = setTimeout(() => {
@@ -93,6 +93,7 @@ export const useJsonDocStore = defineStore('jsonDoc', () => {
   const showAboutModal = ref(false)
   const showAddNodeModal = ref<{ parentPath: string; isArray: boolean } | null>(null)
   const showRawEditModal = ref<{ path: string; title: string; jsonText: string } | null>(null)
+  const showRestoreSectionModal = ref<{ path: string; label?: string } | null>(null)
 
   // ─── 黑白主题切换 (dark / light) ───
   const THEME_STORAGE_KEY = 'json_meta_theme'
@@ -627,9 +628,11 @@ export const useJsonDocStore = defineStore('jsonDoc', () => {
       const cleanData = safeClone(current.value)
       const cleanDescriptions = safeClone(descriptions.value)
       const maxBackupsSetting = Number(localStorage.getItem('json_meta_max_backups')) || 10
+      const autoRotateSetting = localStorage.getItem('json_meta_auto_rotate') !== 'false'
       const writeRes = await window.api.file.writeJson(filePath.value, cleanData, {
         backup: true,
         maxBackups: maxBackupsSetting,
+        autoRotate: autoRotateSetting,
       })
       if (!writeRes.ok) {
         throw new Error(writeRes.error || '写入失败')
@@ -927,6 +930,83 @@ export const useJsonDocStore = defineStore('jsonDoc', () => {
     changeNavIndex.value = -1
   }
 
+  function openRestoreSectionModal(path: string, label?: string) {
+    showRestoreSectionModal.value = {
+      path,
+      label: label || descriptions.value[path] || path,
+    }
+  }
+
+  function closeRestoreSectionModal() {
+    showRestoreSectionModal.value = null
+  }
+
+  async function restoreSectionFromSnapshot(
+    path: string,
+    snapshotPath: string,
+    options: { overwriteMeta?: boolean } = {},
+  ): Promise<boolean> {
+    if (!filePath.value || current.value === null) return false
+    try {
+      const snapshotData = await window.api.file.readJson<unknown>(snapshotPath)
+      const snapshotVal = get(snapshotData, path)
+      if (snapshotVal === undefined) {
+        showToast(`所选快照中不存在配置段 [${path}]`, 'error')
+        return false
+      }
+      // 记录撤销栈
+      recordSnapshot(`从快照恢复配置段 ${path}`)
+      // 替换该段数值
+      current.value = set(current.value as JsonValue, path, safeClone(snapshotVal as JsonValue))
+
+      // 依据方案 B 处理业务中文注释
+      try {
+        const meta = await window.api.file.loadMeta<{ descriptions?: Record<string, string> }>(
+          snapshotPath,
+        )
+        if (meta && meta.descriptions) {
+          const nextDesc = { ...descriptions.value }
+          const prefix = `${path}.`
+
+          if (options.overwriteMeta) {
+            // 强制回退该段注释为快照版本
+            for (const k of Object.keys(nextDesc)) {
+              if (k === path || k.startsWith(prefix)) {
+                if (meta.descriptions[k] !== undefined) {
+                  nextDesc[k] = meta.descriptions[k]
+                } else {
+                  delete nextDesc[k]
+                }
+              }
+            }
+            for (const [k, v] of Object.entries(meta.descriptions)) {
+              if (k === path || k.startsWith(prefix)) {
+                nextDesc[k] = v
+              }
+            }
+          } else {
+            // 方案 B：默认保护当前已有最新注释，仅增量补全缺失项
+            for (const [k, v] of Object.entries(meta.descriptions)) {
+              if ((k === path || k.startsWith(prefix)) && nextDesc[k] === undefined) {
+                nextDesc[k] = v
+              }
+            }
+          }
+          descriptions.value = nextDesc
+        }
+      } catch {
+        // meta 读取失败不阻断参数恢复
+      }
+
+      showToast(`已成功从快照恢复配置段 [${path}] (可按 Ctrl+Z 撤销)`, 'success')
+      closeRestoreSectionModal()
+      return true
+    } catch (err) {
+      showToast(`恢复配置段失败: ${(err as Error).message}`, 'error')
+      return false
+    }
+  }
+
   function initExternalListener() {
     window.api.file.onChange(async (event) => {
       if (event.path === filePath.value && event.type === 'change') {
@@ -1012,6 +1092,10 @@ export const useJsonDocStore = defineStore('jsonDoc', () => {
     showAboutModal,
     showAddNodeModal,
     showRawEditModal,
+    showRestoreSectionModal,
+    openRestoreSectionModal,
+    closeRestoreSectionModal,
+    restoreSectionFromSnapshot,
     recordSnapshot,
     undo,
     redo,
