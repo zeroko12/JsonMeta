@@ -21,6 +21,7 @@ interface SectionDiffItem {
   type: 'modify' | 'add' | 'delete'
   currentValText: string
   snapshotValText: string
+  desc?: string
 }
 
 const snapshots = ref<SnapshotChoice[]>([])
@@ -149,12 +150,14 @@ async function computeSectionDiff(snapPath: string) {
     for (const c of changeMap.values()) {
       const displaySub = c.path || '(当前段数值)'
       const displayFull = c.path ? `${targetPath.value}.${c.path}` : targetPath.value
+      const desc = doc.descriptions[displayFull] || ''
       list.push({
         subPath: displaySub,
         fullPath: displayFull,
         type: c.type,
         currentValText: formatVal(c.oldValue),
         snapshotValText: formatVal(c.newValue),
+        desc: desc || undefined,
       })
     }
     sectionDiffList.value = list
@@ -232,9 +235,7 @@ async function doRestore(goToDiffView = false) {
           <strong>局部定向恢复</strong>
           ：仅将所选快照中的
           <code>{{ targetPath }}</code>
-          分支配置替换到当前编辑区中，其他所有模块参数完全保留不变。恢复后随时可按
-          <kbd>Ctrl+Z</kbd>
-          一键撤销。
+          分支配置替换到当前编辑区中，其他所有模块参数完全保留不变。
         </p>
 
         <!-- 快照选择列表 -->
@@ -287,7 +288,7 @@ async function doRestore(goToDiffView = false) {
           </div>
         </div>
 
-        <!-- 差异对比实时预览 -->
+        <!-- 差异对比实时预览 (紧凑直观对比流) -->
         <div v-if="selectedSnapshot" class="section-block diff-preview-block">
           <div class="block-title-row">
             <span class="block-title">恢复变动字段预览</span>
@@ -297,7 +298,7 @@ async function doRestore(goToDiffView = false) {
           </div>
 
           <div v-if="isDiffLoading" class="diff-loading">
-            <span>正在分析差异...</span>
+            <span>正在对比分析字段差异...</span>
           </div>
 
           <div v-else-if="sectionDiffList.length === 0" class="diff-clean-hint">
@@ -308,27 +309,32 @@ async function doRestore(goToDiffView = false) {
             <table class="preview-diff-table">
               <thead>
                 <tr>
-                  <th width="70">变动</th>
-                  <th>子字段路径</th>
-                  <th>当前值</th>
-                  <th>恢复后 (快照值)</th>
+                  <th width="48" class="text-center">变动</th>
+                  <th width="190">子字段 / 业务注释</th>
+                  <th>当前编辑值</th>
+                  <th width="18" class="text-center"></th>
+                  <th>快照恢复值</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="(item, idx) in sectionDiffList" :key="idx" :class="item.type">
-                  <td>
+                  <td class="text-center">
                     <span class="type-pill" :class="item.type">
-                      {{ item.type === 'modify' ? '修改' : item.type === 'add' ? '增项' : '删项' }}
+                      {{ item.type === 'modify' ? '改' : item.type === 'add' ? '增' : '删' }}
                     </span>
                   </td>
-                  <td>
-                    <code class="field-path-code">{{ item.subPath }}</code>
+                  <td class="col-field">
+                    <code class="field-path-code" :title="item.fullPath">{{ item.subPath }}</code>
+                    <span v-if="item.desc" class="field-desc-tag" :title="item.desc">
+                      {{ item.desc }}
+                    </span>
                   </td>
                   <td class="cell-val old-val">
-                    <code>{{ item.currentValText }}</code>
+                    <code :title="item.currentValText">{{ item.currentValText }}</code>
                   </td>
+                  <td class="cell-arrow">➔</td>
                   <td class="cell-val new-val">
-                    <code>{{ item.snapshotValText }}</code>
+                    <code :title="item.snapshotValText">{{ item.snapshotValText }}</code>
                   </td>
                 </tr>
               </tbody>
@@ -460,37 +466,29 @@ async function doRestore(goToDiffView = false) {
 }
 
 .modal-body {
-  padding: 14px 18px;
+  padding: 10px 16px;
   max-height: 520px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 
 .section-tip {
   margin: 0;
-  font-size: 12px;
+  font-size: 11.5px;
   color: var(--text-muted);
-  line-height: 1.5;
+  line-height: 1.4;
   background: rgba(56, 189, 248, 0.08);
   border: 1px solid rgba(56, 189, 248, 0.2);
-  padding: 8px 12px;
-  border-radius: 6px;
-}
-
-.section-tip kbd {
-  background: var(--bg-btn);
-  border: 1px solid var(--border-color);
-  border-radius: 3px;
-  padding: 1px 4px;
-  font-size: 10px;
+  padding: 6px 10px;
+  border-radius: 5px;
 }
 
 .section-block {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
 }
 
 .block-title-row {
@@ -500,43 +498,43 @@ async function doRestore(goToDiffView = false) {
 }
 
 .block-title {
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 600;
   color: var(--text-muted);
 }
 
 .diff-count-badge {
-  font-size: 10.5px;
+  font-size: 10px;
   background: var(--bg-badge);
   color: var(--text-highlight);
   border: 1px solid var(--border-color);
-  padding: 1px 6px;
-  border-radius: 4px;
+  padding: 1px 5px;
+  border-radius: 3px;
   font-weight: 600;
 }
 
 .loading-state,
 .empty-state {
-  padding: 24px;
+  padding: 18px;
   text-align: center;
   color: var(--text-dim);
-  font-size: 12.5px;
+  font-size: 12px;
 }
 
 .snapshot-selector-list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  max-height: 170px;
+  gap: 4px;
+  max-height: 125px;
   overflow-y: auto;
   padding-right: 2px;
 }
 
 .snap-item {
-  padding: 7px 10px;
+  padding: 5px 8px;
   background: var(--bg-input);
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: 5px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -563,13 +561,13 @@ async function doRestore(goToDiffView = false) {
 .snap-left {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .snap-details {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 
 .snap-title-line {
@@ -579,7 +577,7 @@ async function doRestore(goToDiffView = false) {
 }
 
 .snap-time {
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--text-main);
 }
@@ -588,70 +586,70 @@ async function doRestore(goToDiffView = false) {
   background: rgba(245, 158, 11, 0.15);
   color: #f59e0b;
   border: 1px solid rgba(245, 158, 11, 0.35);
-  font-size: 10px;
-  padding: 1px 5px;
-  border-radius: 4px;
+  font-size: 9.5px;
+  padding: 0 4px;
+  border-radius: 3px;
 }
 
 .snap-lock-pill {
   background: rgba(16, 185, 129, 0.15);
   color: #10b981;
   border: 1px solid rgba(16, 185, 129, 0.35);
-  font-size: 10px;
-  padding: 1px 5px;
-  border-radius: 4px;
+  font-size: 9.5px;
+  padding: 0 4px;
+  border-radius: 3px;
 }
 
 .snap-filename {
-  font-size: 10.5px;
+  font-size: 10px;
   color: var(--text-dim);
   font-family: 'Consolas', monospace;
 }
 
 .badge-available {
-  font-size: 11px;
+  font-size: 10.5px;
   color: var(--text-highlight);
   font-weight: 500;
 }
 
 .badge-missing {
-  font-size: 11px;
+  font-size: 10.5px;
   color: #ef4444;
 }
 
-/* 差异对比预览表格 */
+/* 差异对比预览表格 (紧凑直观) */
 .diff-preview-block {
-  margin-top: 2px;
+  margin-top: 1px;
 }
 
 .diff-loading {
-  padding: 16px;
+  padding: 12px;
   text-align: center;
   color: var(--text-dim);
-  font-size: 11.5px;
+  font-size: 11px;
 }
 
 .diff-clean-hint {
-  padding: 10px 12px;
+  padding: 8px 10px;
   background: rgba(16, 185, 129, 0.08);
   border: 1px solid rgba(16, 185, 129, 0.25);
-  border-radius: 5px;
+  border-radius: 4px;
   color: #10b981;
-  font-size: 11.5px;
+  font-size: 11px;
 }
 
 .diff-table-container {
-  max-height: 140px;
+  max-height: 175px;
   overflow-y: auto;
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: 5px;
   background: var(--bg-workspace);
 }
 
 .preview-diff-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 11.5px;
+  font-size: 11px;
 }
 
 .preview-diff-table th {
@@ -659,31 +657,75 @@ async function doRestore(goToDiffView = false) {
   top: 0;
   background: var(--bg-drawer-header);
   border-bottom: 1px solid var(--border-color);
-  padding: 5px 8px;
+  padding: 4px 6px;
   text-align: left;
   color: var(--text-muted);
   font-weight: 600;
-  font-size: 11px;
+  font-size: 10.5px;
   z-index: 2;
 }
 
+.preview-diff-table th.text-center,
+.preview-diff-table td.text-center {
+  text-align: center;
+}
+
 .preview-diff-table td {
-  padding: 4px 8px;
+  padding: 3px 6px;
   border-bottom: 1px solid var(--border-subtle);
   vertical-align: middle;
+}
+
+.col-field {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
 }
 
 .field-path-code {
   font-family: 'Consolas', monospace;
   color: var(--text-code);
   font-size: 11px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.field-desc-tag {
+  font-size: 9.5px;
+  color: var(--desc-text);
+  background: var(--desc-bg);
+  border: 1px solid var(--desc-border);
+  padding: 0 3px;
+  border-radius: 3px;
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.cell-arrow {
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 9px;
+  padding: 0;
+  user-select: none;
 }
 
 .cell-val code {
   font-family: 'Consolas', monospace;
-  font-size: 11px;
+  font-size: 10.5px;
   padding: 1px 4px;
   border-radius: 3px;
+  display: inline-block;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
 }
 
 .cell-val.old-val code {
@@ -699,8 +741,9 @@ async function doRestore(goToDiffView = false) {
 .type-pill {
   padding: 1px 4px;
   border-radius: 3px;
-  font-size: 10px;
-  font-weight: 600;
+  font-size: 9.5px;
+  font-weight: 700;
+  line-height: 1.2;
 }
 
 .type-pill.modify {
@@ -719,11 +762,11 @@ async function doRestore(goToDiffView = false) {
 }
 
 .meta-protect-row {
-  margin-top: 2px;
-  padding: 9px 12px;
+  margin-top: 1px;
+  padding: 6px 10px;
   background: var(--bg-workspace);
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: 5px;
 }
 
 .protect-label {
@@ -735,18 +778,18 @@ async function doRestore(goToDiffView = false) {
 }
 
 .protect-title {
-  font-size: 11.5px;
+  font-size: 11px;
   color: #10b981;
   font-weight: 500;
 }
 
 .modal-footer {
-  padding: 10px 18px;
+  padding: 8px 16px;
   background: var(--bg-drawer-header);
   border-top: 1px solid var(--border-color);
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
+  gap: 6px;
 }
 
 .btn {

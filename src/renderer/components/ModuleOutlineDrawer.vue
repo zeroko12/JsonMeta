@@ -104,7 +104,7 @@ onUnmounted(() => {
             active: isModuleActive(mod),
             modified: mod.isModified,
           }"
-          :title="`${mod.key}\n${mod.description || '无中文描述'}\n包含 ${mod.childCount} 项属性 (右键可从快照恢复)`"
+          :title="`${mod.key}\n${mod.description || '无中文描述'}\n包含 ${mod.childCount} 项属性`"
           @click="selectModule(mod)"
           @contextmenu.prevent="openModuleContextMenu(mod, $event)"
         >

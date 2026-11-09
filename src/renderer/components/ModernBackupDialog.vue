@@ -1039,7 +1039,7 @@ function formatVal(v: unknown): string {
 }
 
 .modal-header {
-  padding: 12px 18px;
+  padding: 8px 14px;
   background: var(--bg-drawer-header);
   border-bottom: 1px solid var(--border-color);
   flex-shrink: 0;
@@ -1052,11 +1052,11 @@ function formatVal(v: unknown): string {
 .header-title-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 .header-title-row h3 {
   margin: 0;
-  font-size: 15px;
+  font-size: 13.5px;
   color: var(--text-main);
   font-weight: 600;
 }
@@ -1066,9 +1066,9 @@ function formatVal(v: unknown): string {
   gap: 4px;
   background: var(--bg-input);
   border: 1px solid var(--border-color);
-  padding: 2px 8px;
+  padding: 2px 7px;
   border-radius: 12px;
-  font-size: 11px;
+  font-size: 10.5px;
   color: var(--text-dim);
   transition: all 0.15s;
 }
@@ -1076,7 +1076,7 @@ function formatVal(v: unknown): string {
   border-color: var(--border-focus);
 }
 .quota-label {
-  font-size: 11px;
+  font-size: 10.5px;
   opacity: 0.8;
 }
 .quota-current {
@@ -1093,7 +1093,7 @@ function formatVal(v: unknown): string {
   background: transparent;
   border: none;
   color: var(--text-main);
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 600;
   outline: none;
   cursor: pointer;
@@ -1108,7 +1108,7 @@ function formatVal(v: unknown): string {
   background: rgba(16, 185, 129, 0.15);
   color: #10b981;
   border: 1px solid rgba(16, 185, 129, 0.35);
-  padding: 1px 6px;
+  padding: 1px 5px;
   border-radius: 4px;
   font-weight: 600;
 }
@@ -1116,9 +1116,9 @@ function formatVal(v: unknown): string {
   background: var(--bg-btn);
   border: 1px solid var(--border-color);
   color: #38bdf8;
-  padding: 3px 8px;
+  padding: 2px 7px;
   border-radius: 12px;
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s;
@@ -1135,14 +1135,14 @@ function formatVal(v: unknown): string {
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 .btn-tool-secondary {
   background: var(--bg-btn);
   border: 1px solid var(--border-color);
   color: var(--text-main);
-  padding: 5px 11px;
-  border-radius: 6px;
+  padding: 3px 8px;
+  border-radius: 5px;
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
@@ -1156,8 +1156,8 @@ function formatVal(v: unknown): string {
   background: linear-gradient(135deg, #0284c7, #2563eb);
   border: 1px solid #38bdf8;
   color: white;
-  padding: 5px 12px;
-  border-radius: 6px;
+  padding: 3px 10px;
+  border-radius: 5px;
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
@@ -1173,8 +1173,8 @@ function formatVal(v: unknown): string {
 }
 
 .modal-body {
-  padding: 14px 20px;
-  max-height: 420px;
+  padding: 10px 14px;
+  max-height: 480px;
   overflow-y: auto;
 }
 
@@ -1183,12 +1183,12 @@ function formatVal(v: unknown): string {
   background: var(--bg-input);
   border: 1px solid var(--border-focus);
   border-radius: 6px;
-  padding: 10px 12px;
-  margin-bottom: 12px;
+  padding: 6px 10px;
+  margin-bottom: 8px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  gap: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 .memo-header-row {
   display: flex;
@@ -1205,8 +1205,8 @@ function formatVal(v: unknown): string {
   border: none;
   color: var(--text-dim);
   cursor: pointer;
-  padding: 2px 6px;
-  font-size: 13px;
+  padding: 1px 5px;
+  font-size: 12px;
   border-radius: 4px;
 }
 .btn-memo-close:hover {
@@ -1215,14 +1215,14 @@ function formatVal(v: unknown): string {
 }
 .memo-input-row {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   align-items: center;
 }
 .memo-lock-checkbox {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 11px;
+  gap: 4px;
+  font-size: 10.5px;
   color: #10b981;
   cursor: pointer;
   user-select: none;
@@ -1232,9 +1232,9 @@ function formatVal(v: unknown): string {
   flex: 1;
   background: var(--bg-modal);
   border: 1px solid var(--border-color);
-  border-radius: 5px;
-  padding: 6px 10px;
-  font-size: 12px;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 11.5px;
   color: var(--text-main);
   outline: none;
 }
@@ -1242,16 +1242,16 @@ function formatVal(v: unknown): string {
   border-color: var(--border-focus);
 }
 .btn-memo-submit {
-  padding: 6px 14px;
-  font-size: 12px;
+  padding: 4px 10px;
+  font-size: 11.5px;
   white-space: nowrap;
 }
 
 .empty {
   text-align: center;
-  padding: 30px;
+  padding: 24px;
   color: var(--text-dim);
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .backup-list {
@@ -1260,13 +1260,13 @@ function formatVal(v: unknown): string {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 .backup-list li {
-  padding: 10px 12px;
+  padding: 6px 10px;
   border: 1px solid var(--border-color);
   background: var(--bg-input);
-  border-radius: 6px;
+  border-radius: 5px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1285,15 +1285,15 @@ function formatVal(v: unknown): string {
 .b-info {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
 }
 .b-time-line {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 .b-time {
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 600;
   color: var(--text-main);
 }
@@ -1301,11 +1301,11 @@ function formatVal(v: unknown): string {
   background: rgba(245, 158, 11, 0.15);
   color: #f59e0b;
   border: 1px solid rgba(245, 158, 11, 0.35);
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 600;
-  padding: 1px 7px;
-  border-radius: 4px;
-  max-width: 220px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1320,19 +1320,19 @@ function formatVal(v: unknown): string {
   background: rgba(16, 185, 129, 0.15);
   color: #10b981;
   border: 1px solid rgba(16, 185, 129, 0.35);
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 600;
-  padding: 1px 7px;
-  border-radius: 4px;
+  padding: 1px 6px;
+  border-radius: 3px;
   white-space: nowrap;
 }
 .btn-inline-add-memo {
   background: transparent;
   border: 1px dashed var(--border-color);
   color: var(--text-dim);
-  font-size: 11px;
-  padding: 1px 6px;
-  border-radius: 4px;
+  font-size: 10.5px;
+  padding: 1px 5px;
+  border-radius: 3px;
   cursor: pointer;
   transition: all 0.15s;
 }
@@ -1342,30 +1342,30 @@ function formatVal(v: unknown): string {
   background: rgba(245, 158, 11, 0.1);
 }
 .b-path {
-  font-size: 11px;
+  font-size: 10.5px;
   color: var(--text-code);
   font-family: monospace;
 }
 
 /* 行内备注编辑条 */
 .b-memo-inline-edit {
-  margin-top: 6px;
-  padding: 6px 8px;
+  margin-top: 4px;
+  padding: 4px 6px;
   background: var(--bg-modal);
   border: 1px solid var(--border-focus);
-  border-radius: 5px;
+  border-radius: 4px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 .memo-inline-input {
   flex: 1;
   background: var(--bg-input);
   border: 1px solid var(--border-color);
-  border-radius: 4px;
-  padding: 4px 8px;
-  font-size: 11px;
+  border-radius: 3px;
+  padding: 3px 6px;
+  font-size: 10.5px;
   color: var(--text-main);
   outline: none;
 }
@@ -1375,15 +1375,15 @@ function formatVal(v: unknown): string {
 .inline-edit-btns {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
 }
 .btn-memo-confirm {
   background: #0284c7;
   color: white;
   border: none;
-  padding: 4px 10px;
-  border-radius: 4px;
-  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 10.5px;
   font-weight: 500;
   cursor: pointer;
   transition: background 0.15s;
@@ -1395,9 +1395,9 @@ function formatVal(v: unknown): string {
   background: transparent;
   color: var(--text-dim);
   border: 1px solid var(--border-color);
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 11px;
+  padding: 3px 6px;
+  border-radius: 3px;
+  font-size: 10.5px;
   cursor: pointer;
   transition: all 0.15s;
 }
@@ -1409,15 +1409,15 @@ function formatVal(v: unknown): string {
 .b-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 5px;
 }
 .btn-row-lock {
   background: var(--bg-btn);
   border: 1px solid var(--border-color);
   color: var(--text-dim);
-  padding: 3px 7px;
-  border-radius: 4px;
-  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 10.5px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s;
@@ -1439,9 +1439,9 @@ function formatVal(v: unknown): string {
   background: var(--bg-btn);
   border: 1px solid var(--border-color);
   color: var(--text-main);
-  padding: 3px 8px;
-  border-radius: 4px;
-  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 10.5px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s;
@@ -1455,9 +1455,9 @@ function formatVal(v: unknown): string {
   background: var(--bg-btn);
   border: 1px solid var(--border-color);
   color: var(--text-main);
-  padding: 3px 8px;
-  border-radius: 4px;
-  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 10.5px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s;
@@ -1471,9 +1471,9 @@ function formatVal(v: unknown): string {
   background: var(--bg-btn);
   border: 1px solid var(--border-color);
   color: var(--text-dim);
-  padding: 3px 6px;
-  border-radius: 4px;
-  font-size: 11px;
+  padding: 2px 5px;
+  border-radius: 3px;
+  font-size: 10.5px;
   cursor: pointer;
   transition: all 0.15s;
   display: inline-flex;
@@ -1487,12 +1487,12 @@ function formatVal(v: unknown): string {
 }
 .selected-mark {
   color: var(--text-highlight);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
 }
 
 .modal-footer {
-  padding: 12px 20px;
+  padding: 8px 14px;
   background: var(--bg-drawer-header);
   border-top: 1px solid var(--border-color);
   display: flex;
@@ -1504,17 +1504,17 @@ function formatVal(v: unknown): string {
 .footer-left {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 .footer-right {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 .btn {
-  padding: 7px 14px;
-  border-radius: 6px;
-  font-size: 12px;
+  padding: 5px 12px;
+  border-radius: 5px;
+  font-size: 11.5px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s;
@@ -1548,21 +1548,21 @@ function formatVal(v: unknown): string {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 10px 16px;
+  gap: 10px;
+  padding: 7px 12px;
 }
 .diff-header-left {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   flex-shrink: 0;
 }
 .btn-back {
   background: var(--bg-btn);
   border: 1px solid var(--border-color);
   color: var(--text-main);
-  padding: 4px 10px;
-  border-radius: 5px;
+  padding: 3px 8px;
+  border-radius: 4px;
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
@@ -1571,7 +1571,7 @@ function formatVal(v: unknown): string {
   background: var(--bg-btn-hover);
 }
 .diff-title {
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 700;
   color: var(--text-main);
 }
@@ -1579,7 +1579,7 @@ function formatVal(v: unknown): string {
 .diff-selectors {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex: 1;
   max-width: 720px;
 }
@@ -1588,17 +1588,17 @@ function formatVal(v: unknown): string {
   align-items: center;
   background: var(--bg-input);
   border: 1px solid var(--border-color);
-  border-radius: 6px;
-  padding: 2px 6px;
+  border-radius: 5px;
+  padding: 2px 5px;
   flex: 1;
   min-width: 0;
 }
 .selector-tag {
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 600;
-  padding: 2px 6px;
-  border-radius: 4px;
-  margin-right: 6px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  margin-right: 5px;
   flex-shrink: 0;
 }
 .selector-tag.base {
@@ -1613,7 +1613,7 @@ function formatVal(v: unknown): string {
   background: transparent;
   border: none;
   color: var(--text-main);
-  font-size: 12px;
+  font-size: 11.5px;
   width: 100%;
   outline: none;
   cursor: pointer;
@@ -1627,9 +1627,9 @@ function formatVal(v: unknown): string {
   background: var(--bg-btn);
   border: 1px solid var(--border-color);
   color: var(--text-main);
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 11px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  font-size: 10.5px;
   font-weight: 600;
   cursor: pointer;
   flex-shrink: 0;
@@ -1643,9 +1643,9 @@ function formatVal(v: unknown): string {
   background: transparent;
   border: none;
   color: var(--text-dim);
-  font-size: 16px;
+  font-size: 14px;
   cursor: pointer;
-  padding: 4px 8px;
+  padding: 2px 6px;
   border-radius: 4px;
 }
 .btn-close-diff:hover {
@@ -1658,7 +1658,7 @@ function formatVal(v: unknown): string {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 16px;
+  padding: 5px 12px;
   background: var(--bg-subbar);
   border-bottom: 1px solid var(--border-color);
   flex-shrink: 0;
@@ -1666,20 +1666,20 @@ function formatVal(v: unknown): string {
 .sub-left {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 11px;
+  gap: 6px;
+  font-size: 10.5px;
 }
 .sub-badge.total {
   background: rgba(59, 130, 246, 0.15);
   color: #3b82f6;
   font-weight: 700;
-  padding: 2px 7px;
-  border-radius: 4px;
-}
-.stat-mini {
   padding: 1px 6px;
   border-radius: 3px;
-  font-size: 11px;
+}
+.stat-mini {
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 10.5px;
 }
 .stat-mini.mod {
   background: rgba(234, 179, 8, 0.15);
@@ -1701,21 +1701,21 @@ function formatVal(v: unknown): string {
 .sub-right {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 .filter-pills {
   display: flex;
   background: var(--bg-input);
   border: 1px solid var(--border-color);
-  border-radius: 5px;
+  border-radius: 4px;
   overflow: hidden;
 }
 .pill-btn {
   background: transparent;
   border: none;
   color: var(--text-dim);
-  font-size: 11px;
-  padding: 3px 8px;
+  font-size: 10.5px;
+  padding: 2px 7px;
   cursor: pointer;
   transition: all 0.1s;
 }
@@ -1727,12 +1727,12 @@ function formatVal(v: unknown): string {
 .diff-filter-input {
   background: var(--bg-input);
   border: 1px solid var(--border-color);
-  border-radius: 5px;
+  border-radius: 4px;
   color: var(--text-main);
-  padding: 3px 8px;
-  font-size: 11px;
+  padding: 2px 6px;
+  font-size: 10.5px;
   outline: none;
-  width: 170px;
+  width: 150px;
 }
 .diff-filter-input:focus {
   border-color: var(--border-focus);
@@ -1753,21 +1753,22 @@ function formatVal(v: unknown): string {
 .diff-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 12px;
+  font-size: 11.5px;
 }
 .diff-table th {
   position: sticky;
   top: 0;
   background: var(--bg-table-header, var(--bg-drawer-header));
-  padding: 8px 12px;
+  padding: 5px 8px;
   text-align: left;
   border-bottom: 1px solid var(--border-color);
   color: var(--text-muted);
   font-weight: 600;
+  font-size: 11px;
   z-index: 10;
 }
 .diff-table td {
-  padding: 7px 12px;
+  padding: 4px 8px;
   border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.05));
   vertical-align: middle;
 }
@@ -1777,9 +1778,9 @@ function formatVal(v: unknown): string {
 
 .type-pill {
   display: inline-block;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 11px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 10px;
   font-weight: 600;
 }
 .type-pill.modify {
@@ -1797,9 +1798,9 @@ function formatVal(v: unknown): string {
 
 .category-pill {
   display: inline-block;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 10px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 9.5px;
   font-weight: 600;
 }
 .category-pill.data {
@@ -1813,23 +1814,23 @@ function formatVal(v: unknown): string {
 
 .path-code {
   font-family: 'Consolas', 'Fira Code', monospace;
-  font-size: 11px;
+  font-size: 10.5px;
   color: var(--text-code);
   word-break: break-all;
 }
 .old-val code {
   color: #ef4444;
   background: rgba(239, 68, 68, 0.08);
-  padding: 2px 5px;
-  border-radius: 4px;
+  padding: 1px 4px;
+  border-radius: 3px;
   font-family: 'Consolas', 'Fira Code', monospace;
   word-break: break-all;
 }
 .new-val code {
   color: #10b981;
   background: rgba(16, 185, 129, 0.08);
-  padding: 2px 5px;
-  border-radius: 4px;
+  padding: 1px 4px;
+  border-radius: 3px;
   font-family: 'Consolas', 'Fira Code', monospace;
   word-break: break-all;
 }
