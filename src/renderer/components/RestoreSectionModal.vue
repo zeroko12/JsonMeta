@@ -126,22 +126,41 @@ async function loadSnapshotsForSection() {
   }
 }
 
+let sectionDiffReqId = 0
+const sectionDiffLimit = ref(50)
+
+const visibleSectionDiffList = computed(() => {
+  return sectionDiffList.value.slice(0, sectionDiffLimit.value)
+})
+
+const remainingSectionDiffCount = computed(() => {
+  return Math.max(0, sectionDiffList.value.length - sectionDiffLimit.value)
+})
+
 // 选中某个快照时，实时计算当前内存中的该段配置与快照中的差异对比
-async function computeSectionDiff(snapPath: string) {
+async function computeSectionDiff(snapPath: string, reqId: number) {
   if (!snapPath || !targetPath.value || doc.current === null) {
     sectionDiffList.value = []
+    isDiffLoading.value = false
     return
   }
   isDiffLoading.value = true
   try {
     const snapData = await window.api.file.readJson<unknown>(snapPath)
+    if (reqId !== sectionDiffReqId) return
+
     const snapVal = get(snapData, targetPath.value)
     const currentVal = get(doc.current, targetPath.value)
 
     if (snapVal === undefined) {
-      sectionDiffList.value = []
+      if (reqId === sectionDiffReqId) {
+        sectionDiffList.value = []
+      }
       return
     }
+
+    await new Promise((r) => setTimeout(r, 0))
+    if (reqId !== sectionDiffReqId) return
 
     // 比较两者的差异
     const changeMap = diff(currentVal, snapVal)
@@ -160,21 +179,34 @@ async function computeSectionDiff(snapPath: string) {
         desc: desc || undefined,
       })
     }
-    sectionDiffList.value = list
+    if (reqId === sectionDiffReqId) {
+      sectionDiffList.value = list
+    }
   } catch {
-    sectionDiffList.value = []
+    if (reqId === sectionDiffReqId) {
+      sectionDiffList.value = []
+    }
   } finally {
-    isDiffLoading.value = false
+    if (reqId === sectionDiffReqId) {
+      isDiffLoading.value = false
+    }
   }
 }
 
 watch(
   () => selectedSnapshot.value,
-  (val) => {
+  async (val) => {
+    sectionDiffLimit.value = 50
     if (val) {
-      computeSectionDiff(val)
+      const curReq = ++sectionDiffReqId
+      isDiffLoading.value = true
+      await new Promise((r) => setTimeout(r, 0))
+      if (curReq === sectionDiffReqId) {
+        await computeSectionDiff(val, curReq)
+      }
     } else {
       sectionDiffList.value = []
+      isDiffLoading.value = false
     }
   },
 )
@@ -317,7 +349,7 @@ async function doRestore(goToDiffView = false) {
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(item, idx) in sectionDiffList" :key="idx" :class="item.type">
+                <tr v-for="(item, idx) in visibleSectionDiffList" :key="idx" :class="item.type">
                   <td class="text-center">
                     <span class="type-pill" :class="item.type">
                       {{ item.type === 'modify' ? '改' : item.type === 'add' ? '增' : '删' }}
@@ -339,6 +371,17 @@ async function doRestore(goToDiffView = false) {
                 </tr>
               </tbody>
             </table>
+
+            <div v-if="remainingSectionDiffCount > 0" class="auto-diff-more-bar">
+              <span class="more-hint">
+                已显示前 {{ visibleSectionDiffList.length }} 处，剩余
+                {{ remainingSectionDiffCount }} 处
+              </span>
+              <button class="btn-more-diff" @click="sectionDiffLimit += 50">+ 加载 50 条</button>
+              <button class="btn-more-diff" @click="sectionDiffLimit = sectionDiffList.length">
+                全部显示
+              </button>
+            </div>
           </div>
         </div>
 
@@ -736,6 +779,35 @@ async function doRestore(goToDiffView = false) {
 .cell-val.new-val code {
   color: #10b981;
   background: rgba(16, 185, 129, 0.1);
+}
+
+.auto-diff-more-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 5px 10px;
+  background: var(--bg-drawer-header);
+  border-top: 1px dashed var(--border-color);
+  font-size: 10px;
+  color: var(--text-dim);
+}
+.more-hint {
+  font-size: 10px;
+}
+.btn-more-diff {
+  background: var(--bg-btn);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-more-diff:hover {
+  background: var(--bg-btn-hover);
+  border-color: var(--border-focus);
 }
 
 .type-pill {

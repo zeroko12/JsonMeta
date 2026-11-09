@@ -61,9 +61,9 @@ function confirmRevertAll() {
         <span class="unified-change-badge live" title="实时审计会话中的数据改动与中文描述修改">
           ● 实时审计
         </span>
-        <span class="stat-mini mod">{{ stats.modify }} 修改</span>
-        <span class="stat-mini add">{{ stats.add }} 新增</span>
-        <span class="stat-mini del">{{ stats.delete }} 删除</span>
+        <span class="stat-mini mod">{{ stats.modify }} 改</span>
+        <span class="stat-mini add">{{ stats.add }} 增</span>
+        <span class="stat-mini del">{{ stats.delete }} 删</span>
         <span v-if="stats.descCount > 0" class="stat-mini desc">
           // {{ stats.descCount }} 描述修改
         </span>
@@ -126,7 +126,7 @@ function confirmRevertAll() {
           >
             <td>
               <span :class="['type-pill', item.type]">
-                {{ item.type === 'modify' ? '修改' : item.type === 'add' ? '新增' : '删除' }}
+                {{ item.type === 'modify' ? '改' : item.type === 'add' ? '增' : '删' }}
               </span>
             </td>
             <td>

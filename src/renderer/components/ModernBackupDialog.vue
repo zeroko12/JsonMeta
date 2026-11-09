@@ -229,24 +229,52 @@ interface AutoDiffItem {
   path: string
   type: 'modify' | 'add' | 'delete'
   category: 'data' | 'description'
-  oldValue: unknown
-  newValue: unknown
+  oldValText: string
+  newValText: string
   desc?: string
 }
+
+let diffRequestId = 0
+const autoDiffCache = new Map<string, AutoDiffItem[]>()
 
 const autoDiffLoading = ref(false)
 const autoDiffItems = ref<AutoDiffItem[]>([])
 const autoDiffFilter = ref<'all' | 'data' | 'description'>('all')
 const autoDiffSearch = ref('')
+const autoDiffDisplayLimit = ref(50)
 
-async function computeAutoDiff(snapshotPath: string) {
+function formatValFast(v: unknown, maxLen = 260): string {
+  if (v === undefined) return '(无)'
+  if (typeof v === 'string') return v.length > maxLen ? v.slice(0, maxLen) + '...' : v
+  try {
+    const s = JSON.stringify(v)
+    return s.length > maxLen ? s.slice(0, maxLen) + '...' : s
+  } catch {
+    return String(v)
+  }
+}
+
+async function computeAutoDiff(snapshotPath: string, reqId: number) {
   if (!snapshotPath || !doc.filePath) {
     autoDiffItems.value = []
+    autoDiffLoading.value = false
     return
   }
-  autoDiffLoading.value = true
+
+  // 1. 检查内存缓存：切换回已比对过的快照瞬间展现 (0ms 延迟)
+  const cacheKey = snapshotPath + ':' + (doc.isDirty ? 'dirty' : 'clean')
+  if (autoDiffCache.has(cacheKey)) {
+    if (reqId === diffRequestId) {
+      autoDiffItems.value = autoDiffCache.get(cacheKey)!
+      autoDiffLoading.value = false
+    }
+    return
+  }
+
   try {
     const snapshotData = await window.api.file.readJson(snapshotPath)
+    if (reqId !== diffRequestId) return
+
     let snapshotDescs: Record<string, string> = {}
     try {
       const meta = await window.api.file.loadMeta<{ descriptions?: Record<string, string> }>(
@@ -256,20 +284,29 @@ async function computeAutoDiff(snapshotPath: string) {
     } catch {
       // ignore
     }
+    if (reqId !== diffRequestId) return
+
+    // 让出主事件循环帧，避免大配置 diff 阻塞界面
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    if (reqId !== diffRequestId) return
 
     const currentData = toRaw(doc.current)
     const currentDescs = toRaw(doc.descriptions) || {}
 
     // diff(oldValue: 当前配置, newValue: 快照恢复值)
     const dataDiffMap = diff(currentData, snapshotData)
-    const items: AutoDiffItem[] = dataDiffMap.toArray().map((c) => ({
-      path: c.path,
-      type: c.type,
-      category: 'data',
-      oldValue: c.oldValue,
-      newValue: c.newValue,
-      desc: currentDescs[c.path] || snapshotDescs[c.path] || undefined,
-    }))
+    const items: AutoDiffItem[] = []
+
+    for (const c of dataDiffMap.values()) {
+      items.push({
+        path: c.path,
+        type: c.type,
+        category: 'data',
+        oldValText: formatValFast(c.oldValue),
+        newValText: formatValFast(c.newValue),
+        desc: currentDescs[c.path] || snapshotDescs[c.path] || undefined,
+      })
+    }
 
     // 中文业务注释差异比对
     const allDescKeys = new Set([...Object.keys(currentDescs), ...Object.keys(snapshotDescs)])
@@ -281,8 +318,8 @@ async function computeAutoDiff(snapshotPath: string) {
           path: k,
           type: 'add',
           category: 'description',
-          oldValue: '(无)',
-          newValue: newD,
+          oldValText: '(无)',
+          newValText: newD,
           desc: newD,
         })
       } else if (oldD !== undefined && (newD === undefined || newD.trim() === '')) {
@@ -290,8 +327,8 @@ async function computeAutoDiff(snapshotPath: string) {
           path: k,
           type: 'delete',
           category: 'description',
-          oldValue: oldD,
-          newValue: '(无)',
+          oldValText: oldD,
+          newValText: '(无)',
           desc: oldD,
         })
       } else if (oldD !== undefined && newD !== undefined && oldD !== newD) {
@@ -299,29 +336,44 @@ async function computeAutoDiff(snapshotPath: string) {
           path: k,
           type: 'modify',
           category: 'description',
-          oldValue: oldD,
-          newValue: newD,
+          oldValText: oldD,
+          newValText: newD,
           desc: newD,
         })
       }
     }
 
-    autoDiffItems.value = items
+    if (reqId === diffRequestId) {
+      autoDiffCache.set(cacheKey, items)
+      autoDiffItems.value = items
+    }
   } catch (err) {
     console.error('Failed to compute auto diff:', err)
-    autoDiffItems.value = []
+    if (reqId === diffRequestId) {
+      autoDiffItems.value = []
+    }
   } finally {
-    autoDiffLoading.value = false
+    if (reqId === diffRequestId) {
+      autoDiffLoading.value = false
+    }
   }
 }
 
 watch(
   selectedPath,
-  (newP) => {
+  async (newP) => {
+    autoDiffDisplayLimit.value = 50
     if (newP && doc.showBackupModal && dialogMode.value === 'list') {
-      void computeAutoDiff(newP)
+      const curReq = ++diffRequestId
+      autoDiffLoading.value = true
+      // 关键让步：确保用户点击任何快照行时，li 的 active 高亮与加载指示立即绘制 (0ms 视觉反馈)
+      await new Promise((resolve) => setTimeout(resolve, 0))
+      if (curReq === diffRequestId) {
+        await computeAutoDiff(newP, curReq)
+      }
     } else {
       autoDiffItems.value = []
+      autoDiffLoading.value = false
     }
   },
   { immediate: true },
@@ -337,13 +389,30 @@ const filteredAutoDiffItems = computed(() => {
   const q = autoDiffSearch.value.trim().toLowerCase()
   if (!q) return list
   return list.filter((i) => {
-    if (i.path.toLowerCase().includes(q)) return true
-    if (i.desc && i.desc.toLowerCase().includes(q)) return true
-    if (JSON.stringify(i.oldValue).toLowerCase().includes(q)) return true
-    if (JSON.stringify(i.newValue).toLowerCase().includes(q)) return true
-    return false
+    return (
+      i.path.toLowerCase().includes(q) ||
+      (i.desc && i.desc.toLowerCase().includes(q)) ||
+      i.oldValText.toLowerCase().includes(q) ||
+      i.newValText.toLowerCase().includes(q)
+    )
   })
 })
+
+const visibleAutoDiffItems = computed(() => {
+  return filteredAutoDiffItems.value.slice(0, autoDiffDisplayLimit.value)
+})
+
+const remainingDiffCount = computed(() => {
+  return Math.max(0, filteredAutoDiffItems.value.length - autoDiffDisplayLimit.value)
+})
+
+function loadMoreDiffItems() {
+  autoDiffDisplayLimit.value += 50
+}
+
+function loadAllDiffItems() {
+  autoDiffDisplayLimit.value = filteredAutoDiffItems.value.length
+}
 
 const autoDiffStats = computed(() => {
   const all = autoDiffItems.value
@@ -399,7 +468,9 @@ async function loadBackups() {
       if (!selectedPath.value || !items.some((b) => b.path === selectedPath.value)) {
         selectedPath.value = items[0]!.path
       } else {
-        void computeAutoDiff(selectedPath.value)
+        const curReq = ++diffRequestId
+        autoDiffLoading.value = true
+        void computeAutoDiff(selectedPath.value, curReq)
       }
     } else {
       selectedPath.value = null
@@ -888,8 +959,8 @@ function formatVal(v: unknown): string {
                 ✅ 与当前配置完全一致
               </span>
               <span v-else class="diff-badge changes">
-                ● 共 {{ autoDiffStats.total }} 处差异 ({{ autoDiffStats.modify }} 修改,
-                {{ autoDiffStats.add }} 新增, {{ autoDiffStats.delete }} 删除)
+                ● 共 {{ autoDiffStats.total }} 处差异 ({{ autoDiffStats.modify }} 改,
+                {{ autoDiffStats.add }} 增, {{ autoDiffStats.delete }} 删)
               </span>
             </div>
             <div v-if="autoDiffStats.total > 0" class="diff-header-filters">
@@ -940,12 +1011,10 @@ function formatVal(v: unknown): string {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="item in filteredAutoDiffItems" :key="`${item.category}:${item.path}`">
+                  <tr v-for="item in visibleAutoDiffItems" :key="`${item.category}:${item.path}`">
                     <td class="text-center">
                       <span :class="['type-pill', item.type]">
-                        {{
-                          item.type === 'modify' ? '修改' : item.type === 'add' ? '新增' : '删除'
-                        }}
+                        {{ item.type === 'modify' ? '改' : item.type === 'add' ? '增' : '删' }}
                       </span>
                     </td>
                     <td>
@@ -957,15 +1026,24 @@ function formatVal(v: unknown): string {
                       </div>
                     </td>
                     <td class="cell-val old-val">
-                      <code :title="formatVal(item.oldValue)">{{ formatVal(item.oldValue) }}</code>
+                      <code :title="item.oldValText">{{ item.oldValText }}</code>
                     </td>
                     <td class="cell-arrow">➔</td>
                     <td class="cell-val new-val">
-                      <code :title="formatVal(item.newValue)">{{ formatVal(item.newValue) }}</code>
+                      <code :title="item.newValText">{{ item.newValText }}</code>
                     </td>
                   </tr>
                 </tbody>
               </table>
+
+              <!-- 大改动量时的分页加载栏，彻底消除 DOM 卡顿 -->
+              <div v-if="remainingDiffCount > 0" class="auto-diff-more-bar">
+                <span class="more-hint">
+                  已显示前 {{ visibleAutoDiffItems.length }} 处，剩余 {{ remainingDiffCount }} 处
+                </span>
+                <button class="btn-more-diff" @click="loadMoreDiffItems">+ 加载 50 条</button>
+                <button class="btn-more-diff" @click="loadAllDiffItems">全部显示</button>
+              </div>
             </div>
           </div>
         </div>
@@ -1058,9 +1136,9 @@ function formatVal(v: unknown): string {
           <span v-if="isDiffLoading" class="sub-loading">正在比对中...</span>
           <template v-else>
             <span class="sub-badge total">● 共 {{ diffStats.total }} 处差异</span>
-            <span class="stat-mini mod">{{ diffStats.modify }} 修改</span>
-            <span class="stat-mini add">{{ diffStats.add }} 新增</span>
-            <span class="stat-mini del">{{ diffStats.delete }} 删除</span>
+            <span class="stat-mini mod">{{ diffStats.modify }} 改</span>
+            <span class="stat-mini add">{{ diffStats.add }} 增</span>
+            <span class="stat-mini del">{{ diffStats.delete }} 删</span>
             <span v-if="diffStats.descCount > 0" class="stat-mini desc">
               // {{ diffStats.descCount }} 描述不同
             </span>
@@ -1139,7 +1217,7 @@ function formatVal(v: unknown): string {
               >
                 <td>
                   <span :class="['type-pill', item.type]">
-                    {{ item.type === 'modify' ? '修改' : item.type === 'add' ? '新增' : '删除' }}
+                    {{ item.type === 'modify' ? '改' : item.type === 'add' ? '增' : '删' }}
                   </span>
                 </td>
                 <td>
@@ -1859,6 +1937,35 @@ function formatVal(v: unknown): string {
 .cell-val.new-val code {
   color: #10b981;
   background: rgba(16, 185, 129, 0.08);
+}
+
+.auto-diff-more-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: var(--bg-drawer-header);
+  border-top: 1px dashed var(--border-color);
+  font-size: 10.5px;
+  color: var(--text-dim);
+}
+.more-hint {
+  font-size: 10.5px;
+}
+.btn-more-diff {
+  background: var(--bg-btn);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 10.5px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-more-diff:hover {
+  background: var(--bg-btn-hover);
+  border-color: var(--border-focus);
 }
 
 .selected-snapshot-tip {
