@@ -20,6 +20,7 @@
   --bg-drawer-section: #1f1f28;
   --bg-modal: #1e1e26;
   --bg-modal-backdrop: rgba(10, 10, 14, 0.8);
+  --bg-table-header: #1a1a22;
   --bg-input: #1b1b22;
   --bg-input-focus: #1e1e28;
   --bg-statusbar: #111114;
@@ -75,6 +76,7 @@
   --bg-drawer-section: #f8fafc;
   --bg-modal: #ffffff;
   --bg-modal-backdrop: rgba(15, 23, 42, 0.55);
+  --bg-table-header: #f1f5f9;
   --bg-input: #ffffff;
   --bg-input-focus: #f8fafc;
   --bg-statusbar: #f1f5f9;

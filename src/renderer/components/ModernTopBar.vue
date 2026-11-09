@@ -610,9 +610,9 @@ const changeCount = computed(() => doc.totalChangesCount)
   font-size: 10px;
   padding: 1px 5px;
   border-radius: 4px;
-  background: #1a2e1a;
-  color: #4ade80;
-  border: 1px solid #245224;
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
   flex-shrink: 0;
   font-family: inherit;
   transition: all 0.2s;
@@ -621,12 +621,12 @@ const changeCount = computed(() => doc.totalChangesCount)
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: #4ade80;
+  background: #10b981;
 }
 .file-status-badge.dirty {
-  background: #3b280c;
-  color: #fbbf24;
-  border-color: #634212;
+  background: rgba(245, 158, 11, 0.12);
+  color: #f59e0b;
+  border-color: rgba(245, 158, 11, 0.35);
 }
 .file-status-badge.dirty .dot {
   background: #f59e0b;
@@ -637,11 +637,11 @@ const changeCount = computed(() => doc.totalChangesCount)
   user-select: none;
 }
 .file-status-badge.clickable:hover {
-  background: rgba(245, 158, 11, 0.28);
+  background: rgba(245, 158, 11, 0.22);
   border-color: rgba(245, 158, 11, 0.85);
-  color: #fef08a;
+  color: #f59e0b;
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.25);
 }
 .file-status-badge.clickable:active {
   transform: translateY(0);
@@ -740,11 +740,11 @@ const changeCount = computed(() => doc.totalChangesCount)
   cursor: pointer;
   text-align: left;
   transition: all 0.1s;
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 .recent-popover-item:hover {
-  background: #2a2a36;
-  border-color: #3b82f6;
+  background: var(--bg-btn-hover);
+  border-color: var(--border-focus);
 }
 
 .popover-file-icon {
@@ -762,7 +762,7 @@ const changeCount = computed(() => doc.totalChangesCount)
 .popover-name {
   font-size: 12px;
   font-weight: 600;
-  color: #f1f5f9;
+  color: var(--text-main);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -770,7 +770,7 @@ const changeCount = computed(() => doc.totalChangesCount)
 
 .popover-path {
   font-size: 10px;
-  color: #64748b;
+  color: var(--text-dim);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -779,7 +779,7 @@ const changeCount = computed(() => doc.totalChangesCount)
 .nav-btn {
   background: transparent;
   border: none;
-  color: #cbd5e1;
+  color: var(--text-muted);
   padding: 3px 7px;
   font-size: 11px;
   cursor: pointer;
@@ -794,8 +794,8 @@ const changeCount = computed(() => doc.totalChangesCount)
   text-align: center;
 }
 .nav-btn:hover:not(:disabled) {
-  background: #2d2d38;
-  color: #fff;
+  background: var(--bg-btn-hover);
+  color: var(--text-main);
 }
 .nav-btn:disabled {
   opacity: 0.35;
@@ -859,7 +859,7 @@ const changeCount = computed(() => doc.totalChangesCount)
   font-size: 10px;
   font-weight: 700;
   text-align: center;
-  box-shadow: 0 0 0 2px #18181c;
+  box-shadow: 0 0 0 2px var(--bg-topbar);
   pointer-events: none;
   animation: pulse-pop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
@@ -888,8 +888,8 @@ const changeCount = computed(() => doc.totalChangesCount)
   position: relative;
   display: flex;
   align-items: center;
-  background: #202028;
-  border: 1px solid #323240;
+  background: var(--bg-input);
+  border: 1px solid var(--border-input);
   border-radius: 6px;
   height: 28px;
   padding: 0 5px 0 3px;
@@ -906,6 +906,7 @@ const changeCount = computed(() => doc.totalChangesCount)
 .search-capsule:focus-within,
 .search-capsule.has-query {
   width: 245px;
+  border-color: var(--border-focus);
 }
 
 /* 范围下拉选择微徽标 */
@@ -919,9 +920,9 @@ const changeCount = computed(() => doc.totalChangesCount)
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  background: #282834;
-  border: 1px solid #3a3a4c;
-  color: #94a3b8;
+  background: var(--bg-btn);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
   border-radius: 4px;
   padding: 2px 5px;
   font-size: 11px;
@@ -932,9 +933,9 @@ const changeCount = computed(() => doc.totalChangesCount)
 }
 
 .scope-pill-btn:hover {
-  background: #323242;
-  color: #e2e8f0;
-  border-color: #4b4b60;
+  background: var(--bg-btn-hover);
+  color: var(--text-main);
+  border-color: var(--border-muted);
 }
 
 .scope-text {
@@ -951,11 +952,11 @@ const changeCount = computed(() => doc.totalChangesCount)
   position: absolute;
   top: calc(100% + 8px);
   left: 0;
-  background: #1e1e26;
-  border: 1px solid #38384a;
+  background: var(--bg-modal);
+  border: 1px solid var(--border-color);
   box-shadow:
-    0 10px 25px rgba(0, 0, 0, 0.5),
-    0 2px 8px rgba(0, 0, 0, 0.3);
+    0 10px 25px rgba(0, 0, 0, 0.25),
+    0 2px 8px rgba(0, 0, 0, 0.15);
   border-radius: 8px;
   padding: 6px;
   width: 190px;
@@ -967,10 +968,10 @@ const changeCount = computed(() => doc.totalChangesCount)
 
 .popover-header {
   font-size: 10.5px;
-  color: #64748b;
+  color: var(--text-dim);
   font-weight: 600;
   padding: 3px 6px 5px 6px;
-  border-bottom: 1px solid #282836;
+  border-bottom: 1px solid var(--border-subtle);
   margin-bottom: 2px;
 }
 
@@ -988,7 +989,7 @@ const changeCount = computed(() => doc.totalChangesCount)
 }
 
 .scope-menu-item:hover {
-  background: #2a2a36;
+  background: var(--bg-btn-hover);
 }
 
 .scope-menu-item.active {
@@ -1004,17 +1005,17 @@ const changeCount = computed(() => doc.totalChangesCount)
 .menu-title {
   font-size: 12px;
   font-weight: 500;
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .scope-menu-item.active .menu-title {
-  color: #60a5fa;
+  color: var(--text-highlight);
   font-weight: 600;
 }
 
 .menu-desc {
   font-size: 10px;
-  color: #64748b;
+  color: var(--text-dim);
   margin-left: auto;
 }
 
@@ -1037,14 +1038,14 @@ const changeCount = computed(() => doc.totalChangesCount)
   background: transparent;
   border: none;
   outline: none;
-  color: #f1f5f9;
+  color: var(--text-main);
   font-size: 12px;
   min-width: 60px;
   padding: 0 2px;
 }
 
 .capsule-input::placeholder {
-  color: #64748b;
+  color: var(--text-dim);
   font-size: 11.5px;
 }
 
@@ -1060,17 +1061,17 @@ const changeCount = computed(() => doc.totalChangesCount)
 .match-counter {
   font-size: 10.5px;
   font-family: 'Consolas', monospace;
-  background: #2b2b38;
-  color: #38bdf8;
+  background: var(--bg-badge);
+  color: var(--text-highlight);
   padding: 1px 5px;
   border-radius: 4px;
-  border: 1px solid #3c3c4e;
+  border: 1px solid var(--border-color);
   line-height: 1.2;
   white-space: nowrap;
 }
 
 .match-counter.zero-match {
-  color: #f87171;
+  color: #ef4444;
   background: rgba(239, 68, 68, 0.12);
   border-color: rgba(239, 68, 68, 0.25);
 }
@@ -1079,7 +1080,7 @@ const changeCount = computed(() => doc.totalChangesCount)
 .micro-arrow-btn {
   background: transparent;
   border: 1px solid transparent;
-  color: #94a3b8;
+  color: var(--text-dim);
   font-size: 9px;
   width: 17px;
   height: 19px;
@@ -1093,9 +1094,9 @@ const changeCount = computed(() => doc.totalChangesCount)
 }
 
 .micro-arrow-btn:hover:not(:disabled) {
-  background: #2e2e3c;
-  color: #fff;
-  border-color: #444458;
+  background: var(--bg-btn-hover);
+  color: var(--text-main);
+  border-color: var(--border-muted);
 }
 
 .micro-arrow-btn:disabled {
@@ -1105,9 +1106,9 @@ const changeCount = computed(() => doc.totalChangesCount)
 
 /* 模式切换微按钮 */
 .mode-switch-btn {
-  background: #282834;
-  border: 1px solid #3a3a4c;
-  color: #94a3b8;
+  background: var(--bg-btn);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
   font-size: 12px;
   width: 20px;
   height: 19px;
@@ -1121,22 +1122,22 @@ const changeCount = computed(() => doc.totalChangesCount)
 }
 
 .mode-switch-btn:hover {
-  background: #323244;
-  color: #fff;
-  border-color: #4c4c62;
+  background: var(--bg-btn-hover);
+  color: var(--text-main);
+  border-color: var(--border-muted);
 }
 
 .mode-switch-btn.is-tree {
   background: rgba(16, 185, 129, 0.15);
   border-color: rgba(16, 185, 129, 0.4);
-  color: #34d399;
+  color: #10b981;
 }
 
 /* 清空微按钮 */
 .clear-btn {
   background: transparent;
   border: none;
-  color: #64748b;
+  color: var(--text-dim);
   cursor: pointer;
   padding: 0 1px;
   font-size: 11px;
@@ -1149,8 +1150,8 @@ const changeCount = computed(() => doc.totalChangesCount)
 }
 
 .clear-btn:hover {
-  color: #fff;
-  background: #2e2e3c;
+  color: var(--text-main);
+  background: var(--bg-btn-hover);
 }
 
 .actions-group {

@@ -1300,7 +1300,7 @@ watch(
 .caret-btn {
   background: transparent;
   border: none;
-  color: #64748b;
+  color: var(--text-dim);
   font-size: 10px;
   width: 18px;
   height: 18px;
@@ -1312,8 +1312,8 @@ watch(
   flex-shrink: 0;
 }
 .caret-btn:hover {
-  background: #282834;
-  color: #e2e8f0;
+  background: var(--bg-btn-hover);
+  color: var(--text-main);
 }
 .caret-placeholder {
   width: 18px;
@@ -1369,7 +1369,7 @@ watch(
   width: 110px;
 }
 
-/* 类型选择下拉框 (深色现代样式) */
+/* 类型选择下拉框 (自适应深浅主题) */
 .type-selector-wrapper {
   display: flex;
   align-items: center;
@@ -1379,7 +1379,7 @@ watch(
   font-weight: 700;
   padding: 1px 5px;
   border-radius: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-color);
   outline: none;
   cursor: pointer;
   letter-spacing: 0.3px;
@@ -1388,31 +1388,37 @@ watch(
   transition: all 0.1s;
 }
 .type-select-dropdown:hover {
-  border-color: #64748b;
+  border-color: var(--border-focus);
 }
 .type-select-dropdown.string {
-  background: #1e3a5f;
-  color: #93c5fd;
+  background: rgba(59, 130, 246, 0.15);
+  color: var(--syntax-num);
+  border-color: rgba(59, 130, 246, 0.3);
 }
 .type-select-dropdown.number {
-  background: #064e3b;
-  color: #6ee7b7;
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border-color: rgba(16, 185, 129, 0.3);
 }
 .type-select-dropdown.boolean {
-  background: #4c1d95;
-  color: #d8b4fe;
+  background: rgba(168, 85, 247, 0.15);
+  color: #a855f7;
+  border-color: rgba(168, 85, 247, 0.3);
 }
 .type-select-dropdown.array {
-  background: #7c2d12;
-  color: #fdba74;
+  background: rgba(249, 115, 22, 0.15);
+  color: #f97316;
+  border-color: rgba(249, 115, 22, 0.3);
 }
 .type-select-dropdown.object {
-  background: #134e4a;
-  color: #5eead4;
+  background: rgba(20, 184, 166, 0.15);
+  color: #14b8a6;
+  border-color: rgba(20, 184, 166, 0.3);
 }
 .type-select-dropdown.null {
-  background: #27272a;
-  color: #a1a1aa;
+  background: var(--bg-btn);
+  color: var(--text-dim);
+  border-color: var(--border-color);
 }
 
 /* 描述区域与业务注释 (支持完整展示全貌) */
@@ -1541,7 +1547,7 @@ watch(
 .switch-slider {
   width: 28px;
   height: 16px;
-  background: #334155;
+  background: var(--border-muted);
   border-radius: 16px;
   position: relative;
   transition: background 0.2s;
@@ -1566,7 +1572,7 @@ watch(
 .bool-text {
   font-family: monospace;
   font-size: 12px;
-  color: #c084fc;
+  color: var(--syntax-bool);
   font-weight: 600;
 }
 

@@ -130,6 +130,31 @@ async function toggleBackupLock(b: BackupItem) {
   }
 }
 
+interface InlineConfirmOptions {
+  title: string
+  message: string
+  confirmText?: string
+  danger?: boolean
+  onConfirm: () => void | Promise<void>
+  onCancel?: () => void
+}
+
+const inlineConfirm = ref<InlineConfirmOptions | null>(null)
+
+function cancelInlineConfirm() {
+  if (inlineConfirm.value?.onCancel) {
+    inlineConfirm.value.onCancel()
+  }
+  inlineConfirm.value = null
+}
+
+async function executeInlineConfirm() {
+  if (!inlineConfirm.value) return
+  const action = inlineConfirm.value.onConfirm
+  inlineConfirm.value = null
+  await action()
+}
+
 async function handleMaxBackupsChange() {
   const newMax = maxBackupsLimit.value
   localStorage.setItem('json_meta_max_backups', String(newMax))
@@ -138,16 +163,20 @@ async function handleMaxBackupsChange() {
   // 如果新上限小于当前参与轮转的快照数量，提示确认并执行清理
   if (rotatableCount.value > newMax && autoRotateEnabled.value) {
     const diffCount = rotatableCount.value - newMax
-    const ok = confirm(
-      `快照上限已调整为 ${newMax} 份。\n当前已有 ${rotatableCount.value} 份参与轮转的快照（另有 ${lockedCount.value} 份常驻保留快照不受影响），系统将自动清理最旧的 ${diffCount} 份未锁定快照，是否确认？`,
-    )
-    if (ok) {
-      await window.api.file.rotateBackups(doc.filePath, newMax, autoRotateEnabled.value)
-      doc.showToast(`已更新快照保留上限为 ${newMax} 份，并自动清理旧版本`, 'success')
-      await loadBackups()
-    } else {
-      maxBackupsLimit.value = rotatableCount.value
-      localStorage.setItem('json_meta_max_backups', String(maxBackupsLimit.value))
+    inlineConfirm.value = {
+      title: '调整快照保留上限',
+      message: `快照上限已调整为 ${newMax} 份。当前已有 ${rotatableCount.value} 份参与轮转的快照（另有 ${lockedCount.value} 份常驻保留快照不受影响），系统将自动清理最旧的 ${diffCount} 份未锁定快照，是否确认？`,
+      confirmText: '确认清理',
+      danger: false,
+      onConfirm: async () => {
+        await window.api.file.rotateBackups(doc.filePath!, newMax, autoRotateEnabled.value)
+        doc.showToast(`已更新快照保留上限为 ${newMax} 份，并自动清理旧版本`, 'success')
+        await loadBackups()
+      },
+      onCancel: () => {
+        maxBackupsLimit.value = rotatableCount.value
+        localStorage.setItem('json_meta_max_backups', String(maxBackupsLimit.value))
+      },
     }
   } else {
     doc.showToast(`快照保留上限已调整为 ${newMax} 份`, 'success')
@@ -157,28 +186,33 @@ async function handleMaxBackupsChange() {
 async function handleDeleteBackup(b: BackupItem) {
   const memoStr = b.memo ? `【${b.memo}】` : ''
   const shortName = getSnapshotShortName(b.path)
-  const ok = confirm(`确定永久删除该历史快照吗？\n${memoStr} ${shortName}\n此操作不可撤销。`)
-  if (!ok) return
-
-  try {
-    const res = await window.api.file.deleteBackup(b.path)
-    if (!res.ok) {
-      doc.showToast(res.error || '删除快照失败', 'error')
-      return
-    }
-    doc.showToast(`已删除快照: ${shortName}`, 'success')
-    if (selectedPath.value === b.path) {
-      selectedPath.value = null
-    }
-    if (diffSourceA.value === b.path) {
-      diffSourceA.value = ''
-    }
-    if (diffSourceB.value === b.path) {
-      diffSourceB.value = '__CURRENT__'
-    }
-    await loadBackups()
-  } catch (err) {
-    doc.showToast(`删除快照失败: ${(err as Error).message}`, 'error')
+  inlineConfirm.value = {
+    title: '永久删除历史快照',
+    message: `确定永久删除该历史快照吗？\n${memoStr} ${shortName}\n此操作不可撤销。`,
+    confirmText: '永久删除',
+    danger: true,
+    onConfirm: async () => {
+      try {
+        const res = await window.api.file.deleteBackup(b.path)
+        if (!res.ok) {
+          doc.showToast(res.error || '删除快照失败', 'error')
+          return
+        }
+        doc.showToast(`已删除快照: ${shortName}`, 'success')
+        if (selectedPath.value === b.path) {
+          selectedPath.value = null
+        }
+        if (diffSourceA.value === b.path) {
+          diffSourceA.value = ''
+        }
+        if (diffSourceB.value === b.path) {
+          diffSourceB.value = '__CURRENT__'
+        }
+        await loadBackups()
+      } catch (err) {
+        doc.showToast(`删除失败: ${(err as Error).message}`, 'error')
+      }
+    },
   }
 }
 
@@ -288,19 +322,22 @@ async function confirmRestore(targetPath?: string) {
   const item = backups.value.find((b) => b.path === p)
   const memoStr = item && item.memo ? ` (${item.memo})` : ''
   const fileName = p.split(/[\\/]/).pop()
-  const ok = confirm(
-    `确定从历史快照 [${fileName}]${memoStr} 恢复机台配置？\n\n🛡️ 方案 B 默认已开启：将完整保护当前已维护好的最新中文注释字典（仅增量补齐缺失项），不随参数回滚。\n当前本地未保存的改动将被覆盖。`,
-  )
-  if (!ok) return
-
-  const res = await window.api.file.restoreBackup(p, doc.filePath, { overwriteMeta: false })
-  if (res.ok) {
-    await doc.reloadFromDisk()
-    doc.showToast('已成功从历史备份恢复配置参数（已保护最新中文业务注释）！', 'success')
-    doc.showBackupModal = false
-    dialogMode.value = 'list'
-  } else {
-    alert(`恢复失败: ${res.error}`)
+  inlineConfirm.value = {
+    title: '恢复历史快照配置',
+    message: `确定从历史快照 [${fileName}]${memoStr} 恢复配置？\n\n🛡️ 智能注释保护已生效：将完整保护当前已维护好的中文注释字典（仅增量补齐缺失项），不随参数回滚。\n当前本地未保存的改动将被替换。`,
+    confirmText: '确认恢复',
+    danger: false,
+    onConfirm: async () => {
+      const res = await window.api.file.restoreBackup(p, doc.filePath!, { overwriteMeta: false })
+      if (res.ok) {
+        await doc.reloadFromDisk()
+        doc.showToast('已成功从历史备份恢复配置参数（已保护最新中文业务注释）！', 'success')
+        doc.showBackupModal = false
+        dialogMode.value = 'list'
+      } else {
+        doc.showToast(`恢复失败: ${res.error}`, 'error')
+      }
+    },
   }
 }
 
@@ -940,6 +977,24 @@ function formatVal(v: unknown): string {
           <button class="btn secondary" @click="closeModal">关闭</button>
         </div>
       </footer>
+    </div>
+
+    <!-- 内联操作确认浮层 (替代原生系统 confirm 弹窗) -->
+    <div v-if="inlineConfirm" class="confirm-overlay" @click.self="cancelInlineConfirm">
+      <div class="confirm-dialog-card" :class="{ 'is-danger': inlineConfirm.danger }">
+        <h4 class="confirm-title">{{ inlineConfirm.title }}</h4>
+        <div class="confirm-message">{{ inlineConfirm.message }}</div>
+        <div class="confirm-actions">
+          <button class="btn secondary" @click="cancelInlineConfirm">取消</button>
+          <button
+            class="btn"
+            :class="inlineConfirm.danger ? 'danger-btn' : 'primary'"
+            @click="executeInlineConfirm"
+          >
+            {{ inlineConfirm.confirmText || '确定' }}
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -1812,5 +1867,81 @@ function formatVal(v: unknown): string {
   font-size: 11px;
   color: var(--text-muted);
   font-style: italic;
+}
+
+/* 统一内联操作确认弹窗 (响应黑白主题，无原生弹窗) */
+.confirm-overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--bg-modal-backdrop);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeIn 0.12s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.confirm-dialog-card {
+  width: 380px;
+  max-width: 88%;
+  background: var(--bg-modal);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px 20px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: var(--text-main);
+}
+
+.confirm-dialog-card.is-danger {
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.confirm-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.confirm-dialog-card.is-danger .confirm-title {
+  color: #ef4444;
+}
+
+.confirm-message {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.danger-btn {
+  background: #dc2626;
+  border: 1px solid #b91c1c;
+  color: white;
+}
+
+.danger-btn:hover {
+  background: #b91c1c;
 }
 </style>

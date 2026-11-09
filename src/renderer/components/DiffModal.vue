@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useJsonDocStore } from '../stores/jsonDoc'
 import type { UnifiedChangeItem } from '../stores/jsonDoc'
 
@@ -43,10 +43,11 @@ function formatVal(v: unknown): string {
   }
 }
 
-function revertAll() {
-  if (confirm('确定要放弃所有未保存修改（包括数据与中文描述），全部还原为打开时的状态吗？')) {
-    doc.revertAll()
-  }
+const showRevertConfirm = ref(false)
+
+function confirmRevertAll() {
+  showRevertConfirm.value = false
+  doc.revertAll()
 }
 </script>
 
@@ -69,14 +70,23 @@ function revertAll() {
         <span v-if="doc.searchQuery" class="sub-filter-hint">(过滤 "{{ doc.searchQuery }}")</span>
       </div>
       <div class="sub-right">
-        <button
-          class="sub-tool-btn danger"
-          :disabled="stats.total === 0"
-          title="放弃所有修改（包括数据与字段描述），全部还原为打开时的状态"
-          @click="revertAll"
-        >
-          放弃修改并还原
-        </button>
+        <template v-if="!showRevertConfirm">
+          <button
+            class="sub-tool-btn danger"
+            :disabled="stats.total === 0"
+            title="放弃所有修改（包括数据与字段描述），全部还原为打开时的状态"
+            @click="showRevertConfirm = true"
+          >
+            放弃修改并还原
+          </button>
+        </template>
+        <template v-else>
+          <span class="revert-confirm-text">确定放弃全部修改？</span>
+          <button class="sub-tool-btn" @click="showRevertConfirm = false">取消</button>
+          <button class="sub-tool-btn danger-confirm" @click="confirmRevertAll">
+            确认全部还原
+          </button>
+        </template>
       </div>
     </div>
 
@@ -270,6 +280,23 @@ function revertAll() {
   background: var(--bg-btn);
   border-color: var(--border-subtle);
   color: var(--text-dim);
+}
+
+.revert-confirm-text {
+  font-size: 11px;
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.sub-tool-btn.danger-confirm {
+  background: #dc2626;
+  border-color: #b91c1c;
+  color: #fff;
+  font-weight: 600;
+}
+
+.sub-tool-btn.danger-confirm:hover {
+  background: #b91c1c;
 }
 
 .diff-body {

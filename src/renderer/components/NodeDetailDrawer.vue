@@ -422,9 +422,9 @@ onUnmounted(() => {
 }
 
 .action-card-btn.highlight {
-  background: #1e3a8a;
-  border-color: #2563eb;
-  color: #bfdbfe;
+  background: rgba(37, 99, 235, 0.12);
+  border-color: var(--border-focus);
+  color: var(--text-highlight);
 }
 .action-card-btn.highlight:hover {
   background: #2563eb;

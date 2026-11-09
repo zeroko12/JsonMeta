@@ -186,8 +186,8 @@ const descCount = computed(() => Object.keys(doc.descriptions).length)
 }
 
 .copy-success-badge {
-  background: #065f46;
-  color: #a7f3d0;
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
   font-size: 9.5px;
   padding: 1px 4px;
   border-radius: 3px;

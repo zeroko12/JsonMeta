@@ -343,10 +343,10 @@ onUnmounted(() => {
   position: fixed;
   z-index: 99999;
   width: 220px;
-  background: var(--bg-modal, #1e293b);
-  border: 1px solid var(--border-color, #334155);
+  background: var(--bg-modal);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.35);
   padding: 5px;
   display: flex;
   flex-direction: column;
@@ -372,7 +372,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  background: var(--bg-drawer-header, #0f172a);
+  background: var(--bg-drawer-header);
   border-radius: 5px;
   margin-bottom: 2px;
 }
@@ -380,7 +380,7 @@ onUnmounted(() => {
 .ctx-title {
   font-size: 11px;
   font-family: monospace;
-  color: var(--text-code, #38bdf8);
+  color: var(--text-code);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -391,13 +391,13 @@ onUnmounted(() => {
   font-size: 10px;
   padding: 1px 5px;
   border-radius: 3px;
-  background: var(--bg-btn, #334155);
-  color: var(--text-dim, #94a3b8);
+  background: var(--bg-btn);
+  color: var(--text-dim);
 }
 
 .ctx-divider {
   height: 1px;
-  background: var(--border-subtle, rgba(255, 255, 255, 0.08));
+  background: var(--border-subtle);
   margin: 3px 0;
 }
 
@@ -408,7 +408,7 @@ onUnmounted(() => {
   padding: 6px 10px;
   border: none;
   background: transparent;
-  color: var(--text-main, #f1f5f9);
+  color: var(--text-main);
   font-size: 11.5px;
   border-radius: 5px;
   cursor: pointer;
@@ -417,11 +417,11 @@ onUnmounted(() => {
 }
 
 .ctx-item:hover {
-  background: var(--bg-btn-hover, #334155);
+  background: var(--bg-btn-hover);
 }
 
 .ctx-item.primary {
-  color: #38bdf8;
+  color: var(--text-highlight);
   font-weight: 600;
 }
 
